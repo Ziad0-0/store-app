@@ -17,8 +17,9 @@ public class Test extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         mainStage = primaryStage;
-
-        mainStage.setTitle("الواجهة الرئيسية");
+        
+        String sceneTitle = "الواجهة الرئيسية";
+        mainStage.setTitle(sceneTitle);
         mainStage.setScene(getHomeScene());
         mainStage.setMaximized(true);
         mainStage.show();
@@ -140,6 +141,16 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
 
         String showSalesButtonText = "عرض المبيعات";
         Button showSalesButton = new Button(showSalesButtonText);
@@ -183,6 +194,16 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
 
         String showOrdersButtonText = "عرض الطلبيات";
         Button showOrdersButton = new Button(showOrdersButtonText);
@@ -226,6 +247,16 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
 
         String showCategoriesButtonText = "عرض الأنواع";
         Button showCategoriesButton = new Button(showCategoriesButtonText);
@@ -270,6 +301,16 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
 
         String showBillsButtonText = "عرض الفواتير";
         Button showBillsButton = new Button(showBillsButtonText);
@@ -315,6 +356,17 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
+
 
         String showProductsButtonText = "عرض المنتجات";
         Button showProductsButton = new Button(showProductsButtonText);
@@ -358,6 +410,16 @@ public class Test extends Application {
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
         homeButton.setPrefSize(180,30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+
+        });
 
         String showSuppliesButtonText = "عرض التوريدات";
         Button showSuppliesButton = new Button(showSuppliesButtonText);
