@@ -32,9 +32,12 @@ public class Test extends Application {
         salesButton.setPrefSize(120, 50);
 
         salesButton.setOnAction(actionEvent ->  {
-            
+
+            mainStage.close();
             mainStage.setTitle("واجهة المبيعات");
             mainStage.setScene(getSalesScene());
+            System.gc();
+            mainStage.show();
         });
 
         String orderButtonText = "الطلبيات";
@@ -94,14 +97,52 @@ public class Test extends Application {
         borderPane.setCenter(gridPane);
 
         Scene scene = new Scene(borderPane);
-
+        
         return scene;
         
     }
 
     private Scene getSalesScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180,30);
+
+        String showSalesButtonText = "عرض المبيعات";
+        Button showSalesButton = new Button(showSalesButtonText);
+        showSalesButton.setPrefSize(120, 30);
+
+        String addSaleButtonText = "إضافة بيع";
+        Button addSaleButton = new Button(addSaleButtonText);
+        addSaleButton.setPrefSize(120, 30);
+
+        String editSaleButtonText = "تعديل بيع";
+        Button editSaleButton = new Button(editSaleButtonText);
+        editSaleButton.setPrefSize(120, 30);
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        hbox.getChildren().add(homeButton);
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editSaleButton,0,0);
+        gridPane.add(addSaleButton,1,0);
+        gridPane.add(showSalesButton,2,0);
+    
         
-        Scene scene = new Scene();
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hbox);
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+        
+        return scene;
     }
     public static void main(String[] args) {
         Application.launch(args);
