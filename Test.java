@@ -104,6 +104,13 @@ public class Test extends Application {
 
         suppliesButton.setOnAction(actionEvent ->  {
 
+            mainStage.close();
+            String sceneTitle = "واجهة التوريدات";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getSuppliesScene());
+            System.gc();
+            mainStage.show();
+
         });
 
         GridPane gridPane = new GridPane();
@@ -344,8 +351,49 @@ public class Test extends Application {
         Scene scene = new Scene(borderPane);
         
         return scene;
+    }
+
+    private Scene getSuppliesScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180,30);
+
+        String showSuppliesButtonText = "عرض التوريدات";
+        Button showSuppliesButton = new Button(showSuppliesButtonText);
+        showSuppliesButton.setPrefSize(120, 30);
+
+        String addSupplyButtonText = "إضافة توريد";
+        Button addSupplyButton = new Button(addSupplyButtonText);
+        addSupplyButton.setPrefSize(120, 30);
+
+        String editSupplyButtonText = "تعديل توريد";
+        Button editSupplyButton = new Button(editSupplyButtonText);
+        editSupplyButton.setPrefSize(120, 30);
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        hbox.getChildren().add(homeButton);
 
 
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editSupplyButton,0,0);
+        gridPane.add(addSupplyButton,1,0);
+        gridPane.add(showSuppliesButton,2,0);
+    
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hbox);
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+        
+        return scene;
     }
 
     public static void main(String[] args) {
