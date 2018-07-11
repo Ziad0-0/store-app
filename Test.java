@@ -61,6 +61,12 @@ public class Test extends Application {
 
         categoriesButton.setOnAction(actionEvent ->  {
 
+            mainStage.close();
+            String sceneTitle = "واجهة الأنواع";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getCategoriesScene());
+            System.gc();
+            mainStage.show();
         });
 
         String billsButtonText = "الفواتير";
@@ -69,6 +75,12 @@ public class Test extends Application {
 
         billsButton.setOnAction(actionEvent ->  {
 
+            mainStage.close();
+            String sceneTitle = "واجهة الفواتير";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getBillsScene());
+            System.gc();
+            mainStage.show();
         });
 
         String productsButtonText = "المنتجات";
@@ -193,6 +205,94 @@ public class Test extends Application {
         Scene scene = new Scene(borderPane);
         
         return scene;
+    }
+
+    private Scene getCategoriesScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180,30);
+
+        String showCategoriesButtonText = "عرض الأنواع";
+        Button showCategoriesButton = new Button(showCategoriesButtonText);
+        showCategoriesButton.setPrefSize(120, 30);
+
+        String addCategoryButtonText = "إضافة نوع";
+        Button addCategoryButton = new Button(addCategoryButtonText);
+        addCategoryButton.setPrefSize(120, 30);
+
+        String editCategoryButtonText = "تعديل نوع";
+        Button editCategoryButton = new Button(editCategoryButtonText);
+        editCategoryButton.setPrefSize(120, 30);
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        hbox.getChildren().add(homeButton);
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editCategoryButton,0,0);
+        gridPane.add(addCategoryButton,1,0);
+        gridPane.add(showCategoriesButton,2,0);
+    
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hbox);
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+        
+        return scene;
+
+    }
+
+    private Scene getBillsScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180,30);
+
+        String showBillsButtonText = "عرض الفواتير";
+        Button showBillsButton = new Button(showBillsButtonText);
+        showBillsButton.setPrefSize(120, 30);
+
+        String addBillButtonText = "إضافة فاتورة";
+        Button addBillButton = new Button(addBillButtonText);
+        addBillButton.setPrefSize(120, 30);
+
+        String editBillButtonText = "تعديل فاتورة";
+        Button editBillButton = new Button(editBillButtonText);
+        editBillButton.setPrefSize(120, 30);
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        hbox.getChildren().add(homeButton);
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editBillButton,0,0);
+        gridPane.add(addBillButton,1,0);
+        gridPane.add(showBillsButton,2,0);
+    
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hbox);
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+        
+        return scene;
+
     }
 
     public static void main(String[] args) {
