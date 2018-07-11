@@ -34,7 +34,8 @@ public class Test extends Application {
         salesButton.setOnAction(actionEvent ->  {
 
             mainStage.close();
-            mainStage.setTitle("واجهة المبيعات");
+            String sceneTitle = "واجهة المبيعات";
+            mainStage.setTitle(sceneTitle);
             mainStage.setScene(getSalesScene());
             System.gc();
             mainStage.show();
@@ -46,6 +47,12 @@ public class Test extends Application {
 
         ordersButton.setOnAction(actionEvent ->  {
         
+            mainStage.close();
+            String sceneTitle = "واجهة الطلبيات";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getOrdersScene());
+            System.gc();
+            mainStage.show();
         });
 
         String categoriesButtonText = "الأنواع";
@@ -144,6 +151,50 @@ public class Test extends Application {
         
         return scene;
     }
+
+    private Scene getOrdersScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180,30);
+
+        String showOrdersButtonText = "عرض الطلبيات";
+        Button showOrdersButton = new Button(showOrdersButtonText);
+        showOrdersButton.setPrefSize(120, 30);
+
+        String addOrderButtonText = "إضافة طلب";
+        Button addOrderButton = new Button(addOrderButtonText);
+        addOrderButton.setPrefSize(120, 30);
+
+        String editOrderButtonText = "تعديل طلب";
+        Button editOrderButton = new Button(editOrderButtonText);
+        editOrderButton.setPrefSize(120, 30);
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        hbox.getChildren().add(homeButton);
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editOrderButton,0,0);
+        gridPane.add(addOrderButton,1,0);
+        gridPane.add(showOrdersButton,2,0);
+    
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hbox);
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+        
+        return scene;
+    }
+
     public static void main(String[] args) {
         Application.launch(args);
     }
