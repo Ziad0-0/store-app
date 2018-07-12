@@ -1,7 +1,12 @@
+
+import javax.lang.model.util.ElementScanner6;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -719,17 +724,50 @@ public class Main extends Application {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
         
+        TextField primaryCategoryTextField = new TextField();
+        primaryCategoryTextField.setPrefSize(100, 20);
 
+        String nodeText = "النوع الأساسي";
+        Label primaryCategoryLabel = new Label(nodeText);
+
+        TextField secondaryCategoryTextField = new TextField();
+        secondaryCategoryTextField.setPrefSize(100, 20);
+
+        nodeText = "النوع الفرعي";
+        Label secondaryCategoryLabel = new Label(nodeText);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50,20);
+        submitButton.setOnAction(event -> {
+
+            String primaryCategory = primaryCategoryTextField.getText();
+            String secondaryCategory = secondaryCategoryTextField.getText();
+            //ToDo: add the categories to the database and print a mesage to the user
+        });
+
+        
+        
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30)); 
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
+        gridPane.add(primaryCategoryTextField,0,0);
+        gridPane.add(primaryCategoryLabel,1,0);
+        gridPane.add(secondaryCategoryTextField,0,1);
+        gridPane.add(secondaryCategoryLabel,1,1);
+        gridPane.add(submitButton,0,2);
+        gridPane.add(messageLabel,1,2);
+       
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
+        
         
         Scene scene = new Scene(borderPane);
 
