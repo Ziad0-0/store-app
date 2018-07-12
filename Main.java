@@ -22,7 +22,7 @@ public class Main extends Application {
         Button salesButton = new Button("المبيعات");
         salesButton.setPrefSize(120, 50);
         salesButton.setOnAction(actionEvent ->  {
-           
+            
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
             homeButton.setPrefSize(180,30);
             homeButton.setOnAction(event ->  { 
@@ -322,7 +322,6 @@ public class Main extends Application {
         Application.launch(args);
     }
 
-    
 
 }
 
