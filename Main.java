@@ -9,7 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 
-public class Test extends Application {
+public class Main extends Application {
 
     private Stage mainStage;
 
