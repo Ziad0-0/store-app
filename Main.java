@@ -1,6 +1,3 @@
-
-import javax.lang.model.util.ElementScanner6;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,6 +14,7 @@ import javafx.scene.Scene;
 public class Main extends Application {
 
     private Stage mainStage;
+     
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -25,12 +23,60 @@ public class Main extends Application {
         
         String sceneTitle = "الواجهة الرئيسية";
         mainStage.setTitle(sceneTitle);
-        mainStage.setScene(getHomeScene());
+        mainStage.setScene(getLoginScene());
         mainStage.setMaximized(true);
         mainStage.show();
         
     }
+    private Scene getLoginScene() {
 
+        String nodeText;
+        nodeText = "أسم المستخدم";
+        Label userNameLabel = new Label(nodeText);
+        TextField userNameTextField = new TextField();
+        userNameTextField.setPrefSize(50,20);
+
+        nodeText = "كلمة السر";
+        Label passwordLabel = new Label(nodeText);      
+        TextField passwordTextField = new TextField();
+        passwordTextField.setPrefSize(50,20);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(100,20);
+        submitButton.setOnAction(event -> {
+
+        
+            //ToDo: 
+        });
+        
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30)); 
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(userNameTextField,0,0);
+        gridPane.add(userNameLabel,1,0);
+        gridPane.add(passwordTextField,0,1);
+        gridPane.add(passwordLabel,1,1);
+        gridPane.add(submitButton,0,2);
+        gridPane.add(messageLabel,1,2);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+        
+        Scene scene = new Scene(borderPane);
+
+        return scene;
+        
+       
+    }
+    
     private Scene getHomeScene() {
 
         String salesButtonText = "المبيعات";
@@ -258,12 +304,36 @@ public class Main extends Application {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
         
+        TextField salesTextField = new TextField();
+        salesTextField.setPrefSize(50,20);
+
+        String nodeText;
+
+        nodeText = "حجم المبيعات";
+        Label salesLabel = new Label(nodeText);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(100,20);
+        submitButton.setOnAction(event -> {
+
+        
+            //ToDo: 
+        });
+
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30)); 
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
+        gridPane.add(salesTextField,0,1);
+        gridPane.add(salesLabel,1,1);
+        gridPane.add(submitButton,0,2);
+        gridPane.add(messageLabel,1,2);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -993,6 +1063,7 @@ public class Main extends Application {
         hBOx.setSpacing(10);
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
+        
         
 
         GridPane gridPane = new GridPane();
