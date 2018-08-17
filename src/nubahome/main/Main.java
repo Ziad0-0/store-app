@@ -1,4 +1,4 @@
-package com.nubahome;
+package nubahome.main;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
