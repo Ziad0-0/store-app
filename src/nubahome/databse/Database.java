@@ -25,7 +25,7 @@ public class Database {
         }
     }
 
-    public void connect() {
+    void connect() {
 
         loadDriver();
 
@@ -43,7 +43,7 @@ public class Database {
 
     }
 
-    public void disconnect() {
+    void disconnect() {
 
         try{
             if(databaseConnection!=null)
@@ -72,16 +72,22 @@ public class Database {
 
     }
 
-    void executeInsertion(String insertion) {
+    boolean executeInsertion(String insertion) {
 
+        boolean done = false;
         Statement statement;
         try {
+
             statement = databaseConnection.createStatement();
-            statement.execute(insertion);
+            int numOfRows = statement.executeUpdate(insertion);
+            if(numOfRows>0)
+                done = true;
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return done;
     }
 
     void executeUpdate(String update) {

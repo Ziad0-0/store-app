@@ -2,7 +2,7 @@ package nubahome.main;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import nubahome.databse.Database;
+import nubahome.databse.Store;
 import nubahome.gui.GUI;
 
 public class Main extends Application {

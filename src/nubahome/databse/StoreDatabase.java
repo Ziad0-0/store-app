@@ -8,7 +8,7 @@ public class StoreDatabase extends Database {
 
     private HashMap<String, Integer> userTypes;
 
-    public StoreDatabase(String driverURL, String databaseURL) {
+    StoreDatabase(String driverURL, String databaseURL) {
         super(driverURL, databaseURL);
         userTypes = new HashMap<>();
         userTypes.put("NOT_REGISTERED",0);
@@ -17,11 +17,11 @@ public class StoreDatabase extends Database {
 
     }
 
-    public Integer userType(String type) {
+    Integer userType(String type) {
         int user_type  =  userTypes.get(type);
         return user_type;
     }
-    public Integer login(String userName, String userPassword) {
+    Integer login(String userName, String userPassword) {
 
         Integer user_type  = userTypes.get("NOT_REGISTERED");
         ResultSet resultSet = executeQuery("select * from users where user_name='"+userName+"';");
@@ -39,7 +39,12 @@ public class StoreDatabase extends Database {
         }
         return user_type;
     }
-    
 
+    boolean addCategory(String categoryName) {
+        boolean done = false;
+        done = executeInsertion("insert into categories (category_name) values ('"+categoryName+"');");
+
+        return done;
+    }
 
 }

@@ -59,7 +59,10 @@ public class GUI {
                 System.out.println("not registered");
             }
             else if(currentUserType.equals(Main.myStore.userType("MANAGER")))
-            {   System.out.println("manager");
+            {
+                userNameTextField.clear();
+                passwordTextField.clear();
+                System.out.println("manager");
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
@@ -70,6 +73,8 @@ public class GUI {
             else if(currentUserType.equals(Main.myStore.userType("CLERK")))
             {
                 //ToDo: implement the clerk scene
+                userNameTextField.clear();
+                passwordTextField.clear();
                 System.out.println("clerk");
             }
 
@@ -969,17 +974,11 @@ public class GUI {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
 
-        TextField primaryCategoryTextField = new TextField();
-        primaryCategoryTextField.setPrefSize(100, 20);
+        TextField categoryNameTextField = new TextField();
+        categoryNameTextField.setPrefSize(100, 20);
 
-        String nodeText = "النوع الأساسي";
-        Label primaryCategoryLabel = new Label(nodeText);
-
-        TextField secondaryCategoryTextField = new TextField();
-        secondaryCategoryTextField.setPrefSize(100, 20);
-
-        nodeText = "النوع الفرعي";
-        Label secondaryCategoryLabel = new Label(nodeText);
+        String nodeText = "أسم النوع";
+        Label categoryNameLabel = new Label(nodeText);
 
         Label messageLabel = new Label();
 
@@ -987,10 +986,20 @@ public class GUI {
         Button submitButton = new Button(nodeText);
         submitButton.setPrefSize(50, 20);
         submitButton.setOnAction(event -> {
+            //ToDo: complete the add category function
+            String message = "";
+            messageLabel.setText(message);
+            String categoryName = categoryNameTextField.getText();
+            boolean done = false;
+            done = Main.myStore.addCategory(categoryName);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
 
-            String primaryCategory = primaryCategoryTextField.getText();
-            String secondaryCategory = secondaryCategoryTextField.getText();
-            //ToDo: add the categories to the database and print a mesage to the user
+            }
+
+
         });
 
 
@@ -1000,12 +1009,11 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(primaryCategoryTextField, 0, 0);
-        gridPane.add(primaryCategoryLabel, 1, 0);
-        gridPane.add(secondaryCategoryTextField, 0, 1);
-        gridPane.add(secondaryCategoryLabel, 1, 1);
-        gridPane.add(submitButton, 0, 2);
-        gridPane.add(messageLabel, 1, 2);
+        gridPane.add(categoryNameTextField, 0, 0);
+        gridPane.add(categoryNameLabel, 1, 0);
+        gridPane.add(submitButton, 0, 1);
+        gridPane.add(messageLabel, 0, 2);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
