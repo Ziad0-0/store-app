@@ -1,16 +1,20 @@
 package nubahome.gui;
 
+import com.sun.javafx.property.adapter.PropertyDescriptor;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import nubahome.main.Main;
+
+import java.util.ArrayList;
 
 public class GUI {
 
@@ -166,16 +170,16 @@ public class GUI {
 
         });
 
-        String suppliersButtonText = "الموردين";
-        Button suppliersButton = new Button(suppliersButtonText);
-        suppliersButton.setPrefSize(150, 50);
+        String SuppliersButtonText = "الموردين";
+        Button SuppliersButton = new Button(SuppliersButtonText);
+        SuppliersButton.setPrefSize(150, 50);
 
-        suppliersButton.setOnAction(actionEvent -> {
+        SuppliersButton.setOnAction(actionEvent -> {
 
             mainStage.close();
             String sceneTitle = "واجهة الموردين";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getsuppliersScene());
+            mainStage.setScene(getSuppliersScene());
             System.gc();
             mainStage.show();
 
@@ -206,7 +210,7 @@ public class GUI {
         gridPane.add(usersButton, 2, 0);
         gridPane.add(billsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
-        gridPane.add(suppliersButton, 2, 1);
+        gridPane.add(SuppliersButton, 2, 1);
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
@@ -615,11 +619,65 @@ public class GUI {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
 
+        String nodeText;
+        
+        nodeText = "أسم المستخدم";
+        Label userNameLabel = new Label(nodeText);
+        TextField userNameTextField = new TextField();
+        userNameTextField.setPrefSize(100,20);
+
+        nodeText = "كلمة السر";
+        Label userPasswordLabel = new Label(nodeText);
+        TextField userPasswordTextField = new TextField();
+        userPasswordTextField.setPrefSize(100,20);
+
+        nodeText = "نوع المستخدم";
+        Label userTypeLabel = new Label(nodeText);
+        ChoiceBox userTypesChoiceBox = new ChoiceBox();
+        ArrayList<String> typesList = Main.myStore.getUserTypes();
+        userTypesChoiceBox.setItems(FXCollections.observableList(typesList));
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+       submitButton.setOnAction(event -> {
+            //ToDo: complete the add user function
+            String message = "";
+            messageLabel.setText(message);
+
+            String userName = userNameTextField.getText().trim();
+            String userPassword = userPasswordTextField.getText().trim();
+            int userType = userTypesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+
+            boolean done = false;
+            done = Main.myStore.addUser(userName,userPassword,userType);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
+
+            }
+
+
+        });
+
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(userNameTextField,0,0);
+        gridPane.add(userNameLabel,1,0);
+        gridPane.add(userPasswordTextField,0,1);
+        gridPane.add(userPasswordLabel,1,1);
+        gridPane.add(userTypesChoiceBox,0,2);
+        gridPane.add(userTypeLabel,1,2);
+        gridPane.add(submitButton,0,3);
+        gridPane.add(messageLabel,0,4);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -1528,12 +1586,81 @@ public class GUI {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
 
+        String nodeText;
+
+        nodeText = "أسم المنتج";
+        Label productNameLabel = new Label(nodeText);
+        TextField productNameTextField = new TextField();
+        productNameTextField.setPrefSize(100, 20);
+
+        nodeText = "نوع المنتج";
+        Label productCategoryLabel = new Label(nodeText);
+        ChoiceBox categoriesChoiceBox = new ChoiceBox();
+        ArrayList<String> categoriesList = Main.myStore.getCategories();
+        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
+
+        nodeText = "سعر المنتج";
+        Label productPriceLabel = new Label(nodeText);
+        TextField productPriceTextField = new TextField();
+        productPriceTextField.setPrefSize(100, 20);
+
+        nodeText = "الكمية المتاحة";
+        Label productAvailableQuantityLabel = new Label(nodeText);
+        TextField productAvailableQuantityTextField = new TextField();
+        productAvailableQuantityTextField.setPrefSize(100, 20);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+            //ToDo: complete the add product function
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String productName = productNameTextField.getText().trim();
+
+            int productCategory = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+
+            Double productPrice = 0.0;
+            if(!productPriceTextField.getText().trim().isEmpty())
+                productPrice = Double.parseDouble(productPriceTextField.getText().trim());
+
+            int availableQuantity = 0;
+            if(!productAvailableQuantityTextField.getText().trim().isEmpty())
+                availableQuantity = Integer.parseInt(productAvailableQuantityTextField.getText().trim());
+
+            boolean done = false;
+            done = Main.myStore.addProduct(productName, productCategory, availableQuantity, productPrice);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
+
+            }
+
+
+        });
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(productNameTextField,0,0);
+        gridPane.add(productNameLabel,1,0);
+        gridPane.add(categoriesChoiceBox,0,1);
+        gridPane.add(productCategoryLabel,1,1);
+        gridPane.add(productPriceTextField,0,2);
+        gridPane.add(productPriceLabel,1,2);
+        gridPane.add(productAvailableQuantityTextField,0,3);
+        gridPane.add(productAvailableQuantityLabel,1,3);
+        gridPane.add(submitButton,0,4);
+        gridPane.add(messageLabel,0,5);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -1646,7 +1773,7 @@ public class GUI {
         return scene;
     }
 
-    private static Scene getsuppliersScene() {
+    private static Scene getSuppliersScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -1662,42 +1789,42 @@ public class GUI {
 
         });
 
-        String showsuppliersButtonText = "عرض الموردين";
-        Button showsuppliersButton = new Button(showsuppliersButtonText);
-        showsuppliersButton.setPrefSize(150, 30);
-        showsuppliersButton.setOnAction(event -> {
+        String showSuppliersButtonText = "عرض الموردين";
+        Button showSuppliersButton = new Button(showSuppliersButtonText);
+        showSuppliersButton.setPrefSize(150, 30);
+        showSuppliersButton.setOnAction(event -> {
 
             mainStage.close();
             String sceneTitle = "واجهة عرض الموردين";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowsuppliersScene());
+            mainStage.setScene(getShowSuppliersScene());
             System.gc();
             mainStage.show();
         });
 
-        String addsupplierButtonText = "إضافة مورد";
-        Button addsupplierButton = new Button(addsupplierButtonText);
-        addsupplierButton.setPrefSize(150, 30);
-        addsupplierButton.setOnAction(event -> {
+        String addSupplierButtonText = "إضافة مورد";
+        Button addSupplierButton = new Button(addSupplierButtonText);
+        addSupplierButton.setPrefSize(150, 30);
+        addSupplierButton.setOnAction(event -> {
 
             mainStage.close();
             String sceneTitle = "واجهة إضافة مورد";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddsupplierScene());
+            mainStage.setScene(getAddSupplierScene());
             System.gc();
             mainStage.show();
         });
 
 
-        String editsupplierButtonText = "تعديل مورد";
-        Button editsupplierButton = new Button(editsupplierButtonText);
-        editsupplierButton.setPrefSize(150, 30);
-        editsupplierButton.setOnAction(event -> {
+        String editSupplierButtonText = "تعديل مورد";
+        Button editSupplierButton = new Button(editSupplierButtonText);
+        editSupplierButton.setPrefSize(150, 30);
+        editSupplierButton.setOnAction(event -> {
 
             mainStage.close();
             String sceneTitle = "واجهة تعديل مورد";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditsupplierScene());
+            mainStage.setScene(getEditSupplierScene());
             System.gc();
             mainStage.show();
         });
@@ -1712,9 +1839,9 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editsupplierButton, 0, 0);
-        gridPane.add(addsupplierButton, 1, 0);
-        gridPane.add(showsuppliersButton, 2, 0);
+        gridPane.add(editSupplierButton, 0, 0);
+        gridPane.add(addSupplierButton, 1, 0);
+        gridPane.add(showSuppliersButton, 2, 0);
 
 
         BorderPane borderPane = new BorderPane();
@@ -1727,7 +1854,7 @@ public class GUI {
         return scene;
     }
 
-    private static Scene getAddsupplierScene() {
+    private static Scene getAddSupplierScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -1750,7 +1877,94 @@ public class GUI {
             mainStage.close();
             String sceneTitle = "واجهة الموردين";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getsuppliersScene());
+            mainStage.setScene(getSuppliersScene());
+            System.gc();
+            mainStage.show();
+        });
+
+        HBox hBOx = new HBox();
+        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
+        hBOx.setSpacing(10);
+        hBOx.getChildren().add(previousButton);
+        hBOx.getChildren().add(homeButton);
+
+        String nodeText;
+
+        nodeText = "أسم المورد";
+        Label supplierNameLabel = new Label(nodeText);
+        TextField supplierNameTextField = new TextField();
+        supplierNameTextField.setPrefSize(50, 20);
+
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(100, 20);
+        submitButton.setOnAction(event -> {
+
+            //ToDo: complete the add supplier function
+            String message = "";
+            messageLabel.setText(message);
+
+            String supplierName = supplierNameTextField.getText();
+
+            boolean done = false;
+            done = Main.myStore.addSupplier(supplierName);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
+
+            }
+        });
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(supplierNameTextField,0,0);
+        gridPane.add(supplierNameLabel,1,0);
+        gridPane.add(submitButton,0,1);
+        gridPane.add(messageLabel,0,2);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setBottom(hBOx);
+        borderPane.setCenter(gridPane);
+
+        Scene scene = new Scene(borderPane);
+
+        return scene;
+    }
+
+    private static Scene getEditSupplierScene() {
+
+        String homeButtonText = "العودة إلي الواجهة الرئيسية";
+        Button homeButton = new Button(homeButtonText);
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "الواجهة الرئيسية";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getHomeScene());
+            System.gc();
+            mainStage.show();
+        });
+
+        String previousButtonText = "العودة إلي الواجهة السابقة";
+        Button previousButton = new Button(previousButtonText);
+        previousButton.setPrefSize(180, 30);
+        previousButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "واجهة الموردين";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getSuppliersScene());
             System.gc();
             mainStage.show();
         });
@@ -1778,7 +1992,7 @@ public class GUI {
         return scene;
     }
 
-    private static Scene getEditsupplierScene() {
+    private static Scene getShowSuppliersScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -1801,58 +2015,7 @@ public class GUI {
             mainStage.close();
             String sceneTitle = "واجهة الموردين";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getsuppliersScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-        Scene scene = new Scene(borderPane);
-
-        return scene;
-    }
-
-    private static Scene getShowsuppliersScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الموردين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getsuppliersScene());
+            mainStage.setScene(getSuppliersScene());
             System.gc();
             mainStage.show();
         });

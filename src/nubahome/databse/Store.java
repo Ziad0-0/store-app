@@ -1,5 +1,7 @@
 package nubahome.databse;
 
+import java.util.ArrayList;
+
 public class Store {
 
     private String name;
@@ -16,6 +18,10 @@ public class Store {
 
     public void connectToDatabase() {
         database.connect();
+    }
+
+    public void initializeUserTypes() {
+        database.initializeUserTypes();
     }
 
     public void disconnectFromDatabase() {
@@ -35,6 +41,39 @@ public class Store {
     public boolean addCategory(String categoryName) {
         boolean done = false;
         done = database.addCategory(categoryName);
+        return done;
+    }
+
+    public ArrayList<String> getCategories() {
+        return database.getCategories();
+    }
+
+    public boolean addProduct(String productName, int productCategory, int availableQuantity, Double productPrice) {
+        boolean done = false;
+        done = database.addProduct(productName,productCategory, availableQuantity, productPrice);
+        return  done;
+    }
+
+
+    public ArrayList<String> getUserTypes() {
+        return database.getUserTypes();
+    }
+
+    public boolean addUser(String userName, String userPassword, int userType) {
+        boolean done = false;
+        done = database.addUser(userName,userPassword,userType);
+        return done;
+    }
+
+    public boolean addSupplier(String supplierName) {
+        boolean done = false;
+        done = database.addSupplier(supplierName);
+        return done;
+    }
+
+    public boolean addBill(String buyerName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> productsPrices) {
+        boolean done = false;
+        done = database.addBill(buyerName,boughtProductsIDs,boughtQuantities,productsPrices);
         return done;
     }
 }
