@@ -23,14 +23,6 @@ public class Main extends Application {
         myStore.setupDatabase("com.mysql.jdbc.Driver","jdbc:sqlite:db/nuba_home.db");
         myStore.connectToDatabase();
         myStore.initializeUserTypes();
-        ArrayList<Integer> b = new ArrayList<Integer>();
-        b.add(1);
-        ArrayList<Integer> c = new ArrayList<Integer>();
-        c.add(5);
-        ArrayList<Double> d = new ArrayList<Double>();
-        d.add(10.5);
-
-        myStore.addBill("ziad",b,c,d);
         Application.launch(args);
     }
 }
