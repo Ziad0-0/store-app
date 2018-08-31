@@ -76,4 +76,8 @@ public class Store {
         done = database.addBill(buyerName,boughtProductsIDs,boughtQuantities,productsPrices);
         return done;
     }
+
+    public ArrayList<Product> getProductsInCategory(int categoryID) {
+        return database.getProductsInCategory(categoryID);
+    }
 }

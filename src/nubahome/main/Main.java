@@ -5,7 +5,6 @@ import javafx.stage.Stage;
 import nubahome.databse.Store;
 import nubahome.gui.GUI;
 
-import java.util.ArrayList;
 
 public class Main extends Application {
 

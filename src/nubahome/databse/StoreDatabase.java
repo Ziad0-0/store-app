@@ -115,6 +115,41 @@ public class StoreDatabase extends Database {
         Timestamp billDate = new Timestamp(new java.util.Date().getTime());
         done = executeInsertion("insert into bills (bill_date,buyer_name, bill_total_cost) " +
                 "values ('"+ billDate + "', '"+ buyerName +"', "+ totalCost + ");");
+
+        ResultSet resultSet = executeQuery("select bill_id form bills order by bill_id desc limit 1");
+        int lastBillID = 0;
+        try {
+            if(resultSet.next())
+                lastBillID = resultSet.getInt("bill_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        for(int i =0,s = boughtQuantities.size();i<s;i++)
+            done = executeInsertion("insert into bills_details (bill_id, product_id, sold_quantity, unit_price) " +
+                                    "values ("+ lastBillID +", " + boughtProductsIDs.get(i) + ", " +  boughtQuantities.get(i) + ", " + productsPrices.get(i) +");");
         return done;
+    }
+
+    ArrayList<Product> getProductsInCategory(int categoryID) {
+        ArrayList<Product> products = new ArrayList<>();
+
+        ResultSet resultSet = executeQuery("select * from products where category_id="+categoryID+";");
+
+        try {
+            while(resultSet.next())
+            {
+                int productID = resultSet.getInt("product_id");
+                String productName = resultSet.getString("product_name");
+                int availableQuantity = resultSet.getInt("available_quantity");
+                double buyingPrice = resultSet.getDouble("buying_price");
+
+                products.add(new Product(productID,productName,categoryID,availableQuantity,buyingPrice));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return products;
+
     }
 }
