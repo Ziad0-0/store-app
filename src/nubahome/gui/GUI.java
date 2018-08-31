@@ -1423,9 +1423,10 @@ public class GUI {
 
         ScrollPane scrollPane = new ScrollPane();
         GridPane productsGridPane = new GridPane();
+        productsGridPane.setHgap(10);
+        productsGridPane.setVgap(10);
         scrollPane.setContent(productsGridPane);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
+
 
 
         paymentChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -1435,11 +1436,7 @@ public class GUI {
                 if(paymentMethod.equals("تقسيط"))
                 {
                     gridPane.getChildren().remove(addMoreProductsButton);
-
-                    int numOfProducts = productsLabels.size();
-
-                    if(numOfProducts>0)
-                        gridPane.getChildren().remove(scrollPane);
+                    gridPane.getChildren().remove(scrollPane);
 
 
                     gridPane.add(guarantorNameLabel,7,3);
@@ -1453,10 +1450,7 @@ public class GUI {
                     gridPane.add(endDatePicker,6,7);
                     gridPane.add(endOfInstalmentLabel,7,7);
                     gridPane.add(addMoreProductsButton,0,8);
-
-
-                    if (numOfProducts > 0)
-                        gridPane.add(scrollPane,0,9);
+                    gridPane.add(scrollPane,0,9);
 
 
                 }
@@ -1473,19 +1467,11 @@ public class GUI {
                     gridPane.getChildren().remove(endDatePicker);
                     gridPane.getChildren().remove(endOfInstalmentLabel);
                     gridPane.getChildren().remove(addMoreProductsButton);
-
-
-                    int numOfProducts = productsLabels.size();
-
-                    if (numOfProducts > 0)
-                        gridPane.getChildren().remove(scrollPane);
+                    gridPane.getChildren().remove(scrollPane);
 
 
                     gridPane.add(addMoreProductsButton,0,2);
-
-
-                    if (numOfProducts > 0)
-                        gridPane.add(scrollPane,0,3);
+                    gridPane.add(scrollPane,0,3);
 
 
                 }
