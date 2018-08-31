@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -629,7 +630,7 @@ public class GUI {
         hBOx.getChildren().add(homeButton);
 
         String nodeText;
-        
+
         nodeText = "أسم المستخدم";
         Label userNameLabel = new Label(nodeText);
         TextField userNameTextField = new TextField();
@@ -1420,6 +1421,11 @@ public class GUI {
         ArrayList<Label> sellingPricesLabels = new ArrayList<>();
         ArrayList<TextField> sellingPricesTextField = new ArrayList<>();
 
+        ScrollPane scrollPane = new ScrollPane();
+        GridPane productsGridPane = new GridPane();
+        scrollPane.setContent(productsGridPane);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
 
 
         paymentChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -1433,18 +1439,7 @@ public class GUI {
                     int numOfProducts = productsLabels.size();
 
                     if(numOfProducts>0)
-                        for(int i = 0; i<numOfProducts; i++)
-                        {
-                            gridPane.getChildren().remove(productsLabels.get(i));
-                            gridPane.getChildren().remove(productsChoiceBoxes.get(i));
-                            gridPane.getChildren().remove(categoriesLabels.get(i));
-                            gridPane.getChildren().remove(categoriesChoiceBoxes.get(i));
-                            gridPane.getChildren().remove(soldQuantitiesLabels.get(i));
-                            gridPane.getChildren().remove(soldQuantitiesTextFields.get(i));
-                            gridPane.getChildren().remove(sellingPricesLabels.get(i));
-                            gridPane.getChildren().remove(sellingPricesTextField.get(i));
-
-                        }
+                        gridPane.getChildren().remove(scrollPane);
 
 
                     gridPane.add(guarantorNameLabel,7,3);
@@ -1461,27 +1456,12 @@ public class GUI {
 
 
                     if (numOfProducts > 0)
-                    {
-                        int currentProductRow = 9;
-
-                        for (int i = 0; i < numOfProducts; i++)
-                        {
-                            gridPane.add(sellingPricesTextField.get(i),0,currentProductRow);
-                            gridPane.add(sellingPricesLabels.get(i),1,currentProductRow);
-                            gridPane.add(soldQuantitiesTextFields.get(i),2,currentProductRow);
-                            gridPane.add(soldQuantitiesLabels.get(i),3,currentProductRow);
-                            gridPane.add(productsChoiceBoxes.get(i),4,currentProductRow);
-                            gridPane.add(productsLabels.get(i),5,currentProductRow);
-                            gridPane.add(categoriesChoiceBoxes.get(i),6,currentProductRow);
-                            gridPane.add(categoriesLabels.get(i),7,currentProductRow);
-
-                            currentProductRow++;
-                        }
-                    }
+                        gridPane.add(scrollPane,0,9);
 
 
                 }
-                else {
+                else
+                {
                     gridPane.getChildren().remove(guarantorNameLabel);
                     gridPane.getChildren().remove(guarantorNameTextField);
                     gridPane.getChildren().remove(paidMoneyLabel);
@@ -1494,46 +1474,18 @@ public class GUI {
                     gridPane.getChildren().remove(endOfInstalmentLabel);
                     gridPane.getChildren().remove(addMoreProductsButton);
 
+
                     int numOfProducts = productsLabels.size();
 
                     if (numOfProducts > 0)
-                        for (int i = 0; i < numOfProducts; i++)
-                        {
-                            gridPane.getChildren().remove(productsLabels.get(i));
-                            gridPane.getChildren().remove(productsChoiceBoxes.get(i));
-                            gridPane.getChildren().remove(categoriesLabels.get(i));
-                            gridPane.getChildren().remove(categoriesChoiceBoxes.get(i));
-                            gridPane.getChildren().remove(soldQuantitiesLabels.get(i));
-                            gridPane.getChildren().remove(soldQuantitiesTextFields.get(i));
-                            gridPane.getChildren().remove(sellingPricesLabels.get(i));
-                            gridPane.getChildren().remove(sellingPricesTextField.get(i));
-                        }
-
+                        gridPane.getChildren().remove(scrollPane);
 
 
                     gridPane.add(addMoreProductsButton,0,2);
 
 
                     if (numOfProducts > 0)
-                    {
-                        int currentProductRow = 3;
-
-                        for (int i = 0; i < numOfProducts; i++)
-                        {
-                            gridPane.add(sellingPricesTextField.get(i),0,currentProductRow);
-                            gridPane.add(sellingPricesLabels.get(i),1,currentProductRow);
-                            gridPane.add(soldQuantitiesTextFields.get(i),2,currentProductRow);
-                            gridPane.add(soldQuantitiesLabels.get(i),3,currentProductRow);
-                            gridPane.add(productsChoiceBoxes.get(i),4,currentProductRow);
-                            gridPane.add(productsLabels.get(i),5,currentProductRow);
-                            gridPane.add(categoriesChoiceBoxes.get(i),6,currentProductRow);
-                            gridPane.add(categoriesLabels.get(i),7,currentProductRow);
-
-                            currentProductRow++;
-                        }
-                    }
-
-
+                        gridPane.add(scrollPane,0,3);
 
 
                 }
@@ -1599,28 +1551,28 @@ public class GUI {
                 sellingPricesLabels.add(sellingPriceLabel);
 
 
-                int currentProductRow = (paymentMethod.equals("كاش"))? 3 : 9;
+                int currentProductRow = 0;
                 int numOfProducts = productsLabels.size();
                 currentProductRow += numOfProducts;
 
 
                 int lastProductIndex = numOfProducts -1;
 
-                gridPane.add(sellingPricesTextField.get(lastProductIndex),0,currentProductRow);
-                gridPane.add(sellingPricesLabels.get(lastProductIndex),1,currentProductRow);
-                gridPane.add(soldQuantitiesTextFields.get(lastProductIndex),2,currentProductRow);
-                gridPane.add(soldQuantitiesLabels.get(lastProductIndex),3,currentProductRow);
-                gridPane.add(productsChoiceBoxes.get(lastProductIndex),4,currentProductRow);
-                gridPane.add(productsLabels.get(lastProductIndex),5,currentProductRow);
-                gridPane.add(categoriesChoiceBoxes.get(lastProductIndex),6,currentProductRow);
-                gridPane.add(categoriesLabels.get(lastProductIndex),7,currentProductRow);
+                productsGridPane.add(sellingPricesTextField.get(lastProductIndex),0,currentProductRow);
+                productsGridPane.add(sellingPricesLabels.get(lastProductIndex),1,currentProductRow);
+                productsGridPane.add(soldQuantitiesTextFields.get(lastProductIndex),2,currentProductRow);
+                productsGridPane.add(soldQuantitiesLabels.get(lastProductIndex),3,currentProductRow);
+                productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),4,currentProductRow);
+                productsGridPane.add(productsLabels.get(lastProductIndex),5,currentProductRow);
+                productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),6,currentProductRow);
+                productsGridPane.add(categoriesLabels.get(lastProductIndex),7,currentProductRow);
 
             }
 
 
 
         });
-                
+
 
         Label messageLabel = new Label();
 
@@ -1653,15 +1605,7 @@ public class GUI {
         gridPane.add(paymentMethodLabel,7,1);
         gridPane.add(paymentChoiceBox,6,1);
         gridPane.add(addMoreProductsButton,0,2);
-        /*gridPane.add(sellingPriceTextField,0,1);
-        gridPane.add(sellingPriceLabel,1,1);
-        gridPane.add(soldQuantityTextField,2,1);
-        gridPane.add(soldQuantityLabel,3,1);
-        gridPane.add(productsChoiceBox,4,1);
-        gridPane.add(productNameLabel,5,1);
-        gridPane.add(categoriesChoiceBox,6,1);
-        gridPane.add(productCategoryLabel,7,1);*/
-
+        gridPane.add(scrollPane,0,3);
 
 
 
