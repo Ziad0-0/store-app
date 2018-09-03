@@ -1,10 +1,10 @@
 package nubahome.databse;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -106,17 +106,14 @@ public class StoreDatabase extends Database {
         return done;
     }
 
-    boolean addBill(String buyerName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> productsPrices) {
-        Double totalCost = 0.0;
-        for(int i =0,s = boughtQuantities.size();i<s;i++)
-            totalCost += boughtQuantities.get(i)*productsPrices.get(i);
+    boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill) {
 
         boolean done = false;
         Timestamp billDate = new Timestamp(new java.util.Date().getTime());
         done = executeInsertion("insert into bills (bill_date,buyer_name, bill_total_cost) " +
-                "values ('"+ billDate + "', '"+ buyerName +"', "+ totalCost + ");");
+                "values ('"+ billDate + "', '"+ buyerName +"', "+ totalBill + ");");
 
-        ResultSet resultSet = executeQuery("select bill_id form bills order by bill_id desc limit 1");
+        ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
         int lastBillID = 0;
         try {
             if(resultSet.next())
@@ -124,9 +121,30 @@ public class StoreDatabase extends Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        for(int i =0,s = boughtQuantities.size();i<s;i++)
+        for(int i =0,s = soldQuantities.size();i<s;i++)
             done = executeInsertion("insert into bills_details (bill_id, product_id, sold_quantity, unit_price) " +
-                                    "values ("+ lastBillID +", " + boughtProductsIDs.get(i) + ", " +  boughtQuantities.get(i) + ", " + productsPrices.get(i) +");");
+                                    "values ("+ lastBillID +", " + soldProductsIDs.get(i) + ", " +  soldQuantities.get(i) + ", " + sellingPrices.get(i) +");");
+        return done;
+    }
+
+    boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill, String guarantorName, double paidMoney, double instalmentAmount, Date startDate, Date endDate){
+        boolean done = false;
+
+        done = addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+
+        ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
+        int lastBillID = 0;
+        try {
+            if(resultSet.next())
+                lastBillID = resultSet.getInt("bill_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        double remainingMoney = totalBill - paidMoney;
+
+        done = executeInsertion("insert into instalments (bill_id, guarantor_name, paid_money, remaining_money, instalment_amount, start_date, end_date)" +
+                                "values ("+ lastBillID+ ", '"+ guarantorName+ "', "+ paidMoney + ", " +  remainingMoney + ", " + instalmentAmount + ", " +  startDate + ", " +  endDate +");");
         return done;
     }
 

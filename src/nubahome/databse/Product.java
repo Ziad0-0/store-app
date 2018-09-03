@@ -16,7 +16,7 @@ public class Product {
         this.buyingPrice = buyingPrice;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 

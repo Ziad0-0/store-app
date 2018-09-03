@@ -1,6 +1,7 @@
 package nubahome.databse;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Store {
 
@@ -71,9 +72,15 @@ public class Store {
         return done;
     }
 
-    public boolean addBill(String buyerName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> productsPrices) {
+    public boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill) {
         boolean done = false;
-        done = database.addBill(buyerName,boughtProductsIDs,boughtQuantities,productsPrices);
+        done = database.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+        return done;
+    }
+
+    public boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill, String guarantorName, double paidMoney,  double instalmentAmount, Date startDate, Date endDate){
+        boolean done = false;
+        done = database.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
         return done;
     }
 

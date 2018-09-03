@@ -6,7 +6,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -20,11 +19,11 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import nubahome.main.Main;
 import nubahome.databse.Product;
-
-import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.PrimitiveIterator;
 
 public class GUI {
 
@@ -37,7 +36,7 @@ public class GUI {
 
         String sceneTitle = "تسجيل الدخول";
         mainStage.setTitle(sceneTitle);
-        mainStage.setScene(GUI.getHomeScene());
+        mainStage.setScene(GUI.getAddBillScene());
         mainStage.show();
     }
 
@@ -111,10 +110,9 @@ public class GUI {
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
+        
 
-        Scene scene = new Scene(borderPane);
-
-        return scene;
+        return new Scene(borderPane);
 
 
     }
@@ -135,7 +133,7 @@ public class GUI {
             mainStage.show();
         });
 
-        String instalmentsButtonText = "الأقساط";
+        /*String instalmentsButtonText = "الأقساط";
         Button instalmentsButton = new Button(instalmentsButtonText);
         instalmentsButton.setPrefSize(150, 50);
 
@@ -147,20 +145,20 @@ public class GUI {
             mainStage.setScene(getInstalmentsScene());
             System.gc();
             mainStage.show();
-        });
+        });*/
 
 
 
-        String billsButtonText = "الفواتير";
-        Button billsButton = new Button(billsButtonText);
-        billsButton.setPrefSize(150, 50);
+        String billsAndInstalmentsButtonText = "الفواتير و الأقساط";
+        Button billsAndInstalmentsButton = new Button(billsAndInstalmentsButtonText);
+        billsAndInstalmentsButton.setPrefSize(150, 50);
 
-        billsButton.setOnAction(actionEvent -> {
+        billsAndInstalmentsButton.setOnAction(actionEvent -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الفواتير";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -180,7 +178,7 @@ public class GUI {
 
         });
 
-        String SuppliersButtonText = "الموردين";
+        /*String SuppliersButtonText = "الموردين";
         Button SuppliersButton = new Button(SuppliersButtonText);
         SuppliersButton.setPrefSize(150, 50);
 
@@ -193,7 +191,7 @@ public class GUI {
             System.gc();
             mainStage.show();
 
-        });
+        });*/
 
         String usersButtonText = "المستخدمين";
         Button usersButton = new Button(usersButtonText);
@@ -215,23 +213,23 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+
         gridPane.add(salesButton, 0, 0);
-        gridPane.add(instalmentsButton, 1, 0);
-        gridPane.add(usersButton, 2, 0);
-        gridPane.add(billsButton, 0, 1);
+        //gridPane.add(instalmentsButton, 1, 0);
+        gridPane.add(usersButton, 1, 0);
+        gridPane.add(billsAndInstalmentsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
-        gridPane.add(SuppliersButton, 2, 1);
+        //gridPane.add(SuppliersButton, 2, 1);
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
+        
 
-        Scene scene = new Scene(borderPane);
-
-        return scene;
+        return new Scene(borderPane);
 
     }
 
-    private static Scene getInstalmentsScene() {
+    {/*private static Scene getInstalmentsScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -305,9 +303,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
 
-        return scene;
+
+        return new Scene(borderPane);
 
     }
 
@@ -356,10 +354,10 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
 
-        return scene;
-    }
+
+        return new Scene(borderPane);
+    }*/}
 
     private static Scene getEditInstalmentScene() {
 
@@ -382,9 +380,9 @@ public class GUI {
         previousButton.setOnAction(event -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الأقساط";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getInstalmentsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -406,9 +404,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+        
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowInstalmentsScene() {
@@ -432,9 +430,9 @@ public class GUI {
         previousButton.setOnAction(event -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الأقساط";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getInstalmentsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -456,9 +454,8 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getUsersScene() {
@@ -539,9 +536,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
 
     }
 
@@ -590,9 +587,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getAddUserScene() {
@@ -694,9 +691,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowUsersScene() {
@@ -744,9 +741,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getSalesScene() {
@@ -826,9 +823,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getAddSaleScene() {
@@ -901,10 +898,9 @@ public class GUI {
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
+        
 
-        Scene scene = new Scene(borderPane);
-
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getEditSaleScene() {
@@ -953,9 +949,8 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowSalesScene() {
@@ -1003,9 +998,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+        
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getAddCategoryScene() {
@@ -1089,9 +1084,9 @@ public class GUI {
         borderPane.setCenter(gridPane);
 
 
-        Scene scene = new Scene(borderPane);
+        
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getEditCategoryScene() {
@@ -1140,9 +1135,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowCategoriesScene() {
@@ -1191,12 +1186,12 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
-    private static Scene getBillsScene() {
+    private static Scene getBillsAndInstalmentsScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -1220,7 +1215,7 @@ public class GUI {
             mainStage.close();
             String sceneTitle = "واجهة عرض الفواتير";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowBillsScene());
+            mainStage.setScene(getShowBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
 
@@ -1254,6 +1249,32 @@ public class GUI {
 
         });
 
+        String showInstalmentsButtonText = "عرض الأقساط";
+        Button showInstalmentsButton = new Button(showInstalmentsButtonText);
+        showInstalmentsButton.setPrefSize(150, 30);
+        showInstalmentsButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "واجهة عرض الأقساط";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getShowInstalmentsScene());
+            System.gc();
+            mainStage.show();
+        });
+
+        String editInstalmentButtonText = "تعديل قسط";
+        Button editInstalmentButton = new Button(editInstalmentButtonText);
+        editInstalmentButton.setPrefSize(150, 30);
+        editInstalmentButton.setOnAction(event -> {
+
+            mainStage.close();
+            String sceneTitle = "واجهة تعديل قسط";
+            mainStage.setTitle(sceneTitle);
+            mainStage.setScene(getEditInstalmentScene());
+            System.gc();
+            mainStage.show();
+        });
+
         HBox hBOx = new HBox();
         hBOx.setAlignment(Pos.BOTTOM_RIGHT);
         hBOx.getChildren().add(homeButton);
@@ -1264,9 +1285,14 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editBillButton, 0, 0);
-        gridPane.add(addBillButton, 1, 0);
-        gridPane.add(showBillsButton, 2, 0);
+
+        gridPane.add(addBillButton, 2, 0);
+        gridPane.add(showBillsButton, 1, 0);
+        gridPane.add(showInstalmentsButton,0,0);
+        gridPane.add(editInstalmentButton,1,1);
+        gridPane.add(editBillButton, 2, 1);
+
+
 
 
         BorderPane borderPane = new BorderPane();
@@ -1274,9 +1300,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
 
     }
 
@@ -1301,9 +1327,9 @@ public class GUI {
         previousButton.setOnAction(event -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الفواتير";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -1419,15 +1445,21 @@ public class GUI {
         ArrayList<Label> soldQuantitiesLabels = new ArrayList<>();
         ArrayList<TextField> soldQuantitiesTextFields = new ArrayList<>();
         ArrayList<Label> sellingPricesLabels = new ArrayList<>();
-        ArrayList<TextField> sellingPricesTextField = new ArrayList<>();
+        ArrayList<TextField> sellingPricesTextFields = new ArrayList<>();
 
         ScrollPane scrollPane = new ScrollPane();
         GridPane productsGridPane = new GridPane();
         productsGridPane.setHgap(10);
         productsGridPane.setVgap(10);
+        productsGridPane.setPadding(new Insets(10, 10, 10, 10));
         scrollPane.setContent(productsGridPane);
 
 
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
 
         paymentChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -1437,6 +1469,8 @@ public class GUI {
                 {
                     gridPane.getChildren().remove(addMoreProductsButton);
                     gridPane.getChildren().remove(scrollPane);
+                    gridPane.getChildren().remove(submitButton);
+                    gridPane.getChildren().remove(messageLabel);
 
 
                     gridPane.add(guarantorNameLabel,7,3);
@@ -1451,6 +1485,8 @@ public class GUI {
                     gridPane.add(endOfInstalmentLabel,7,7);
                     gridPane.add(addMoreProductsButton,0,8);
                     gridPane.add(scrollPane,0,9);
+                    gridPane.add(submitButton,0,10);
+                    gridPane.add(messageLabel,0,11);
 
 
                 }
@@ -1468,10 +1504,14 @@ public class GUI {
                     gridPane.getChildren().remove(endOfInstalmentLabel);
                     gridPane.getChildren().remove(addMoreProductsButton);
                     gridPane.getChildren().remove(scrollPane);
+                    gridPane.getChildren().remove(submitButton);
+                    gridPane.getChildren().remove(messageLabel);
 
 
                     gridPane.add(addMoreProductsButton,0,2);
                     gridPane.add(scrollPane,0,3);
+                    gridPane.add(submitButton,0,4);
+                    gridPane.add(messageLabel,0,5);
 
 
                 }
@@ -1486,13 +1526,11 @@ public class GUI {
 
             if(paymentMethod == null)
                 //ToDo : Show a warning that you must select payment method before choosing products
-                System.out.println("You can't add product till you choose a paymenet methood.");
+                System.out.println("You can't add product till you choose a payment method.");
             else
             {
                 Label productLabel = new Label("أسم المنتج");
                 ChoiceBox productsChoiceBox = new ChoiceBox();
-                ArrayList<Product> productsList = new ArrayList<>();
-                productsChoiceBox.setItems(FXCollections.observableList(productsList));
 
 
                 Label categoryLabel = new Label("نوع المنتج");
@@ -1506,7 +1544,9 @@ public class GUI {
                     @Override
                     public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
                         int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+
                         ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
+
 
                         ArrayList<String> productsNames = new ArrayList<>();
 
@@ -1533,7 +1573,7 @@ public class GUI {
                 categoriesChoiceBoxes.add(categoriesChoiceBox);
                 soldQuantitiesLabels.add(soldQuantityLabel);
                 soldQuantitiesTextFields.add(soldQuantityTextField);
-                sellingPricesTextField.add(sellingPriceTextField);
+                sellingPricesTextFields.add(sellingPriceTextField);
                 sellingPricesLabels.add(sellingPriceLabel);
 
 
@@ -1544,7 +1584,7 @@ public class GUI {
 
                 int lastProductIndex = numOfProducts -1;
 
-                productsGridPane.add(sellingPricesTextField.get(lastProductIndex),0,currentProductRow);
+                productsGridPane.add(sellingPricesTextFields.get(lastProductIndex),0,currentProductRow);
                 productsGridPane.add(sellingPricesLabels.get(lastProductIndex),1,currentProductRow);
                 productsGridPane.add(soldQuantitiesTextFields.get(lastProductIndex),2,currentProductRow);
                 productsGridPane.add(soldQuantitiesLabels.get(lastProductIndex),3,currentProductRow);
@@ -1560,19 +1600,61 @@ public class GUI {
         });
 
 
-        Label messageLabel = new Label();
-
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
         submitButton.setOnAction(event -> {
             //ToDo: complete the add product function
 
             String message = "";
             messageLabel.setText(message);
 
+            String buyerName = buyerNameTextField.getText().trim();
+            String paymentChoice = paymentChoiceBox.getValue();
+            
+            int numOfSoldProducts =  productsChoiceBoxes.size();
+            
+            ArrayList<Integer> soldProductsIDs = new ArrayList<>();
+            
+            for(int i = 0; i < numOfSoldProducts; i++)
+            {
+                int selectedCategoryID = categoriesChoiceBoxes.get(i).getSelectionModel().getSelectedIndex()+1;
+                ArrayList <Product> productsInSelectedCategory = Main.myStore.getProductsInCategory(selectedCategoryID);
+
+                int selectedProductIndex = productsChoiceBoxes.get(i).getSelectionModel().getSelectedIndex();
+                Product selectedProduct = productsInSelectedCategory.get(selectedProductIndex);
+
+                soldProductsIDs.add(selectedProduct.getID());
+            }
+
+            ArrayList<Integer> soldQuantities = new ArrayList<>();
+            for(int i = 0; i < numOfSoldProducts; i++)
+                soldQuantities.add(Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim()));
+
+
+            ArrayList<Double> sellingPrices = new ArrayList<>();
+            for(int i = 0; i < numOfSoldProducts; i++)
+                sellingPrices.add(Double.parseDouble(sellingPricesTextFields.get(i).getText().trim()));
+
+            double totalBill = 0;
+            for(int i = 0; i < numOfSoldProducts; i++)
+                totalBill += sellingPrices.get(i) * soldQuantities.get(i);
 
             boolean done = false;
+
+            if(paymentChoice.equals("تقسيط"))
+            {
+                String guarantorName = guarantorNameTextField.getText().trim();
+                double paidMoney = Double.parseDouble(paidMoneyTextField.getText().trim());
+
+                double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
+                Date startDate = java.sql.Date.valueOf(startDatePicker.getValue());
+                Date endDate = java.sql.Date.valueOf(endDatePicker.getValue());
+
+                done = Main.myStore.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+            }
+            else
+                done = Main.myStore.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+
+
+
             //done = Main.myStore.addBill();
             if(done)
             {
@@ -1581,9 +1663,7 @@ public class GUI {
 
             }
 
-
         });
-
 
 
         gridPane.add(buyuerNameLabel,7,0);
@@ -1592,6 +1672,8 @@ public class GUI {
         gridPane.add(paymentChoiceBox,6,1);
         gridPane.add(addMoreProductsButton,0,2);
         gridPane.add(scrollPane,0,3);
+        gridPane.add(submitButton,0,4);
+        gridPane.add(messageLabel,0,5);
 
 
 
@@ -1601,9 +1683,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getEditBillScene() {
@@ -1627,9 +1709,9 @@ public class GUI {
         previousButton.setOnAction(event -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الفواتير";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -1652,12 +1734,12 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
-    private static Scene getShowBillsScene() {
+    private static Scene getShowBillsAndInstalmentsScene() {
 
         String homeButtonText = "العودة إلي الواجهة الرئيسية";
         Button homeButton = new Button(homeButtonText);
@@ -1678,9 +1760,9 @@ public class GUI {
         previousButton.setOnAction(event -> {
 
             mainStage.close();
-            String sceneTitle = "واجهة الفواتير";
+            String sceneTitle = "واجهة الفواتير و الأقساط";
             mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsScene());
+            mainStage.setScene(getBillsAndInstalmentsScene());
             System.gc();
             mainStage.show();
         });
@@ -1702,9 +1784,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getProductsScene() {
@@ -1832,9 +1914,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getAddProductScene() {
@@ -1952,9 +2034,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getEditProductScene() {
@@ -2003,9 +2085,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowProductsScene() {
@@ -2053,9 +2135,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getSuppliersScene() {
@@ -2134,9 +2216,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getAddSupplierScene() {
@@ -2221,9 +2303,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getEditSupplierScene() {
@@ -2272,9 +2354,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
     private static Scene getShowSuppliersScene() {
@@ -2322,9 +2404,9 @@ public class GUI {
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-        Scene scene = new Scene(borderPane);
+         
 
-        return scene;
+        return new Scene(borderPane);
     }
 
 
