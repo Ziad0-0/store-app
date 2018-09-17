@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+
 
 public class StoreDatabase extends Database {
 
@@ -121,8 +121,11 @@ public class StoreDatabase extends Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        //ToDo: get all the unit prices refer to database to more info
+
         for(int i =0,s = soldQuantities.size();i<s;i++)
-            done = executeInsertion("insert into bills_details (bill_id, product_id, sold_quantity, unit_price) " +
+            done = executeInsertion("insert into bills_details (bill_id, product_id, sold_quantity, selling_price) " +
                                     "values ("+ lastBillID +", " + soldProductsIDs.get(i) + ", " +  soldQuantities.get(i) + ", " + sellingPrices.get(i) +");");
         return done;
     }
@@ -169,5 +172,96 @@ public class StoreDatabase extends Database {
 
         return products;
 
+    }
+
+    int getSoldQuantity(int productID, Date startDate, Date endDate) {
+        int soldQuantity = 0;
+
+        ResultSet resultSet = executeQuery("select sum(sold_quantity) from bills_details where product_id = "+productID +
+                                           "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '"+ endDate + "');");
+
+        try {
+            if(resultSet.next())
+                soldQuantity += resultSet.getInt("sum(sold_quantity)");
+            return soldQuantity;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return soldQuantity;
+    }
+
+   double getProfit(int productID, Date startDate, Date endDate) {
+
+        double totalSellingPrice = 0;
+        ResultSet resultSet = executeQuery("select sum(selling_price) from bills_details where product_id = "+productID +
+                                           "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '"+ endDate + "');");
+        try {
+            if(resultSet.next())
+                totalSellingPrice += resultSet.getDouble("sum(selling_price)");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        double totalUnitsPrices = 0;
+        resultSet = executeQuery("select sum(unit_price) from bills_details where product_id = "+productID +
+                "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '"+ endDate + "');");
+        try {
+            if(resultSet.next())
+                totalUnitsPrices += resultSet.getDouble("sum(unit_price)");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        double profit =  totalSellingPrice - totalUnitsPrices;
+
+        return profit;
+    }
+
+    ArrayList<User> getAllUsers() {
+
+        ArrayList<User> users = new ArrayList<>();
+
+        ResultSet resultSet = executeQuery("select * from users;");
+
+        try {
+            while(resultSet.next())
+            {
+                String userName = resultSet.getString("user_name");
+                String userPassword = resultSet.getString("user_password");
+                int userType = resultSet.getInt("user_type");
+                users.add(new User(userName, userPassword, userType));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+
+    }
+
+    void updateUser(String userName, String userPassword, int userType) {
+        executeUpdate("update users set user_name='" +userName +"', user_password='"+ userPassword + "', user_type="+ userType  + "where user_name='"+userName+"';");
+
+
+    }
+
+    void deleteUser(String userName) {
+        executeDelete("delete from users where user_name= '"+userName+"';");
+    }
+
+   void updateUserName(User user, String newName) {
+        String oldName = user.getName();
+        executeUpdate("update users set user_name='"+ newName + "' where user_name='"+ oldName + "';");
+   }
+
+   void updateUserPassword(User user, String newPassword) {
+        String userName = user.getName();
+       executeUpdate("update users set user_password='"+ newPassword + "' where user_name='"+ userName + "';");
+   }
+
+   void updateUserType(User user, int newType) {
+        String userName = user.getName();
+        executeUpdate("update users set user_type="+newType+';');
     }
 }

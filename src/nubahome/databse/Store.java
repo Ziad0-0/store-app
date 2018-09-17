@@ -87,4 +87,23 @@ public class Store {
     public ArrayList<Product> getProductsInCategory(int categoryID) {
         return database.getProductsInCategory(categoryID);
     }
+    public ArrayList<User> getAllUsers() {
+        return database.getAllUsers();
+    }
+
+    public void deleteUser(String userName) {
+        database.deleteUser(userName);
+    }
+
+    public void updateUserName(User user, String newName) {
+        database.updateUserName(user, newName);
+    }
+
+    public void updateUserPassword(User user, String newPassword) {
+        database.updateUserPassword(user, newPassword);
+    }
+
+    public void updateUserType(User user, int newType) {
+        database.updateUserType(user, newType);
+    }
 }

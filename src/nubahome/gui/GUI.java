@@ -19,11 +19,13 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import nubahome.main.Main;
 import nubahome.databse.Product;
+import nubahome.databse.User;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.PrimitiveIterator;
+import java.util.concurrent.TimeUnit;
+
 
 public class GUI {
 
@@ -36,7 +38,7 @@ public class GUI {
 
         String sceneTitle = "تسجيل الدخول";
         mainStage.setTitle(sceneTitle);
-        mainStage.setScene(GUI.getAddBillScene());
+        mainStage.setScene(GUI.getHomeScene());
         mainStage.show();
     }
 
@@ -446,18 +448,192 @@ public class GUI {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
 
+        ChoiceBox usersChoiceBox = new ChoiceBox();
+        Label usersLabel = new Label("اختار المستخدم");
+        ArrayList<User> users = Main.myStore.getAllUsers();
+        ArrayList<String> usersNames = new ArrayList<>();
+        for(User x : users)
+            usersNames.add(x.getName());
+        usersChoiceBox.setItems(FXCollections.observableList(usersNames));
+
+        Button deleteUserButton = new Button("حذف المستخدم");
+        deleteUserButton.setPrefSize(200,50);
+
+        Button updateUserBtutton = new Button("تحديث بيانات المستخدم");
+        updateUserBtutton.setPrefSize(200,50);
+
+        Label messageLabel = new Label();
+
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
+        Button updatePasswordButton = new Button("تحديث كلمة السر");
+        updatePasswordButton.setPrefSize(180,50);
+
+        Button updateNameButton = new Button("تحديث أسم المستخدم");
+        updateNameButton.setPrefSize(180,50);
+
+        Button updateTypeButton = new Button("تحديث وظيفة المستخدم");
+        updateTypeButton.setPrefSize(180,50);
+
+        deleteUserButton.setOnAction(actionEvent -> {
+            gridPane.getChildren().remove(updateNameButton);
+            gridPane.getChildren().remove(updatePasswordButton);
+            gridPane.getChildren().remove(updateTypeButton);
+            gridPane.getChildren().remove(messageLabel);
+
+            gridPane.add(messageLabel,0,2);
+
+            String message = "";
+            messageLabel.setText(message);
+
+            User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
+            Main.myStore.deleteUser(selectedUser.getName());
+            message = "تم الحذف بنجاح";
+            messageLabel.setText(message);
+
+            ArrayList <User> undeletedUSers = Main.myStore.getAllUsers();
+            ArrayList<String> undeletedusersNames = new ArrayList<>();
+            for(User x : undeletedUSers)
+                undeletedusersNames.add(x.getName());
+            usersChoiceBox.setItems(FXCollections.observableList(undeletedusersNames));
+
+
+            gridPane.getChildren().clear();
+
+            gridPane.add(usersChoiceBox,0,0);
+            gridPane.add(usersLabel,1,0);
+            gridPane.add(deleteUserButton,0,1);
+            gridPane.add(updateUserBtutton,1,1);
+            gridPane.add(messageLabel,0,2);
+
+        });
+
+        updateUserBtutton.setOnAction(actionEvent -> {
+            gridPane.getChildren().remove(messageLabel);
+
+            gridPane.add(updatePasswordButton,0,2);
+            gridPane.add(updateNameButton,1,2);
+            gridPane.add(updateTypeButton,2,2);
+        });
+
+        updateNameButton.setOnAction(actionEvent -> {
+            TextField newNameTextField = new TextField();
+            newNameTextField.setPrefSize(100,20);
+
+            Label newNameLabel = new Label("الأسم الجديد");
+
+            Button submitButton = new Button("أدخل");
+
+            submitButton.setOnAction(event -> {
+                String message = "";
+                messageLabel.setText(message);
+
+                String newName = newNameTextField.getText().trim();
+                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
+                Main.myStore.updateUserName(selectedUser, newName);
+
+                message = "تم التعديل بنجاح";
+                messageLabel.setText(message);
+
+                gridPane.getChildren().clear();
+
+                gridPane.add(usersChoiceBox,0,0);
+                gridPane.add(usersLabel,1,0);
+                gridPane.add(deleteUserButton,0,1);
+                gridPane.add(updateUserBtutton,1,1);
+                gridPane.add(messageLabel,0,2);
+
+            });
+
+            gridPane.add(newNameTextField,0,3);
+            gridPane.add(newNameLabel,1,3);
+            gridPane.add(submitButton,0,4);
+            gridPane.add(messageLabel,0,5);
+        });
+
+        updatePasswordButton.setOnAction(actionEvent -> {
+            TextField newPasswordTextField = new TextField();
+            newPasswordTextField.setPrefSize(100,20);
+
+            Label newPasswordLabel = new Label("كلمة السر الجديدة");
+
+            Button submitButton = new Button("أدخل");
+
+            submitButton.setOnAction(event -> {
+                String message = "";
+                messageLabel.setText(message);
+
+                String newPassword = newPasswordTextField.getText().trim();
+                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
+                Main.myStore.updateUserPassword(selectedUser, newPassword);
+
+                message = "تم التعديل بنجاح";
+                messageLabel.setText(message);
+
+                gridPane.getChildren().clear();
+
+                gridPane.add(usersChoiceBox,0,0);
+                gridPane.add(usersLabel,1,0);
+                gridPane.add(deleteUserButton,0,1);
+                gridPane.add(updateUserBtutton,1,1);
+                gridPane.add(messageLabel,0,2);
+            });
+
+            gridPane.add(newPasswordTextField,0,3);
+            gridPane.add(newPasswordLabel,1,3);
+            gridPane.add(submitButton,0,4);
+            gridPane.add(messageLabel,0,5);
+        });
+
+        updateTypeButton.setOnAction(actionEvent -> {
+            Label newPasswordLabel = new Label("الوظيفة الجديدة");
+
+            ChoiceBox newTypeChoiceBox = new ChoiceBox();
+            ArrayList<String> typesList = Main.myStore.getUserTypes();
+            newTypeChoiceBox.setItems(FXCollections.observableList(typesList));
+
+            Button submitButton = new Button("أدخل");
+            submitButton.setOnAction(event->{
+                String message = "";
+                messageLabel.setText(message);
+
+                int newUserType = newTypeChoiceBox.getSelectionModel().getSelectedIndex()+1;
+                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
+                Main.myStore.updateUserType(selectedUser, newUserType);
+
+                message = "تم التعديل بنجاح";
+                messageLabel.setText(message);
+
+                gridPane.getChildren().clear();
+
+                gridPane.add(usersChoiceBox,0,0);
+                gridPane.add(usersLabel,1,0);
+                gridPane.add(deleteUserButton,0,1);
+                gridPane.add(updateUserBtutton,1,1);
+                gridPane.add(messageLabel,0,2);
+            });
+            gridPane.add(newTypeChoiceBox,0,3);
+            gridPane.add(newPasswordLabel,1,3);
+            gridPane.add(submitButton,0,4);
+            gridPane.add(messageLabel,0,5);
+        });
+
+
+        gridPane.add(usersChoiceBox,0,0);
+        gridPane.add(usersLabel,1,0);
+        gridPane.add(deleteUserButton,0,1);
+        gridPane.add(updateUserBtutton,1,1);
+        gridPane.add(messageLabel,0,2);
+
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
 
         return new Scene(borderPane);
     }
@@ -1994,18 +2170,34 @@ public class GUI {
         hBOx.getChildren().add(previousButton);
         hBOx.getChildren().add(homeButton);
 
+        TableView table = new TableView();
+
+        TableColumn productName = new TableColumn("أسم المنتج");
+        TableColumn productBuyingPrice = new TableColumn("سعر الشراء");
+        TableColumn productAvailableQuantity = new TableColumn("الكمية المتوافرة");
+        TableColumn productCashPrice = new TableColumn("سعر البيع كاش");
+        TableColumn productInstalmentPrice = new TableColumn("سعر البيع تقسيط");
+
+        table.getColumns().add(productInstalmentPrice);
+        table.getColumns().add(productCashPrice);
+        table.getColumns().add(productAvailableQuantity);
+        table.getColumns().add(productBuyingPrice);
+        table.getColumns().add(productName);
+
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setAlignment(Pos.CENTER_RIGHT);
+
+        gridPane.add(table,20,0);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-         
+        borderPane.setCenter(table);
 
         return new Scene(borderPane);
     }
