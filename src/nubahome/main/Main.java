@@ -11,7 +11,7 @@ public class Main extends Application {
     public static Store myStore;
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
 
         GUI.open(primaryStage);
     }

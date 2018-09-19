@@ -6,15 +6,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import nubahome.main.Main;
@@ -38,11 +37,12 @@ public class GUI {
 
         String sceneTitle = "تسجيل الدخول";
         mainStage.setTitle(sceneTitle);
-        mainStage.setScene(GUI.getHomeScene());
+        Scene loginScene = new Scene(getLoginLayout());
+        mainStage.setScene(loginScene);
         mainStage.show();
     }
 
-    private static Scene getLoginScene() {
+    private static Pane getLoginLayout() {
 
         String nodeText;
         nodeText = "أسم المستخدم";
@@ -81,7 +81,8 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                mainStage.setScene(getHomeScene());
+                Scene homeScene = new Scene(getHomeSceneLayout());
+                mainStage.setScene(homeScene);
                 System.gc();
                 mainStage.show();
             }
@@ -114,53 +115,77 @@ public class GUI {
         borderPane.setCenter(gridPane);
         
 
-        return new Scene(borderPane);
+        return borderPane;
 
 
     }
 
-    private static Scene getHomeScene() {
+    private static Pane getHomeSceneLayout() {
 
-        String salesButtonText = "المبيعات";
-        Button salesButton = new Button(salesButtonText);
-        salesButton.setPrefSize(150, 50);
+        String purchasesButtonText = "المشتريات";
+        Button purchasesButton = new Button(purchasesButtonText);
+        purchasesButton.setPrefSize(150, 50);
 
-        salesButton.setOnAction(actionEvent -> {
-
+        purchasesButton.setOnAction(actionEvent -> {
             mainStage.close();
-            String sceneTitle = "واجهة المبيعات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getSalesScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
+            purchasesLayout.setBottom(hBox);
+
+            Scene purchasesScene = new Scene(purchasesLayout);
+
+            mainStage.setTitle("واجهة الفواتير و الأقساط");
+            mainStage.setScene(purchasesScene);
             System.gc();
             mainStage.show();
         });
-
-        /*String instalmentsButtonText = "الأقساط";
-        Button instalmentsButton = new Button(instalmentsButtonText);
-        instalmentsButton.setPrefSize(150, 50);
-
-        instalmentsButton.setOnAction(actionEvent -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });*/
-
-
-
+        
         String billsAndInstalmentsButtonText = "الفواتير و الأقساط";
         Button billsAndInstalmentsButton = new Button(billsAndInstalmentsButtonText);
         billsAndInstalmentsButton.setPrefSize(150, 50);
 
         billsAndInstalmentsButton.setOnAction(actionEvent -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
+            
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+            
+            BorderPane billsAndInstalmentLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+            billsAndInstalmentLayout.setBottom(hBox);
+            
+            Scene billsAndInstalmentScene = new Scene(billsAndInstalmentLayout);
+
+            mainStage.setTitle("واجهة الفواتير و الأقساط");
+            mainStage.setScene(billsAndInstalmentScene);
             System.gc();
             mainStage.show();
         });
@@ -170,205 +195,228 @@ public class GUI {
         productsButton.setPrefSize(150, 50);
 
         productsButton.setOnAction(actionEvent -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+            productsLayout.setBottom(hBox);
+
+            Scene productsScene = new Scene(productsLayout);
+
+            mainStage.setTitle("واجهة المنتجات");
+            mainStage.setScene(productsScene);
             System.gc();
             mainStage.show();
-
         });
 
-        /*String SuppliersButtonText = "الموردين";
+        String SuppliersButtonText = "الموردين";
         Button SuppliersButton = new Button(SuppliersButtonText);
         SuppliersButton.setPrefSize(150, 50);
 
         SuppliersButton.setOnAction(actionEvent -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة الموردين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getSuppliersScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+           suppliersLayout.setBottom(hBox);
+
+            Scene suppliersScene = new Scene(suppliersLayout);
+
+            mainStage.setTitle("واجهة المنتجات");
+            mainStage.setScene(suppliersScene);
             System.gc();
             mainStage.show();
-
-        });*/
+        });
 
         String usersButtonText = "المستخدمين";
         Button usersButton = new Button(usersButtonText);
         usersButton.setPrefSize(150, 50);
 
         usersButton.setOnAction(actionEvent -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة المستخدمين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getUsersScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+            usersLayout.setBottom(hBox);
+
+            Scene usersScene = new Scene(usersLayout);
+            mainStage.setTitle("واجهة المستخدمين");
+            mainStage.setScene(usersScene);
             System.gc();
             mainStage.show();
         });
-
-
+        
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(salesButton, 0, 0);
-        //gridPane.add(instalmentsButton, 1, 0);
+        gridPane.add(purchasesButton, 0, 0);
         gridPane.add(usersButton, 1, 0);
         gridPane.add(billsAndInstalmentsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
-        //gridPane.add(SuppliersButton, 2, 1);
+        gridPane.add(SuppliersButton, 0, 2);
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
         
-
-        return new Scene(borderPane);
+        return borderPane;
 
     }
-
-    private static Scene getEditInstalmentScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-        
-
-        return new Scene(borderPane);
-    }
-
-    private static Scene getShowInstalmentsScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-
-        return new Scene(borderPane);
-    }
-
-    private static Scene getUsersScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-
-        });
-
+    
+    private static Pane getUsersSceneLayout() {
         String showUsersButtonText = "عرض المستخدمين";
         Button showUsersButton = new Button(showUsersButtonText);
         showUsersButton.setPrefSize(150, 30);
         showUsersButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة عرض المستخدمين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowUsersScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                usersLayout.setBottom(hBox);
+
+                Scene usersScene = new Scene(usersLayout);
+                mainStage.setTitle("واجهة المستخدمين");
+                mainStage.setScene(usersScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showUsersSceneLayout = (BorderPane) getShowUsersSceneLayout();
+            showUsersSceneLayout.setBottom(hBox);
+            
+            Scene showUsersScene = new Scene(showUsersSceneLayout);
+            mainStage.setTitle("واجهة عرض المستخدمين");
+            mainStage.setScene(showUsersScene);
             System.gc();
             mainStage.show();
         });
-
 
         String addUserButtonText = "إضافة مستخدم";
         Button addUserButton = new Button(addUserButtonText);
         addUserButton.setPrefSize(150, 30);
         addUserButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة إضافة مستخدم";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddUserScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                usersLayout.setBottom(hBox);
+
+                Scene usersScene = new Scene(usersLayout);
+                mainStage.setTitle("واجهة المستخدمين");
+                mainStage.setScene(usersScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addUserLayout = (BorderPane) getAddUserSceneLayout();
+            addUserLayout.setBottom(hBox);
+
+            Scene addUserScene = new Scene(addUserLayout);
+            mainStage.setTitle( "واجهة إضافة مستخدم");
+            mainStage.setScene(addUserScene);
             System.gc();
             mainStage.show();
         });
@@ -378,18 +426,56 @@ public class GUI {
         Button editUserButton = new Button(editUserButtonText);
         editUserButton.setPrefSize(150, 30);
         editUserButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة تعديل مستخدم";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditUserScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                usersLayout.setBottom(hBox);
+
+                Scene usersScene = new Scene(usersLayout);
+                mainStage.setTitle("واجهة المستخدمين");
+                mainStage.setScene(usersScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane editUserLayout = (BorderPane) getEditUserSceneLayout();
+            editUserLayout.setBottom(hBox);
+
+            Scene editUserScene = new Scene(editUserLayout);
+            mainStage.setTitle("واجهة تعديل مستخدم");
+            mainStage.setScene(editUserScene);
             System.gc();
             mainStage.show();
         });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.getChildren().add(homeButton);
 
 
         GridPane gridPane = new GridPane();
@@ -402,58 +488,24 @@ public class GUI {
         gridPane.add(addUserButton, 1, 0);
         gridPane.add(showUsersButton, 2, 0);
 
-
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
 
-        return new Scene(borderPane);
+        return borderPane;
 
     }
 
-    private static Scene getEditUserScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المستخدمين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getUsersScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getEditUserSceneLayout() {
         ChoiceBox usersChoiceBox = new ChoiceBox();
         Label usersLabel = new Label("اختار المستخدم");
         ArrayList<User> users = Main.myStore.getAllUsers();
         ArrayList<String> usersNames = new ArrayList<>();
+
         for(User x : users)
             usersNames.add(x.getName());
+
         usersChoiceBox.setItems(FXCollections.observableList(usersNames));
 
         Button deleteUserButton = new Button("حذف المستخدم");
@@ -495,11 +547,11 @@ public class GUI {
             message = "تم الحذف بنجاح";
             messageLabel.setText(message);
 
-            ArrayList <User> undeletedUSers = Main.myStore.getAllUsers();
-            ArrayList<String> undeletedusersNames = new ArrayList<>();
-            for(User x : undeletedUSers)
-                undeletedusersNames.add(x.getName());
-            usersChoiceBox.setItems(FXCollections.observableList(undeletedusersNames));
+            ArrayList <User> undeletedUsers = Main.myStore.getAllUsers();
+            ArrayList<String> undeletedUsersNames = new ArrayList<>();
+            for(User x : undeletedUsers)
+                undeletedUsersNames.add(x.getName());
+            usersChoiceBox.setItems(FXCollections.observableList(undeletedUsersNames));
 
 
             gridPane.getChildren().clear();
@@ -616,6 +668,7 @@ public class GUI {
                 gridPane.add(updateUserBtutton,1,1);
                 gridPane.add(messageLabel,0,2);
             });
+
             gridPane.add(newTypeChoiceBox,0,3);
             gridPane.add(newPasswordLabel,1,3);
             gridPane.add(submitButton,0,4);
@@ -631,47 +684,13 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
 
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getAddUserScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المستخدمين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getUsersScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getAddUserSceneLayout() {
         String nodeText;
 
         nodeText = "أسم المستخدم";
@@ -734,48 +753,14 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
          
 
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getShowUsersScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المستخدمين";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getUsersScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getShowUsersSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -784,143 +769,204 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
-
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getSalesScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
+    private static Pane getPurchasesSceneLayout() {
+        String showPurchasesButtonText = "عرض المشتريات";
+        Button showPurchasesButton = new Button(showPurchasesButtonText);
+        showPurchasesButton.setPrefSize(150, 30);
+        showPurchasesButton.setOnAction(event -> {
             mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+                
+                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
+                purchasesLayout.setBottom(hBox);
+
+                Scene purchasesScene = new Scene(purchasesLayout);
+                mainStage.setTitle("واجهة المشتريات");
+                mainStage.setScene(purchasesScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+            
+            BorderPane showPurchasesSceneLayout = (BorderPane) getShowPurchasesSceneLayout();
+            showPurchasesSceneLayout.setBottom(hBox);
+            
+            Scene showPurchasesScene = new Scene(showPurchasesSceneLayout);
+            mainStage.setTitle("واجهة عرض المشتريات");
+            mainStage.setScene(showPurchasesScene);
             System.gc();
             mainStage.show();
-
         });
 
-        String showSalesButtonText = "عرض المبيعات";
-        Button showSalesButton = new Button(showSalesButtonText);
-        showSalesButton.setPrefSize(150, 30);
-        showSalesButton.setOnAction(event -> {
 
+        String addPurchaseButtonText = "إضافة شراء";
+        Button addPurchaseButton = new Button(addPurchaseButtonText);
+        addPurchaseButton.setPrefSize(150, 30);
+        addPurchaseButton.setOnAction(event -> {
             mainStage.close();
-            String sceneTitle = "واجهة عرض المبيعات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowSalesScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
+                purchasesLayout.setBottom(hBox);
+
+                Scene purchasesScene = new Scene(purchasesLayout);
+                mainStage.setTitle("واجهة المشتريات");
+                mainStage.setScene(purchasesScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+            
+            
+            BorderPane addPurchaseLayout = (BorderPane) getAddPurchaseSceneLayout();
+            addPurchaseLayout.setBottom(hBox);
+
+            Scene addPurchaseScene = new Scene(addPurchaseLayout);
+            mainStage.setTitle( "واجهة إضافة شراء");
+            mainStage.setScene(addPurchaseScene);
             System.gc();
             mainStage.show();
         });
 
 
-        String addSaleButtonText = "إضافة بيع";
-        Button addSaleButton = new Button(addSaleButtonText);
-        addSaleButton.setPrefSize(150, 30);
-        addSaleButton.setOnAction(event -> {
-
+        String editPurchaseButtonText = "تعديل شراء";
+        Button editPurchaseButton = new Button(editPurchaseButtonText);
+        editPurchaseButton.setPrefSize(150, 30);
+        editPurchaseButton.setOnAction(event -> {
             mainStage.close();
-            String sceneTitle = "واجهة إضافة بيع";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddSaleScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
+                purchasesLayout.setBottom(hBox);
+
+                Scene purchasesScene = new Scene(purchasesLayout);
+                mainStage.setTitle("واجهة المشتريات");
+                mainStage.setScene(purchasesScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+            
+            
+            BorderPane editPurchaseLayout = (BorderPane) getEditPurchaseSceneLayout();
+            editPurchaseLayout.setBottom(hBox);
+
+            Scene editPurchaseScene = new Scene(editPurchaseLayout);
+            mainStage.setTitle("واجهة تعديل شراء");
+            mainStage.setScene(editPurchaseScene);
             System.gc();
             mainStage.show();
         });
 
-
-        String editSaleButtonText = "تعديل بيع";
-        Button editSaleButton = new Button(editSaleButtonText);
-        editSaleButton.setPrefSize(150, 30);
-        editSaleButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة تعديل بيع";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditSaleScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.getChildren().add(homeButton);
-
-
+        
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editSaleButton, 0, 0);
-        gridPane.add(addSaleButton, 1, 0);
-        gridPane.add(showSalesButton, 2, 0);
+        gridPane.add(editPurchaseButton, 0, 0);
+        gridPane.add(addPurchaseButton, 1, 0);
+        gridPane.add(showPurchasesButton, 2, 0);
 
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
 
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getAddSaleScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المبيعات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getSalesScene());
-            System.gc();
-            mainStage.show();
-        });
-
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-        TextField salesTextField = new TextField();
-        salesTextField.setPrefSize(50, 20);
-
-        String nodeText;
-
-        nodeText = "حجم المبيعات";
-        Label salesLabel = new Label(nodeText);
-
+    private static Pane getAddPurchaseSceneLayout() {
         Label messageLabel = new Label();
 
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
+        Button submitButton = new Button("أدخل");
         submitButton.setPrefSize(100, 20);
         submitButton.setOnAction(event -> {
 
@@ -928,179 +974,173 @@ public class GUI {
             //ToDo:
         });
 
+        Label supplierNameLabel = new Label("أسم المورد");
+        ChoiceBox supplierChoiceBox = new ChoiceBox();
+        ArrayList<String> suppliers = Main.myStore.getSuppliers();
+        supplierChoiceBox.setItems(FXCollections.observableList(suppliers));
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
+        addMoreProductsButton.setPrefSize(120,20);
 
-        gridPane.add(salesTextField, 0, 1);
-        gridPane.add(salesLabel, 1, 1);
-        gridPane.add(submitButton, 0, 2);
-        gridPane.add(messageLabel, 1, 2);
+        ArrayList<Label> productsLabels =new ArrayList<>();
+        ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
+        ArrayList<Label> categoriesLabels = new ArrayList<>();
+        ArrayList<ChoiceBox> categoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<Label> boughtQuantitiesLabels = new ArrayList<>();
+        ArrayList<TextField> boughtQuantitiesTextFields = new ArrayList<>();
+        ArrayList<Label> buyingPricesLabels = new ArrayList<>();
+        ArrayList<TextField> buyingPricesTextFields = new ArrayList<>();
 
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-        
+        ScrollPane scrollPane = new ScrollPane();
+        GridPane productsGridPane = new GridPane();
+        productsGridPane.setHgap(10);
+        productsGridPane.setVgap(10);
+        productsGridPane.setPadding(new Insets(10, 10, 10, 10));
+        scrollPane.setContent(productsGridPane);
 
-        return new Scene(borderPane);
-    }
+        addMoreProductsButton.setOnAction(event -> {
 
-    private static Scene getEditSaleScene() {
+            Label productLabel = new Label("أسم المنتج");
+            ChoiceBox productsChoiceBox = new ChoiceBox();
 
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
+            Label categoryLabel = new Label("نوع المنتج");
+            ChoiceBox categoriesChoiceBox = new ChoiceBox();
+            ArrayList<String> categoriesList = Main.myStore.getCategories();
+            categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
 
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
+            categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
+                    int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+
+                    ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
+
+                    ArrayList<String> productsNames = new ArrayList<>();
+
+                    for(Product x : products)
+                        productsNames.add(x.getProductName());
+
+                    productsNames.add("أخري");
+
+                    productsChoiceBox.setItems(FXCollections.observableList(productsNames));
+                }
+            });
+
+            productsChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                    String selectedProduct = productsChoiceBox.getSelectionModel().getSelectedItem().toString();
+
+                    if(selectedProduct.equals("أخري"))
+                    {
+                        BorderPane addProductLayout = (BorderPane) getAddProductSceneLayout();
+
+                        Scene addProductScene = new Scene(addProductLayout);
+                        Stage secondaryStage = new Stage();
+                        secondaryStage.setAlwaysOnTop(true);
+                        secondaryStage.setTitle("واجهة إضافة منتج");
+                        secondaryStage.setScene(addProductScene);
+                        System.gc();
+                        secondaryStage.show();
+
+                        if(!secondaryStage.isShowing())
+                        {
+                            System.out.println("I am here");
+                            int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex() + 1;
+                            ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
+
+                            ArrayList<String> productsNames = new ArrayList<>();
+
+                            for (Product x : products)
+                                productsNames.add(x.getProductName());
+
+                            productsNames.add("أخري");
+
+                            productsChoiceBox.setItems(FXCollections.observableList(productsNames));
+                        }
+                    }
+                }
+            });
+
+
+            Label boughtQuantityLabel = new Label("الكمية المشتراة");
+            TextField boughtQuantityTextField = new TextField();
+            boughtQuantityTextField.setPrefSize(100,20);
+
+
+            Label buyingPriceLabel = new Label( "سعر الشراء");
+            TextField buyingPriceTextField = new TextField();
+            buyingPriceTextField.setPrefSize(100,20);
+
+            productsLabels.add(productLabel);
+            productsChoiceBoxes.add(productsChoiceBox);
+            categoriesLabels.add(categoryLabel);
+            categoriesChoiceBoxes.add(categoriesChoiceBox);
+            boughtQuantitiesLabels.add(boughtQuantityLabel);
+            boughtQuantitiesTextFields.add(boughtQuantityTextField);
+            buyingPricesTextFields.add(buyingPriceTextField);
+            buyingPricesLabels.add(buyingPriceLabel);
+
+
+            int currentProductRow = 0;
+            int numOfProducts = productsLabels.size();
+            currentProductRow += numOfProducts;
+
+            int lastProductIndex = numOfProducts -1;
+
+            productsGridPane.add(buyingPricesTextFields.get(lastProductIndex),0,currentProductRow);
+            productsGridPane.add(buyingPricesLabels.get(lastProductIndex),1,currentProductRow);
+            productsGridPane.add(boughtQuantitiesTextFields.get(lastProductIndex),2,currentProductRow);
+            productsGridPane.add(boughtQuantitiesLabels.get(lastProductIndex),3,currentProductRow);
+            productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),4,currentProductRow);
+            productsGridPane.add(productsLabels.get(lastProductIndex),5,currentProductRow);
+            productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),6,currentProductRow);
+            productsGridPane.add(categoriesLabels.get(lastProductIndex),7,currentProductRow);
+
+
         });
 
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المبيعات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getSalesScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-
-        return new Scene(borderPane);
-    }
-
-    private static Scene getShowSalesScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المبيعات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getSalesScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-        
-
-        return new Scene(borderPane);
-    }
-
-    private static Scene getAddCategoryScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-        TextField categoryNameTextField = new TextField();
-        categoryNameTextField.setPrefSize(100, 20);
-
-        String nodeText = "أسم النوع";
-        Label categoryNameLabel = new Label(nodeText);
-
-        Label messageLabel = new Label();
-
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
         submitButton.setOnAction(event -> {
-            //ToDo: complete the add category function
+            //ToDo: complete the add product function
+
             String message = "";
             messageLabel.setText(message);
-            String categoryName = categoryNameTextField.getText();
+
+            String supplierName = supplierChoiceBox.getSelectionModel().getSelectedItem().toString();
+
+            int numOfBoughtProducts =  productsChoiceBoxes.size();
+
+            ArrayList<Integer> boughtProductsIDs = new ArrayList<>();
+
+            for(int i = 0; i < numOfBoughtProducts ; i++)
+            {
+                int selectedCategoryID = categoriesChoiceBoxes.get(i).getSelectionModel().getSelectedIndex()+1;
+                ArrayList <Product> productsInSelectedCategory = Main.myStore.getProductsInCategory(selectedCategoryID);
+
+                int selectedProductIndex = productsChoiceBoxes.get(i).getSelectionModel().getSelectedIndex();
+                Product selectedProduct = productsInSelectedCategory.get(selectedProductIndex);
+
+                boughtProductsIDs.add(selectedProduct.getID());
+            }
+
+            ArrayList<Integer> boughtQuantities = new ArrayList<>();
+            for(int i = 0; i < numOfBoughtProducts; i++)
+                boughtQuantities.add(Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim()));
+
+
+            ArrayList<Double> buyingPrices = new ArrayList<>();
+            for(int i = 0; i < numOfBoughtProducts; i++)
+                buyingPrices.add(Double.parseDouble(buyingPricesTextFields.get(i).getText().trim()));
+
+            double totalCost = 0;
+            for(int i = 0; i < numOfBoughtProducts; i++)
+                totalCost += buyingPrices.get(i) * boughtQuantities.get(i);
+
             boolean done = false;
-            done = Main.myStore.addCategory(categoryName);
+
+            done = Main.myStore.addSupply(supplierName, boughtProductsIDs, boughtQuantities, buyingPrices, totalCost);
+
             if(done)
             {
                 message = "تم الإدخال بنجاح";
@@ -1108,9 +1148,7 @@ public class GUI {
 
             }
 
-
         });
-
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -1118,58 +1156,42 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(categoryNameTextField, 0, 0);
-        gridPane.add(categoryNameLabel, 1, 0);
-        gridPane.add(submitButton, 0, 1);
-        gridPane.add(messageLabel, 0, 2);
-
+        gridPane.add(supplierNameLabel,7,0);
+        gridPane.add(supplierChoiceBox,6,0);
+        gridPane.add(addMoreProductsButton,0,1);
+        gridPane.add(scrollPane,0,2);
+        gridPane.add(submitButton,0,3);
+        gridPane.add(messageLabel,0,4);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
+        
+        borderPane.setCenter(gridPane);
+        
+
+        return borderPane;
+    }
+
+    private static Pane getEditPurchaseSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        
         borderPane.setCenter(gridPane);
 
+
+        return borderPane;
+    }
+
+    private static Pane getShowPurchasesSceneLayout() {
 
         
 
-        return new Scene(borderPane);
-    }
-
-    private static Scene getEditCategoryScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1178,90 +1200,66 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
+        
         borderPane.setCenter(gridPane);
 
-         
+        
 
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getShowCategoriesScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(gridPane);
-
-         
-
-        return new Scene(borderPane);
-    }
-
-    private static Scene getBillsAndInstalmentsScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-
-        });
-
+    private static Pane getBillsAndInstalmentsSceneLayout() {
         String showBillsButtonText = "عرض الفواتير";
         Button showBillsButton = new Button(showBillsButtonText);
         showBillsButton.setPrefSize(150, 30);
         showBillsButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة عرض الفواتير";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowBillsAndInstalmentsScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                billsAndInstalmentsLayout.setBottom(hBox);
+
+                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
+                mainStage.setTitle("واجهة الفواتير و الأقساط");
+                mainStage.setScene(billsAndInstalmentsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showBillsSceneLayout = (BorderPane) getShowBillsSceneLayout();
+            showBillsSceneLayout.setBottom(hBox);
+
+            Scene showBillsScene = new Scene(showBillsSceneLayout);
+            mainStage.setTitle("واجهة عرض الفواتير");
+            mainStage.setScene(showBillsScene);
             System.gc();
             mainStage.show();
 
@@ -1271,25 +1269,108 @@ public class GUI {
         Button addBillButton = new Button(addBillButtonText);
         addBillButton.setPrefSize(150, 30);
         addBillButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة إضافة الفاتورة";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddBillScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                billsAndInstalmentsLayout.setBottom(hBox);
+
+                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
+                mainStage.setTitle("واجهة الفواتير و الأقساط");
+                mainStage.setScene(billsAndInstalmentsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addBillLayout = (BorderPane) getAddBillSceneLayout();
+            addBillLayout.setBottom(hBox);
+
+            Scene addBillScene = new Scene(addBillLayout);
+            mainStage.setTitle("واجهة إضافة الفاتورة");
+            mainStage.setScene(addBillScene);
             System.gc();
             mainStage.show();
-
         });
 
         String editBillButtonText = "تعديل فاتورة";
         Button editBillButton = new Button(editBillButtonText);
         editBillButton.setPrefSize(150, 30);
         editBillButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة تعديل الفاتورة";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditBillScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                billsAndInstalmentsLayout.setBottom(hBox);
+
+                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
+                mainStage.setTitle("واجهة الفواتير و الأقساط");
+                mainStage.setScene(billsAndInstalmentsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane editBillLayout = (BorderPane) getEditBillSceneLayout();
+            editBillLayout.setBottom(hBox);
+
+            Scene editBillScene = new Scene(editBillLayout);
+            mainStage.setTitle( "واجهة تعديل الفاتورة");
+            mainStage.setScene(editBillScene);
             System.gc();
             mainStage.show();
 
@@ -1299,11 +1380,53 @@ public class GUI {
         Button showInstalmentsButton = new Button(showInstalmentsButtonText);
         showInstalmentsButton.setPrefSize(150, 30);
         showInstalmentsButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة عرض الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowInstalmentsScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                billsAndInstalmentsLayout.setBottom(hBox);
+
+                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
+                mainStage.setTitle("واجهة الفواتير و الأقساط");
+                mainStage.setScene(billsAndInstalmentsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showInstalmentsSceneLayout = (BorderPane) getShowInstalmentsSceneLayout();
+            showInstalmentsSceneLayout.setBottom(hBox);
+
+            Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
+            mainStage.setTitle("واجهة عرض الأقساط");
+            mainStage.setScene(showInstalmentsScene);
             System.gc();
             mainStage.show();
         });
@@ -1312,19 +1435,57 @@ public class GUI {
         Button editInstalmentButton = new Button(editInstalmentButtonText);
         editInstalmentButton.setPrefSize(150, 30);
         editInstalmentButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة تعديل قسط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditInstalmentScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                billsAndInstalmentsLayout.setBottom(hBox);
+
+                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
+                mainStage.setTitle("واجهة الفواتير و الأقساط");
+                mainStage.setScene(billsAndInstalmentsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+
+            BorderPane editInstalmentSceneLayout = (BorderPane) getEditInstalmentSceneLayout();
+            editInstalmentSceneLayout.setBottom(hBox);
+
+            Scene editInstalmentScene = new Scene(editInstalmentSceneLayout);
+            mainStage.setTitle("واجهة تعديل قسط");
+            mainStage.setScene(editInstalmentScene);
             System.gc();
             mainStage.show();
         });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.getChildren().add(homeButton);
-
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -1338,54 +1499,18 @@ public class GUI {
         gridPane.add(editInstalmentButton,1,1);
         gridPane.add(editBillButton, 2, 1);
 
-
-
+        
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
-
-        return new Scene(borderPane);
+        
+        return borderPane;
 
     }
 
-    private static Scene getAddBillScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getAddBillSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1395,7 +1520,7 @@ public class GUI {
         String nodeText;
 
         nodeText = "أسم العميل";
-        Label buyuerNameLabel = new Label(nodeText);
+        Label buyerNameLabel = new Label(nodeText);
         TextField buyerNameTextField = new TextField();
         buyerNameTextField.setPrefSize(100,20);
 
@@ -1564,8 +1689,6 @@ public class GUI {
             }
         });
 
-
-
         addMoreProductsButton.setOnAction(event -> {
 
             String paymentMethod = paymentChoiceBox.getSelectionModel().getSelectedItem();
@@ -1609,7 +1732,7 @@ public class GUI {
                 soldQuantityTextField.setPrefSize(100,20);
 
 
-                Label sellingPriceLabel = new Label( "سعر البيع");
+                Label sellingPriceLabel = new Label( "سعر الشراء");
                 TextField sellingPriceTextField = new TextField();
                 sellingPriceTextField.setPrefSize(100,20);
 
@@ -1645,7 +1768,6 @@ public class GUI {
 
         });
 
-
         submitButton.setOnAction(event -> {
             //ToDo: complete the add product function
 
@@ -1679,9 +1801,9 @@ public class GUI {
             for(int i = 0; i < numOfSoldProducts; i++)
                 sellingPrices.add(Double.parseDouble(sellingPricesTextFields.get(i).getText().trim()));
 
-            double totalBill = 0;
+            double totalCost = 0;
             for(int i = 0; i < numOfSoldProducts; i++)
-                totalBill += sellingPrices.get(i) * soldQuantities.get(i);
+                totalCost += sellingPrices.get(i) * soldQuantities.get(i);
 
             boolean done = false;
 
@@ -1694,10 +1816,10 @@ public class GUI {
                 Date startDate = java.sql.Date.valueOf(startDatePicker.getValue());
                 Date endDate = java.sql.Date.valueOf(endDatePicker.getValue());
 
-                done = Main.myStore.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+                done = Main.myStore.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
             }
             else
-                done = Main.myStore.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+                done = Main.myStore.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost);
 
 
 
@@ -1711,8 +1833,7 @@ public class GUI {
 
         });
 
-
-        gridPane.add(buyuerNameLabel,7,0);
+        gridPane.add(buyerNameLabel,7,0);
         gridPane.add(buyerNameTextField,6,0);
         gridPane.add(paymentMethodLabel,7,1);
         gridPane.add(paymentChoiceBox,6,1);
@@ -1722,53 +1843,15 @@ public class GUI {
         gridPane.add(messageLabel,0,5);
 
 
-
-
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
 
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getEditBillScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
-
+    private static Pane getEditBillSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1777,48 +1860,13 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
-
-        return new Scene(borderPane);
+        
+        return borderPane;
     }
 
-    private static Scene getShowBillsAndInstalmentsScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة الفواتير و الأقساط";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getBillsAndInstalmentsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getShowBillsSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1827,41 +1875,92 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
-
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getProductsScene() {
+    private static Pane getEditInstalmentSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
 
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+        
 
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
+        return borderPane;
+    }
 
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
+    private static Pane getShowInstalmentsSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
 
-        });
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
 
+        return borderPane;
+    }
 
+    private static Pane getProductsSceneLayout() {
         String showProductsButtonText = "عرض المنتجات";
         Button showProductsButton = new Button(showProductsButtonText);
         showProductsButton.setPrefSize(150, 30);
         showProductsButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة عرض المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowProductsScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showProductsSceneLayout = (BorderPane) getShowProductsSceneLayout();
+            showProductsSceneLayout.setBottom(hBox);
+
+            Scene showProductsScene = new Scene(showProductsSceneLayout);
+            mainStage.setTitle( "واجهة عرض المنتجات");
+            mainStage.setScene(showProductsScene);
             System.gc();
             mainStage.show();
 
@@ -1872,14 +1971,55 @@ public class GUI {
         Button addProductButton = new Button(addProductButtonText);
         addProductButton.setPrefSize(150, 30);
         addProductButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة إضافة منتج";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddProductScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addProductLayout = (BorderPane) getAddProductSceneLayout();
+            addProductLayout.setBottom(hBox);
+
+            Scene addProductScene = new Scene(addProductLayout);
+            mainStage.setTitle( "واجهة إضافة منتج");
+            mainStage.setScene(addProductScene);
             System.gc();
             mainStage.show();
-
         });
 
 
@@ -1887,25 +2027,108 @@ public class GUI {
         Button editProductButton = new Button(editProductButtonText);
         editProductButton.setPrefSize(150, 30);
         editProductButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة تعديل منتج";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditProductScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane editProductLayout = (BorderPane) getEditProductSceneLayout();
+            editProductLayout.setBottom(hBox);
+
+            Scene editProductScene = new Scene(editProductLayout);
+            mainStage.setTitle("واجهة تعديل منتج");
+            mainStage.setScene(editProductScene);
             System.gc();
             mainStage.show();
-
         });
 
         String showCategoriesButtonText = "عرض الأنواع";
         Button showCategoriesButton = new Button(showCategoriesButtonText);
         showCategoriesButton.setPrefSize(150, 30);
         showCategoriesButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة عرض الأنواع";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getShowCategoriesScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showCategoriesSceneLayout = (BorderPane) getShowCategoriesSceneLayout();
+            showCategoriesSceneLayout.setBottom(hBox);
+
+            Scene showCategoriesScene = new Scene(showCategoriesSceneLayout);
+            mainStage.setTitle( "واجهة عرض الأنواع");
+            mainStage.setScene(showCategoriesScene);
             System.gc();
             mainStage.show();
         });
@@ -1914,11 +2137,53 @@ public class GUI {
         Button addCategoryButton = new Button(addCategoryButtonText);
         addCategoryButton.setPrefSize(150, 30);
         addCategoryButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة إضافة نوع";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getAddCategoryScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addCategoryLayout = (BorderPane) getAddCategorySceneLayout();
+            addCategoryLayout.setBottom(hBox);
+
+            Scene addCategoryScene = new Scene(addCategoryLayout);
+            mainStage.setTitle( "واجهة إضافة نوع");
+            mainStage.setScene(addCategoryScene);
             System.gc();
             mainStage.show();
         });
@@ -1927,20 +2192,57 @@ public class GUI {
         Button editCategoryButton = new Button(editCategoryButtonText);
         editCategoryButton.setPrefSize(150, 30);
         editCategoryButton.setOnAction(event -> {
-
             mainStage.close();
-            String sceneTitle = "واجهة تعديل نوع";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getEditCategoryScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            String previousButtonText = "العودة إلي الواجهة السابقة";
+            Button previousButton = new Button(previousButtonText);
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                productsLayout.setBottom(hBox);
+
+                Scene productsScene = new Scene(productsLayout);
+                mainStage.setTitle("واجهة المنتجات");
+                mainStage.setScene(productsScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane editCategoryLayout = (BorderPane) getEditCategorySceneLayout();
+            editCategoryLayout.setBottom(hBox);
+
+            Scene editCategoryScene = new Scene(editCategoryLayout);
+            mainStage.setTitle("واجهة تعديل نوع");
+            mainStage.setScene(editCategoryScene);
             System.gc();
             mainStage.show();
         });
-
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.getChildren().add(homeButton);
-
+        
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -1957,48 +2259,13 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
+        
 
-         
-
-        return new Scene(borderPane);
+        return borderPane;
     }
 
-    private static Scene getAddProductScene() {
-
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
-            mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
-            System.gc();
-            mainStage.show();
-        });
-
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
-
+    private static Pane getAddProductSceneLayout() {
         String nodeText;
 
         nodeText = "أسم المنتج";
@@ -2077,48 +2344,124 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
         borderPane.setCenter(gridPane);
 
-         
-
-        return new Scene(borderPane);
+        
+        return borderPane;
     }
 
-    private static Scene getEditProductScene() {
+    private static Pane getEditProductSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
 
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+        
+        return borderPane;
+    }
 
-            mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
-            System.gc();
-            mainStage.show();
+    private static Pane getShowProductsSceneLayout() {
+        TableView table = new TableView();
+
+        TableColumn productName = new TableColumn("أسم المنتج");
+        TableColumn productBuyingPrice = new TableColumn("سعر الشراء");
+        TableColumn productAvailableQuantity = new TableColumn("الكمية المتوافرة");
+        TableColumn productSellingPrice = new TableColumn("سعر الشراء");
+
+
+        table.getColumns().add(productSellingPrice);
+        table.getColumns().add(productAvailableQuantity);
+        table.getColumns().add(productBuyingPrice);
+        table.getColumns().add(productName);
+
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        Label productCategoryLabel = new Label("نوع المنتج");
+        ChoiceBox productsCategroriesChoiceBox = new ChoiceBox();
+        ArrayList<String> productsCategories = Main.myStore.getCategories();
+        productsCategroriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+
+        productsCategroriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
+                System.out.println( number2);
+            }
         });
 
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
 
-            mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
-            System.gc();
-            mainStage.show();
+
+        HBox topHbox = new HBox();
+        topHbox.setAlignment(Pos.TOP_RIGHT);
+        topHbox.setSpacing(20);
+        topHbox.getChildren().add(productsCategroriesChoiceBox);
+        topHbox.getChildren().add(productCategoryLabel);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(topHbox);
+        borderPane.setCenter(table);
+
+        return borderPane;
+    }
+
+    private static Pane getAddCategorySceneLayout() {
+        TextField categoryNameTextField = new TextField();
+        categoryNameTextField.setPrefSize(100, 20);
+
+        String nodeText = "أسم النوع";
+        Label categoryNameLabel = new Label(nodeText);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+            //ToDo: complete the add category function
+            String message = "";
+            messageLabel.setText(message);
+            String categoryName = categoryNameTextField.getText();
+            boolean done = false;
+            done = Main.myStore.addCategory(categoryName);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
+
+            }
+
+
         });
 
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
 
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(categoryNameTextField, 0, 0);
+        gridPane.add(categoryNameLabel, 1, 0);
+        gridPane.add(submitButton, 0, 1);
+        gridPane.add(messageLabel, 0, 2);
+
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+
+        borderPane.setCenter(gridPane);
+
+
+
+
+        return borderPane;
+    }
+
+    private static Pane getEditCategorySceneLayout() {
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -2128,78 +2471,291 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
+
         borderPane.setCenter(gridPane);
 
-         
 
-        return new Scene(borderPane);
+
+        return borderPane;
     }
 
-    private static Scene getShowProductsScene() {
+    private static Pane getShowCategoriesSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
 
-        String homeButtonText = "العودة إلي الواجهة الرئيسية";
-        Button homeButton = new Button(homeButtonText);
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(event -> {
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
 
+
+        return borderPane;
+    }
+
+    private static Pane getSuppliersSceneLayout() {
+        String showSuppliersButtonText = "عرض الموردين";
+        Button showSuppliersButton = new Button(showSuppliersButtonText);
+        showSuppliersButton.setPrefSize(150, 30);
+        showSuppliersButton.setOnAction(event -> {
             mainStage.close();
-            String sceneTitle = "الواجهة الرئيسية";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getHomeScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            
+            Button previousButton = new Button("العودة إلي الواجهة السابقة");
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                suppliersLayout.setBottom(hBox);
+
+                Scene suppliersScene = new Scene(suppliersLayout);
+                mainStage.setTitle("واجهة الموردين");
+                mainStage.setScene(suppliersScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showSuppliersSceneLayout = (BorderPane) getShowSuppliersSceneLayout();
+
+            showSuppliersSceneLayout.setBottom(hBox);
+            Scene showSuppliersScene = new Scene(showSuppliersSceneLayout);
+            mainStage.setTitle("واجهة عرض الموردين");
+            mainStage.setScene(showSuppliersScene);
             System.gc();
             mainStage.show();
         });
 
-        String previousButtonText = "العودة إلي الواجهة السابقة";
-        Button previousButton = new Button(previousButtonText);
-        previousButton.setPrefSize(180, 30);
-        previousButton.setOnAction(event -> {
-
+        String addSupplierButtonText = "إضافة مورد";
+        Button addSupplierButton = new Button(addSupplierButtonText);
+        addSupplierButton.setPrefSize(150, 30);
+        addSupplierButton.setOnAction(event -> {
             mainStage.close();
-            String sceneTitle = "واجهة المنتجات";
-            mainStage.setTitle(sceneTitle);
-            mainStage.setScene(getProductsScene());
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            Button previousButton = new Button("العودة إلي الواجهة السابقة");
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
+
+                suppliersLayout.setBottom(hBox);
+
+                Scene suppliersScene = new Scene(suppliersLayout);
+                mainStage.setTitle("واجهة الموردين");
+                mainStage.setScene(suppliersScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addSupplierSceneLayout = (BorderPane) getAddSupplierSceneLayout();
+
+            addSupplierSceneLayout.setBottom(hBox);
+            Scene addSuppliersScene = new Scene(addSupplierSceneLayout);
+            mainStage.setTitle("واجهة إضافة مورد");
+            mainStage.setScene(addSuppliersScene);
             System.gc();
             mainStage.show();
         });
 
-        HBox hBOx = new HBox();
-        hBOx.setAlignment(Pos.BOTTOM_RIGHT);
-        hBOx.setSpacing(10);
-        hBOx.getChildren().add(previousButton);
-        hBOx.getChildren().add(homeButton);
 
-        TableView table = new TableView();
+        String editSupplierButtonText = "تعديل مورد";
+        Button editSupplierButton = new Button(editSupplierButtonText);
+        editSupplierButton.setPrefSize(150, 30);
+        editSupplierButton.setOnAction(event -> {
+            mainStage.close();
 
-        TableColumn productName = new TableColumn("أسم المنتج");
-        TableColumn productBuyingPrice = new TableColumn("سعر الشراء");
-        TableColumn productAvailableQuantity = new TableColumn("الكمية المتوافرة");
-        TableColumn productCashPrice = new TableColumn("سعر البيع كاش");
-        TableColumn productInstalmentPrice = new TableColumn("سعر البيع تقسيط");
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Pane homeLayout = getHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            Button previousButton = new Button("العودة إلي الواجهة السابقة");
+            previousButton.setPrefSize(180, 30);
+            previousButton.setOnAction(actionEvent -> {
+                mainStage.close();
+                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
 
-        table.getColumns().add(productInstalmentPrice);
-        table.getColumns().add(productCashPrice);
-        table.getColumns().add(productAvailableQuantity);
-        table.getColumns().add(productBuyingPrice);
-        table.getColumns().add(productName);
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                hBox.getChildren().add(homeButton);
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                suppliersLayout.setBottom(hBox);
+
+                Scene suppliersScene = new Scene(suppliersLayout);
+                mainStage.setTitle("واجهة الموردين");
+                mainStage.setScene(suppliersScene);
+                System.gc();
+                mainStage.show();
+            });
+            
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.setSpacing(10);
+            hBox.getChildren().add(previousButton);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane editSupplierSceneLayout = (BorderPane) getEditSupplierSceneLayout();
+
+            editSupplierSceneLayout.setBottom(hBox);
+            Scene editSupplierScene = new Scene(editSupplierSceneLayout);
+            mainStage.setTitle("واجهة تعديل مورد");
+            mainStage.setScene(editSupplierScene);
+            System.gc();
+            mainStage.show();
+        });
+
+       
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.add(editSupplierButton, 0, 0);
+        gridPane.add(addSupplierButton, 1, 0);
+        gridPane.add(showSuppliersButton, 2, 0);
+        
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+       
+        return borderPane;
+    }
+
+    private static Pane getAddSupplierSceneLayout() {
+        String nodeText;
+
+        nodeText = "أسم المورد";
+        Label supplierNameLabel = new Label(nodeText);
+        TextField supplierNameTextField = new TextField();
+        supplierNameTextField.setPrefSize(50, 20);
+
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(100, 20);
+        submitButton.setOnAction(event -> {
+
+            //ToDo: complete the add supplier function
+            String message = "";
+            messageLabel.setText(message);
+
+            String supplierName = supplierNameTextField.getText();
+
+            boolean done = false;
+            done = Main.myStore.addSupplier(supplierName);
+            if(done)
+            {
+                message = "تم الإدخال بنجاح";
+                messageLabel.setText(message);
+
+            }
+        });
+
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER_RIGHT);
+        gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(table,20,0);
+        gridPane.add(supplierNameTextField,0,0);
+        gridPane.add(supplierNameLabel,1,0);
+        gridPane.add(submitButton,0,1);
+        gridPane.add(messageLabel,0,2);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setBottom(hBOx);
-        borderPane.setCenter(table);
+        borderPane.setCenter(gridPane);
+        
+        return borderPane;
+    }
 
-        return new Scene(borderPane);
+    private static Pane getEditSupplierSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+        
+        return borderPane;
+    }
+
+    private static Pane getShowSuppliersSceneLayout() {
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+        return borderPane;
     }
 
 

@@ -7,6 +7,7 @@ public class Store {
 
     private String name;
     private StoreDatabase database;
+
     private int currentUserType;
 
     public Store(String name) {
@@ -49,6 +50,10 @@ public class Store {
         return database.getCategories();
     }
 
+    public ArrayList<String> getSuppliers() {
+        return database.getSuppliers();
+    }
+
     public boolean addProduct(String productName, int productCategory, int availableQuantity, Double productPrice) {
         boolean done = false;
         done = database.addProduct(productName,productCategory, availableQuantity, productPrice);
@@ -72,15 +77,21 @@ public class Store {
         return done;
     }
 
-    public boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill) {
+    public boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost) {
         boolean done = false;
-        done = database.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+        done = database.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost);
         return done;
     }
 
-    public boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill, String guarantorName, double paidMoney,  double instalmentAmount, Date startDate, Date endDate){
+    public boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney,  double instalmentAmount, Date startDate, Date endDate){
         boolean done = false;
-        done = database.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+        done = database.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+        return done;
+    }
+
+    public boolean addSupply(String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double totalCost) {
+        boolean done = false;
+        done = database.addSupply(supplierName, boughtProductsIDs, boughtQuantities, buyingPrices, totalCost);
         return done;
     }
 

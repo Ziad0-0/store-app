@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 
-public class StoreDatabase extends Database {
+class StoreDatabase extends Database {
 
     private HashMap<String, Integer> userTypes;
 
@@ -98,6 +98,20 @@ public class StoreDatabase extends Database {
         return types;
     }
 
+    ArrayList<String> getSuppliers() {
+        ArrayList<String> suppliers = new ArrayList<>();
+        ResultSet resultSet = executeQuery("select supplier_name from  suppliers;");
+
+        try {
+            while(resultSet.next())
+                suppliers.add(resultSet.getString("supplier"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return suppliers;
+    }
+
     boolean addSupplier(String supplierName) {
         boolean done = false;
 
@@ -106,12 +120,12 @@ public class StoreDatabase extends Database {
         return done;
     }
 
-    boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill) {
+    boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost) {
 
         boolean done = false;
         Timestamp billDate = new Timestamp(new java.util.Date().getTime());
         done = executeInsertion("insert into bills (bill_date,buyer_name, bill_total_cost) " +
-                "values ('"+ billDate + "', '"+ buyerName +"', "+ totalBill + ");");
+                "values ('"+ billDate + "', '"+ buyerName +"', "+ totalCost + ");");
 
         ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
         int lastBillID = 0;
@@ -130,10 +144,10 @@ public class StoreDatabase extends Database {
         return done;
     }
 
-    boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalBill, String guarantorName, double paidMoney, double instalmentAmount, Date startDate, Date endDate){
+    boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney, double instalmentAmount, Date startDate, Date endDate){
         boolean done = false;
 
-        done = addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalBill);
+        done = addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost);
 
         ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
         int lastBillID = 0;
@@ -144,10 +158,31 @@ public class StoreDatabase extends Database {
             e.printStackTrace();
         }
 
-        double remainingMoney = totalBill - paidMoney;
+        double remainingMoney = totalCost - paidMoney;
 
         done = executeInsertion("insert into instalments (bill_id, guarantor_name, paid_money, remaining_money, instalment_amount, start_date, end_date)" +
                                 "values ("+ lastBillID+ ", '"+ guarantorName+ "', "+ paidMoney + ", " +  remainingMoney + ", " + instalmentAmount + ", " +  startDate + ", " +  endDate +");");
+        return done;
+    }
+
+    boolean addSupply(String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double totalCost) {
+        boolean done = false;
+        Timestamp supplyDate = new Timestamp(new java.util.Date().getTime());
+        done = executeInsertion("insert into supplies (supply_date, supplier_name, supply_total_cost) " +
+                "values ('"+ supplyDate + "', '"+ supplierName +"', "+ totalCost + ");");
+
+        ResultSet resultSet = executeQuery("select supply_id from supplies order by supply_id desc limit 1;");
+        int lastSupplyID = 0;
+        try {
+            if(resultSet.next())
+                lastSupplyID = resultSet.getInt("supply_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0,s = boughtQuantities.size();i<s;i++)
+            done = executeInsertion("insert into supplies_details (supply_id, product_id, bought_quantity, buying_price) " +
+                    "values ("+ lastSupplyID +", " + boughtProductsIDs.get(i) + ", " +  boughtQuantities.get(i) + ", " + buyingPrices.get(i) +");");
         return done;
     }
 
@@ -264,4 +299,6 @@ public class StoreDatabase extends Database {
         String userName = user.getName();
         executeUpdate("update users set user_type="+newType+';');
     }
+
+
 }
