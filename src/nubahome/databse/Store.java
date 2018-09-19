@@ -46,6 +46,7 @@ public class Store {
         return done;
     }
 
+
     public ArrayList<String> getCategories() {
         return database.getCategories();
     }

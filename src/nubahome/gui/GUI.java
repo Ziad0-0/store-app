@@ -4,6 +4,7 @@ package nubahome.gui;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -15,6 +16,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import nubahome.main.Main;
 import nubahome.databse.Product;
@@ -122,11 +124,11 @@ public class GUI {
 
     private static Pane getHomeSceneLayout() {
 
-        String purchasesButtonText = "المشتريات";
-        Button purchasesButton = new Button(purchasesButtonText);
-        purchasesButton.setPrefSize(150, 50);
+        String suppliesButtonText = "التوريدات";
+        Button suppliesButton = new Button(suppliesButtonText);
+        suppliesButton.setPrefSize(150, 50);
 
-        purchasesButton.setOnAction(actionEvent -> {
+        suppliesButton.setOnAction(actionEvent -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -145,13 +147,13 @@ public class GUI {
             hBox.setAlignment(Pos.BOTTOM_RIGHT);
             hBox.getChildren().add(homeButton);
 
-            BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
-            purchasesLayout.setBottom(hBox);
+            BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+            suppliesLayout.setBottom(hBox);
 
-            Scene purchasesScene = new Scene(purchasesLayout);
+            Scene suppliesScene = new Scene(suppliesLayout);
 
-            mainStage.setTitle("واجهة الفواتير و الأقساط");
-            mainStage.setScene(purchasesScene);
+            mainStage.setTitle("واجهة التوريدات");
+            mainStage.setScene(suppliesScene);
             System.gc();
             mainStage.show();
         });
@@ -297,7 +299,7 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(purchasesButton, 0, 0);
+        gridPane.add(suppliesButton, 0, 0);
         gridPane.add(usersButton, 1, 0);
         gridPane.add(billsAndInstalmentsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
@@ -774,11 +776,11 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getPurchasesSceneLayout() {
-        String showPurchasesButtonText = "عرض المشتريات";
-        Button showPurchasesButton = new Button(showPurchasesButtonText);
-        showPurchasesButton.setPrefSize(150, 30);
-        showPurchasesButton.setOnAction(event -> {
+    private static Pane getSuppliesSceneLayout() {
+        String showSuppliesButtonText = "عرض التوريدات";
+        Button showSuppliesButton = new Button(showSuppliesButtonText);
+        showSuppliesButton.setPrefSize(150, 30);
+        showSuppliesButton.setOnAction(event -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -804,12 +806,12 @@ public class GUI {
                 hBox.setAlignment(Pos.BOTTOM_RIGHT);
                 hBox.getChildren().add(homeButton);
                 
-                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
-                purchasesLayout.setBottom(hBox);
+                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                suppliesLayout.setBottom(hBox);
 
-                Scene purchasesScene = new Scene(purchasesLayout);
-                mainStage.setTitle("واجهة المشتريات");
-                mainStage.setScene(purchasesScene);
+                Scene suppliesScene = new Scene(suppliesLayout);
+                mainStage.setTitle("واجهة التوريدات");
+                mainStage.setScene(suppliesScene);
                 System.gc();
                 mainStage.show();
             });
@@ -820,21 +822,21 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
             
-            BorderPane showPurchasesSceneLayout = (BorderPane) getShowPurchasesSceneLayout();
-            showPurchasesSceneLayout.setBottom(hBox);
+            BorderPane showSuppliesSceneLayout = (BorderPane) getShowSuppliesSceneLayout();
+            showSuppliesSceneLayout.setBottom(hBox);
             
-            Scene showPurchasesScene = new Scene(showPurchasesSceneLayout);
-            mainStage.setTitle("واجهة عرض المشتريات");
-            mainStage.setScene(showPurchasesScene);
+            Scene showSuppliesScene = new Scene(showSuppliesSceneLayout);
+            mainStage.setTitle("واجهة عرض التوريدات");
+            mainStage.setScene(showSuppliesScene);
             System.gc();
             mainStage.show();
         });
 
 
-        String addPurchaseButtonText = "إضافة شراء";
-        Button addPurchaseButton = new Button(addPurchaseButtonText);
-        addPurchaseButton.setPrefSize(150, 30);
-        addPurchaseButton.setOnAction(event -> {
+        String addSupplyButtonText = "إضافة توريد";
+        Button addSupplyButton = new Button(addSupplyButtonText);
+        addSupplyButton.setPrefSize(150, 30);
+        addSupplyButton.setOnAction(event -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -860,12 +862,12 @@ public class GUI {
                 hBox.setAlignment(Pos.BOTTOM_RIGHT);
                 hBox.getChildren().add(homeButton);
 
-                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
-                purchasesLayout.setBottom(hBox);
+                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                suppliesLayout.setBottom(hBox);
 
-                Scene purchasesScene = new Scene(purchasesLayout);
-                mainStage.setTitle("واجهة المشتريات");
-                mainStage.setScene(purchasesScene);
+                Scene suppliesScene = new Scene(suppliesLayout);
+                mainStage.setTitle("واجهة التوريدات");
+                mainStage.setScene(suppliesScene);
                 System.gc();
                 mainStage.show();
             });
@@ -877,21 +879,21 @@ public class GUI {
             hBox.getChildren().add(homeButton);
             
             
-            BorderPane addPurchaseLayout = (BorderPane) getAddPurchaseSceneLayout();
-            addPurchaseLayout.setBottom(hBox);
+            BorderPane addSupplyLayout = (BorderPane) getAddSupplySceneLayout();
+            addSupplyLayout.setBottom(hBox);
 
-            Scene addPurchaseScene = new Scene(addPurchaseLayout);
-            mainStage.setTitle( "واجهة إضافة شراء");
-            mainStage.setScene(addPurchaseScene);
+            Scene addSupplyScene = new Scene(addSupplyLayout);
+            mainStage.setTitle( "واجهة إضافة توريد");
+            mainStage.setScene(addSupplyScene);
             System.gc();
             mainStage.show();
         });
 
 
-        String editPurchaseButtonText = "تعديل شراء";
-        Button editPurchaseButton = new Button(editPurchaseButtonText);
-        editPurchaseButton.setPrefSize(150, 30);
-        editPurchaseButton.setOnAction(event -> {
+        String editSupplyButtonText = "تعديل توريد";
+        Button editSupplyButton = new Button(editSupplyButtonText);
+        editSupplyButton.setPrefSize(150, 30);
+        editSupplyButton.setOnAction(event -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -917,12 +919,12 @@ public class GUI {
                 hBox.setAlignment(Pos.BOTTOM_RIGHT);
                 hBox.getChildren().add(homeButton);
 
-                BorderPane purchasesLayout = (BorderPane) getPurchasesSceneLayout();
-                purchasesLayout.setBottom(hBox);
+                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                suppliesLayout.setBottom(hBox);
 
-                Scene purchasesScene = new Scene(purchasesLayout);
-                mainStage.setTitle("واجهة المشتريات");
-                mainStage.setScene(purchasesScene);
+                Scene suppliesScene = new Scene(suppliesLayout);
+                mainStage.setTitle("واجهة التوريدات");
+                mainStage.setScene(suppliesScene);
                 System.gc();
                 mainStage.show();
             });
@@ -934,12 +936,12 @@ public class GUI {
             hBox.getChildren().add(homeButton);
             
             
-            BorderPane editPurchaseLayout = (BorderPane) getEditPurchaseSceneLayout();
-            editPurchaseLayout.setBottom(hBox);
+            BorderPane editSupplyLayout = (BorderPane) getEditSupplySceneLayout();
+            editSupplyLayout.setBottom(hBox);
 
-            Scene editPurchaseScene = new Scene(editPurchaseLayout);
-            mainStage.setTitle("واجهة تعديل شراء");
-            mainStage.setScene(editPurchaseScene);
+            Scene editSupplyScene = new Scene(editSupplyLayout);
+            mainStage.setTitle("واجهة تعديل توريد");
+            mainStage.setScene(editSupplyScene);
             System.gc();
             mainStage.show();
         });
@@ -950,9 +952,9 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editPurchaseButton, 0, 0);
-        gridPane.add(addPurchaseButton, 1, 0);
-        gridPane.add(showPurchasesButton, 2, 0);
+        gridPane.add(editSupplyButton, 0, 0);
+        gridPane.add(addSupplyButton, 1, 0);
+        gridPane.add(showSuppliesButton, 2, 0);
 
 
         BorderPane borderPane = new BorderPane();
@@ -963,7 +965,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddPurchaseSceneLayout() {
+    private static Pane getAddSupplySceneLayout() {
         Label messageLabel = new Label();
 
         Button submitButton = new Button("أدخل");
@@ -1044,21 +1046,25 @@ public class GUI {
                         System.gc();
                         secondaryStage.show();
 
-                        if(!secondaryStage.isShowing())
-                        {
-                            System.out.println("I am here");
-                            int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex() + 1;
-                            ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
+                        secondaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                            @Override
+                            public void handle(WindowEvent windowEvent) {
+                                int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex() + 1;
+                                ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
 
-                            ArrayList<String> productsNames = new ArrayList<>();
+                                ArrayList<String> productsNames = new ArrayList<>();
 
-                            for (Product x : products)
-                                productsNames.add(x.getProductName());
+                                for (Product x : products)
+                                    productsNames.add(x.getProductName());
 
-                            productsNames.add("أخري");
+                                productsNames.add("أخري");
 
-                            productsChoiceBox.setItems(FXCollections.observableList(productsNames));
-                        }
+                                productsChoiceBox.setItems(FXCollections.observableList(productsNames));
+                                secondaryStage.close();
+                            }
+                        });
+
+
                     }
                 }
             });
@@ -1069,7 +1075,7 @@ public class GUI {
             boughtQuantityTextField.setPrefSize(100,20);
 
 
-            Label buyingPriceLabel = new Label( "سعر الشراء");
+            Label buyingPriceLabel = new Label( "سعر التوريد");
             TextField buyingPriceTextField = new TextField();
             buyingPriceTextField.setPrefSize(100,20);
 
@@ -1172,7 +1178,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditPurchaseSceneLayout() {
+    private static Pane getEditSupplySceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1188,7 +1194,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowPurchasesSceneLayout() {
+    private static Pane getShowSuppliesSceneLayout() {
 
         
 
@@ -2706,7 +2712,6 @@ public class GUI {
             {
                 message = "تم الإدخال بنجاح";
                 messageLabel.setText(message);
-
             }
         });
 
@@ -2757,6 +2762,5 @@ public class GUI {
 
         return borderPane;
     }
-
 
 }

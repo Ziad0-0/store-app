@@ -52,6 +52,12 @@ class StoreDatabase extends Database {
         return done;
     }
 
+    boolean addSupplier(String supplierName) {
+        boolean done = false;
+        done = executeInsertion("insert into suppliers (supplier_name) values ('"+supplierName+"');");
+        return done;
+    }
+
     boolean addProduct(String productName, int productCategory, int availableQuanity, Double productPrice) {
         boolean done = false;
         done = executeInsertion("insert into products (product_name, category_id, available_quantity, buying_price) " +
@@ -104,20 +110,12 @@ class StoreDatabase extends Database {
 
         try {
             while(resultSet.next())
-                suppliers.add(resultSet.getString("supplier"));
+                suppliers.add(resultSet.getString("supplier_name"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return suppliers;
-    }
-
-    boolean addSupplier(String supplierName) {
-        boolean done = false;
-
-        done = executeInsertion("insert into suppliers (supplier_name) values ('"+supplierName+"');");
-
-        return done;
     }
 
     boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost) {
@@ -144,6 +142,7 @@ class StoreDatabase extends Database {
         return done;
     }
 
+
     boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney, double instalmentAmount, Date startDate, Date endDate){
         boolean done = false;
 
@@ -167,11 +166,20 @@ class StoreDatabase extends Database {
 
     boolean addSupply(String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double totalCost) {
         boolean done = false;
-        Timestamp supplyDate = new Timestamp(new java.util.Date().getTime());
-        done = executeInsertion("insert into supplies (supply_date, supplier_name, supply_total_cost) " +
-                "values ('"+ supplyDate + "', '"+ supplierName +"', "+ totalCost + ");");
+        ResultSet resultSet = executeQuery("select supplier_id from suppliers where supplier_name='"+ supplierName+"';");
+        int supplierID = 0;
+        try {
+            if(resultSet.next())
+                supplierID = resultSet.getInt("supplier_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        ResultSet resultSet = executeQuery("select supply_id from supplies order by supply_id desc limit 1;");
+        Timestamp supplyDate = new Timestamp(new java.util.Date().getTime());
+        done = executeInsertion("insert into supplies (supply_date, supplier_id, supply_total_cost) " +
+                "values ('"+ supplyDate + "', "+ supplierID +", "+ totalCost + ");");
+
+         resultSet = executeQuery("select supply_id from supplies order by supply_id desc limit 1;");
         int lastSupplyID = 0;
         try {
             if(resultSet.next())
