@@ -58,10 +58,10 @@ class StoreDatabase extends Database {
         return done;
     }
 
-    boolean addProduct(String productName, int productCategory, int availableQuanity, Double productPrice) {
+    boolean addProduct(String productName, int productCategory, int availableQuantity, Double productPrice) {
         boolean done = false;
         done = executeInsertion("insert into products (product_name, category_id, available_quantity, buying_price) " +
-                                "values ('"+productName+"', " + productCategory + ", " + availableQuanity + ", " + productPrice +
+                                "values ('"+productName+"', " + productCategory + ", " + availableQuantity + ", " + productPrice +
                                 ");");
         return done;
     }

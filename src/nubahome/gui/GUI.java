@@ -70,12 +70,7 @@ public class GUI {
 
             Integer currentUserType = Main.myStore.login(userName,password);
 
-            if(currentUserType.equals( Main.myStore.userType("NOT_REGISTERED")))
-            {
-                //ToDo: implement the error message
-                System.out.println("not registered");
-            }
-            else if(currentUserType.equals(Main.myStore.userType("MANAGER")))
+            if(currentUserType.equals(Main.myStore.userType("مدير")))
             {
                 userNameTextField.clear();
                 passwordTextField.clear();
@@ -88,7 +83,7 @@ public class GUI {
                 System.gc();
                 mainStage.show();
             }
-            else if(currentUserType.equals(Main.myStore.userType("CLERK")))
+            else if(currentUserType.equals(Main.myStore.userType("موظف")))
             {
                 //ToDo: implement the clerk scene
                 userNameTextField.clear();
@@ -763,15 +758,17 @@ public class GUI {
     }
 
     private static Pane getShowUsersSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        TableColumn userName = new TableColumn("أسم المستخدم");
+        TableColumn userType = new TableColumn("وظيفة المستخدم");
+
+        TableView usersTable = new TableView();
+        usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        usersTable.getColumns().add(userType);
+        usersTable.getColumns().add(userName);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setCenter(usersTable);
 
         return borderPane;
     }
@@ -1195,21 +1192,24 @@ public class GUI {
     }
 
     private static Pane getShowSuppliesSceneLayout() {
+        TableColumn supplyID = new TableColumn("رقم التوريد");
+        TableColumn supplyDate = new TableColumn("تاريخ التوريد");
+        TableColumn supplierName = new TableColumn("اسم المورد");
+        TableColumn totalCost = new TableColumn("التكلفة الكاملة");
 
-        
+        TableView supplies = new TableView();
+        supplies.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        supplies.getColumns().add(totalCost);
+        supplies.getColumns().add(supplierName);
+        supplies.getColumns().add(supplyDate);
+        supplies.getColumns().add(supplyID);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        
-        borderPane.setCenter(gridPane);
 
-        
+        borderPane.setCenter(supplies);
 
         return borderPane;
     }
@@ -1738,7 +1738,7 @@ public class GUI {
                 soldQuantityTextField.setPrefSize(100,20);
 
 
-                Label sellingPriceLabel = new Label( "سعر الشراء");
+                Label sellingPriceLabel = new Label( "سعر البيع");
                 TextField sellingPriceTextField = new TextField();
                 sellingPriceTextField.setPrefSize(100,20);
 
@@ -1873,15 +1873,41 @@ public class GUI {
     }
 
     private static Pane getShowBillsSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        Label whichMonthLabel = new Label("فواتير شهر");
+        DatePicker monthPicker = new DatePicker();
+
+        Label selectedBillLabel = new Label("أدخل رقم الفاتورة المراد عرض تفاصيلها");
+        TextField selectedBillID = new TextField();
+        Button showButton = new Button("أعرض");
+
+        HBox topHBox = new HBox();
+        topHBox.setAlignment(Pos.TOP_RIGHT);
+        topHBox.setSpacing(20);
+        topHBox.getChildren().add(showButton);
+        topHBox.getChildren().add(selectedBillID);
+        topHBox.getChildren().add(selectedBillLabel);
+        topHBox.getChildren().add(monthPicker);
+        topHBox.getChildren().add(whichMonthLabel);
+
+        TableView billsTable = new TableView();
+        billsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn buyerName = new TableColumn("أسم العميل");
+        TableColumn billID = new TableColumn("رقم الفاتورة");
+        TableColumn billDate = new TableColumn("تاريخ الفاتورة");
+        TableColumn billTotalCost = new TableColumn("التكلفة الكلية");
+
+        billsTable.getColumns().add(billTotalCost);
+        billsTable.getColumns().add(billDate);
+        billsTable.getColumns().add(buyerName);
+        billsTable.getColumns().add(billID);
+
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setTop(topHBox);
+        borderPane.setCenter(billsTable);
 
         return borderPane;
     }
@@ -1902,15 +1928,33 @@ public class GUI {
     }
 
     private static Pane getShowInstalmentsSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        Label whichMonthLabel = new Label("أقساط شهر");
+        DatePicker monthPicker = new DatePicker();
+
+        HBox topHBox = new HBox();
+        topHBox.setAlignment(Pos.TOP_RIGHT);
+        topHBox.setSpacing(20);
+        topHBox.getChildren().add(monthPicker);
+        topHBox.getChildren().add(whichMonthLabel);
+        
+        TableView instalmentsTable = new TableView();
+        instalmentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn buyerName = new TableColumn("أسم العميل");
+        TableColumn billID = new TableColumn("رقم الفاتورة");
+        TableColumn instalmentQuantity = new TableColumn("حجم القسط");
+        TableColumn endOfInstalments = new TableColumn("نهاية الأقساط");
+
+        instalmentsTable.getColumns().add(endOfInstalments);
+        instalmentsTable.getColumns().add(instalmentQuantity);
+        instalmentsTable.getColumns().add(billID);
+        instalmentsTable.getColumns().add(buyerName);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setTop(topHBox);
+        borderPane.setCenter(instalmentsTable);
 
         return borderPane;
     }
@@ -2376,7 +2420,7 @@ public class GUI {
         TableColumn productName = new TableColumn("أسم المنتج");
         TableColumn productBuyingPrice = new TableColumn("سعر الشراء");
         TableColumn productAvailableQuantity = new TableColumn("الكمية المتوافرة");
-        TableColumn productSellingPrice = new TableColumn("سعر الشراء");
+        TableColumn productSellingPrice = new TableColumn("سعر البيع");
 
 
         table.getColumns().add(productSellingPrice);
@@ -2400,15 +2444,15 @@ public class GUI {
 
 
 
-        HBox topHbox = new HBox();
-        topHbox.setAlignment(Pos.TOP_RIGHT);
-        topHbox.setSpacing(20);
-        topHbox.getChildren().add(productsCategroriesChoiceBox);
-        topHbox.getChildren().add(productCategoryLabel);
+        HBox topHBox = new HBox();
+        topHBox.setAlignment(Pos.TOP_RIGHT);
+        topHBox.setSpacing(20);
+        topHBox.getChildren().add(productsCategroriesChoiceBox);
+        topHBox.getChildren().add(productCategoryLabel);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setTop(topHbox);
+        borderPane.setTop(topHBox);
         borderPane.setCenter(table);
 
         return borderPane;
@@ -2486,15 +2530,11 @@ public class GUI {
     }
 
     private static Pane getShowCategoriesSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
+        TableColumn categoryName = new TableColumn("");
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+
 
 
         return borderPane;
