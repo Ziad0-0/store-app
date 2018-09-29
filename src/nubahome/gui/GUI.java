@@ -4,28 +4,30 @@ package nubahome.gui;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
-import nubahome.main.Main;
+import nubahome.databse.Bill;
 import nubahome.databse.Product;
 import nubahome.databse.User;
+import nubahome.main.Main;
+
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 
 public class GUI {
@@ -78,7 +80,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Scene homeScene = new Scene(getHomeSceneLayout());
+                Scene homeScene = new Scene(getManagerHomeSceneLayout());
                 mainStage.setScene(homeScene);
                 System.gc();
                 mainStage.show();
@@ -89,6 +91,13 @@ public class GUI {
                 userNameTextField.clear();
                 passwordTextField.clear();
                 System.out.println("clerk");
+                mainStage.close();
+                String sceneTitle = "الواجهة الرئيسية";
+                mainStage.setTitle(sceneTitle);
+                Scene homeScene = new Scene(getClerkHomeSceneLayout());
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
             }
 
         });
@@ -117,7 +126,7 @@ public class GUI {
 
     }
 
-    private static Pane getHomeSceneLayout() {
+    private static Pane getManagerHomeSceneLayout() {
 
         String suppliesButtonText = "التوريدات";
         Button suppliesButton = new Button(suppliesButtonText);
@@ -131,7 +140,7 @@ public class GUI {
             homeButton.setOnAction(event -> {
                 mainStage.close();
                 mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -165,7 +174,7 @@ public class GUI {
             homeButton.setOnAction(event -> {
                 mainStage.close();
                 mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -199,7 +208,7 @@ public class GUI {
             homeButton.setOnAction(event -> {
                 mainStage.close();
                 mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -233,7 +242,7 @@ public class GUI {
             homeButton.setOnAction(event -> {
                 mainStage.close();
                 mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -267,7 +276,7 @@ public class GUI {
             homeButton.setOnAction(event -> {
                 mainStage.close();
                 mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -299,6 +308,7 @@ public class GUI {
         gridPane.add(billsAndInstalmentsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
         gridPane.add(SuppliersButton, 0, 2);
+
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
@@ -306,7 +316,122 @@ public class GUI {
         return borderPane;
 
     }
-    
+
+    private static Pane getClerkHomeSceneLayout() {
+        Button addBillButton = new Button("إضافة فاتورة");
+        addBillButton.setPrefSize(150,50);
+
+        Button addSupplyButton = new Button("إضافة توريد");
+        addSupplyButton.setPrefSize(150,50);
+
+        Button showInstalmentsButton = new Button("عرض الأقساط");
+        showInstalmentsButton.setPrefSize(150,50);
+
+        addBillButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getManagerHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addBillLayout = (BorderPane) getAddBillSceneLayout();
+            addBillLayout.setBottom(hBox);
+
+            Scene addBillScene = new Scene(addBillLayout);
+            mainStage.setTitle("واجهة إضافة الفاتورة");
+            mainStage.setScene(addBillScene);
+            System.gc();
+            mainStage.show();
+        });
+
+        addSupplyButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getManagerHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addSupplyLayout = (BorderPane) getAddSupplySceneLayout();
+            addSupplyLayout.setBottom(hBox);
+
+            Scene addSupplyScene = new Scene(addSupplyLayout);
+            mainStage.setTitle( "واجهة إضافة توريد");
+            mainStage.setScene(addSupplyScene);
+            System.gc();
+            mainStage.show();
+        });
+
+        showInstalmentsButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getManagerHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.BOTTOM_RIGHT);
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showInstalmentsSceneLayout = (BorderPane) getShowInstalmentsSceneLayout();
+            showInstalmentsSceneLayout.setBottom(hBox);
+
+            Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
+            mainStage.setTitle("واجهة عرض الأقساط");
+            mainStage.setScene(showInstalmentsScene);
+            System.gc();
+            mainStage.show();
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(showInstalmentsButton,2,0);
+        gridPane.add(addSupplyButton,1,0);
+        gridPane.add(addBillButton,0,0);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+        return borderPane;
+
+    }
+
     private static Pane getUsersSceneLayout() {
         String showUsersButtonText = "عرض المستخدمين";
         Button showUsersButton = new Button(showUsersButtonText);
@@ -320,7 +445,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -375,7 +500,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -431,7 +556,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -786,7 +911,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -842,7 +967,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -899,7 +1024,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1227,7 +1352,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1283,7 +1408,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1338,7 +1463,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1394,7 +1519,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1449,7 +1574,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -1875,17 +2000,19 @@ public class GUI {
     private static Pane getShowBillsSceneLayout() {
         Label whichMonthLabel = new Label("فواتير شهر");
         DatePicker monthPicker = new DatePicker();
+        Button showBillsButton = new Button("أعرض الفواتير");
 
         Label selectedBillLabel = new Label("أدخل رقم الفاتورة المراد عرض تفاصيلها");
         TextField selectedBillID = new TextField();
-        Button showButton = new Button("أعرض");
+        Button showBillDetailsButton = new Button("أعرض");
 
         HBox topHBox = new HBox();
         topHBox.setAlignment(Pos.TOP_RIGHT);
         topHBox.setSpacing(20);
-        topHBox.getChildren().add(showButton);
+        topHBox.getChildren().add(showBillDetailsButton);
         topHBox.getChildren().add(selectedBillID);
         topHBox.getChildren().add(selectedBillLabel);
+        topHBox.getChildren().add(showBillsButton);
         topHBox.getChildren().add(monthPicker);
         topHBox.getChildren().add(whichMonthLabel);
 
@@ -1902,8 +2029,15 @@ public class GUI {
         billsTable.getColumns().add(buyerName);
         billsTable.getColumns().add(billID);
 
+        showBillsButton.setOnAction( actionEvent -> {
+            ObservableList billsList = FXCollections.observableList(Main.myStore.getAllBills());
+            billID.setCellValueFactory( new PropertyValueFactory<Bill, Integer>("id"));
+            buyerName.setCellValueFactory( new PropertyValueFactory<Bill, String>("buyerName"));
+            billDate.setCellValueFactory( new PropertyValueFactory<Bill, Date>("date"));
+            billTotalCost.setCellValueFactory( new PropertyValueFactory<Bill, Double>("totalCost"));
 
-
+            billsTable.setItems(billsList);
+        });
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setTop(topHBox);
@@ -1930,10 +2064,12 @@ public class GUI {
     private static Pane getShowInstalmentsSceneLayout() {
         Label whichMonthLabel = new Label("أقساط شهر");
         DatePicker monthPicker = new DatePicker();
+        Button showButton = new Button("أعرض");
 
         HBox topHBox = new HBox();
         topHBox.setAlignment(Pos.TOP_RIGHT);
         topHBox.setSpacing(20);
+        topHBox.getChildren().add(showButton);
         topHBox.getChildren().add(monthPicker);
         topHBox.getChildren().add(whichMonthLabel);
         
@@ -1950,6 +2086,9 @@ public class GUI {
         instalmentsTable.getColumns().add(billID);
         instalmentsTable.getColumns().add(buyerName);
 
+        showButton.setOnAction(actionEvent -> {
+            Month month = monthPicker.getValue().getMonth();
+        });
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -1972,7 +2111,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2029,7 +2168,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2085,7 +2224,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2140,7 +2279,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2195,7 +2334,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2250,7 +2389,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2430,6 +2569,8 @@ public class GUI {
 
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+
+
         Label productCategoryLabel = new Label("نوع المنتج");
         ChoiceBox productsCategroriesChoiceBox = new ChoiceBox();
         ArrayList<String> productsCategories = Main.myStore.getCategories();
@@ -2438,7 +2579,14 @@ public class GUI {
         productsCategroriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                System.out.println( number2);
+                int categoryID = number2.intValue() + 1;
+
+                ObservableList<Product> productsList = FXCollections.observableList(Main.myStore.getProductsInCategory(categoryID));
+
+                productName.setCellValueFactory(new PropertyValueFactory<Product, String>("productName"));
+                productAvailableQuantity.setCellValueFactory(new PropertyValueFactory<Product, Integer>("availableQuantity"));
+
+                table.setItems(productsList);
             }
         });
 
@@ -2553,7 +2701,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2608,7 +2756,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -2663,7 +2811,7 @@ public class GUI {
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getHomeSceneLayout();
+                Pane homeLayout = getManagerHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 mainStage.setScene(homeScene);
                 System.gc();
