@@ -7,13 +7,19 @@ public class Product {
     private int categoryID;
     private int availableQuantity;
     private double buyingPrice;
+    private String lastBuyingDate;
+    private double sellingPrice;
+    private double installmentPrice;
 
-    Product(int id, String productName, int categoryID, int availableQuantity, double buyingPrice) {
+    Product(int id, String productName, int categoryID, int availableQuantity, double buyingPrice, String lastBuyingDate, double sellingPrice, double installmentPrice) {
         this.id = id;
         this.productName = productName;
         this.categoryID = categoryID;
         this.availableQuantity = availableQuantity;
         this.buyingPrice = buyingPrice;
+        this.lastBuyingDate = lastBuyingDate;
+        this.sellingPrice = sellingPrice;
+        this.installmentPrice = installmentPrice;
     }
 
     public int getID() {
@@ -34,5 +40,17 @@ public class Product {
 
     public double getBuyingPrice() {
         return buyingPrice;
+    }
+
+    public String getLastBuyingDate() {
+        return lastBuyingDate;
+    }
+
+    public double getSellingPrice() {
+        return sellingPrice;
+    }
+
+    public double getInstallmentPrice() {
+        return installmentPrice;
     }
 }

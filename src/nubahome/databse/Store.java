@@ -78,21 +78,21 @@ public class Store {
         return done;
     }
 
-    public boolean addBill(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost) {
+    public boolean addBill(String billDate, String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String paymentMethod) {
         boolean done = false;
-        done = database.addBill(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost);
+        done = database.addBill(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, "كاش");
         return done;
     }
 
-    public boolean addInstalment(String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney,  double instalmentAmount, Date startDate, Date endDate){
+    public boolean addInstalment(String billDate, String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney,  double instalmentAmount, String startDate, String endDate){
         boolean done = false;
-        done = database.addInstalment(buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+        done = database.addInstalment(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
         return done;
     }
 
-    public boolean addSupply(String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double totalCost) {
+    public boolean addSupply(String supplyDate, String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double transportationFees, double productsTotalCost, double supplyTotalCost) {
         boolean done = false;
-        done = database.addSupply(supplierName, boughtProductsIDs, boughtQuantities, buyingPrices, totalCost);
+        done = database.addSupply(supplyDate, supplierName, boughtProductsIDs, boughtQuantities, buyingPrices, transportationFees, productsTotalCost, supplyTotalCost);
         return done;
     }
 
@@ -118,4 +118,22 @@ public class Store {
     public void updateUserType(User user, int newType) {
         database.updateUserType(user, newType);
     }
+
+    public ArrayList<Bill> getAllBills() {
+        return database.getAllBills();
+    }
+
+    public ArrayList<Supply> getAllSupplies() {
+        return database.getAllSupplies();
+    }
+
+    public ArrayList<SoldProduct> getBillSoldProducts(int billID) {
+        return database.getBillSoldProducts(billID);
+    }
+
+    public ArrayList<BoughtProduct> getSupplyBoughtProducts(int billID) {
+        return database.getSupplyBoughtProducts(billID);
+    }
+
+
 }
