@@ -135,5 +135,8 @@ public class Store {
         return database.getSupplyBoughtProducts(billID);
     }
 
+    public ArrayList<Instalment> getAllInstalments() {
+        return database.getAllInstalments();
+    }
 
 }

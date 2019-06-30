@@ -350,7 +350,7 @@ class StoreDatabase extends Database {
 
     ArrayList<SoldProduct> getBillSoldProducts(int billID) {
         ArrayList<SoldProduct> soldProducts = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select products.product_name, bills_details.sold_quantity, bills_details.selling_price from bills_details left join products where bills_details.product_id = products.product_id and bills_details.bill_id=" + billID + ";");
+        ResultSet resultSet = executeQuery("select * from bills_details, products where bills_details.product_id = products.product_id and bills_details.bill_id=" + billID + ";");
 
         try {
             while (resultSet.next()) {
@@ -388,6 +388,33 @@ class StoreDatabase extends Database {
 
         return boughtProducts;
 
+    }
+
+    ArrayList<Instalment> getAllInstalments() {
+        ArrayList<Instalment> instalments = new ArrayList<>();
+        ResultSet resultSet = executeQuery("select * from bills, instalments where bills.bill_id = instalments.bill_id;");
+
+        try {
+            while(resultSet.next())
+            {
+                int billID = resultSet.getInt("bill_id");
+                String buyerName = resultSet.getString("buyer_name");
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                double paidMoney = resultSet.getDouble("paid_money");
+                double instalmentAmount = resultSet.getDouble("instalment_amount");
+                String startDate = resultSet.getString("start_date");
+                String endDate = resultSet.getString("end_date");
+
+                Instalment instalment = new Instalment(billID, buyerName, billTotalCost, paidMoney, instalmentAmount, startDate, endDate);
+                instalments.add(instalment);
+
+            }
+        } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+
+        return instalments;
     }
 
 }

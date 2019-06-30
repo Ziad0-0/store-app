@@ -2364,18 +2364,27 @@ public class GUI {
         instalmentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn buyerName = new TableColumn("أسم العميل");
+        buyerName.setCellValueFactory(new PropertyValueFactory<Instalment, String>("buyerName"));
+
         TableColumn billID = new TableColumn("رقم الفاتورة");
-        TableColumn instalmentQuantity = new TableColumn("حجم القسط");
+        billID.setCellValueFactory( new PropertyValueFactory<Instalment, Integer>("billID"));
+
+        TableColumn instalmentAmount = new TableColumn("حجم القسط");
+        instalmentAmount.setCellValueFactory(new PropertyValueFactory<Instalment, Double>("instalmentAmount"));
+
         TableColumn endOfInstalments = new TableColumn("نهاية الأقساط");
+        endOfInstalments.setCellValueFactory(new PropertyValueFactory<Instalment, String>("endDate"));
 
         instalmentsTable.getColumns().add(billID);
         instalmentsTable.getColumns().add(buyerName);
         instalmentsTable.getColumns().add(endOfInstalments);
-        instalmentsTable.getColumns().add(instalmentQuantity);
+        instalmentsTable.getColumns().add(instalmentAmount);
 
 
         showInstalmentsButton.setOnAction(actionEvent -> {
-
+            ArrayList<Instalment> instalments = Main.myStore.getAllInstalments();
+            System.out.println(instalments.size());
+            instalmentsTable.setItems(FXCollections.observableList(instalments));
         });
 
         BorderPane borderPane = new BorderPane();
