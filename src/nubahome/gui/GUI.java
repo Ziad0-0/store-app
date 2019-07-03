@@ -156,7 +156,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+            BorderPane suppliesLayout = (BorderPane) getManagerSuppliesSceneLayout();
             suppliesLayout.setBottom(hBox);
 
             Scene suppliesScene = new Scene(suppliesLayout);
@@ -190,7 +190,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane billsAndInstalmentLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+            BorderPane billsAndInstalmentLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
             billsAndInstalmentLayout.setBottom(hBox);
 
             Scene billsAndInstalmentScene = new Scene(billsAndInstalmentLayout);
@@ -224,7 +224,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+            BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
             productsLayout.setBottom(hBox);
 
             Scene productsScene = new Scene(productsLayout);
@@ -258,7 +258,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+            BorderPane suppliersLayout = (BorderPane) getManagerSuppliersSceneLayout();
            suppliersLayout.setBottom(hBox);
 
             Scene suppliersScene = new Scene(suppliersLayout);
@@ -292,7 +292,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+            BorderPane usersLayout = (BorderPane) getManagerUsersSceneLayout();
             usersLayout.setBottom(hBox);
 
             Scene usersScene = new Scene(usersLayout);
@@ -352,7 +352,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane addBillLayout = (BorderPane) getAddBillSceneLayout();
+            BorderPane addBillLayout = (BorderPane) getManagerAddBillSceneLayout();
             addBillLayout.setBottom(hBox);
 
             Scene addBillScene = new Scene(addBillLayout);
@@ -382,7 +382,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane addSupplyLayout = (BorderPane) getAddSupplySceneLayout();
+            BorderPane addSupplyLayout = (BorderPane) getManagerAddSupplySceneLayout();
             addSupplyLayout.setBottom(hBox);
 
             Scene addSupplyScene = new Scene(addSupplyLayout);
@@ -412,7 +412,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane showInstalmentsSceneLayout = (BorderPane) getShowInstalmentsSceneLayout();
+            BorderPane showInstalmentsSceneLayout = (BorderPane) getManagerShowInstalmentsSceneLayout();
             showInstalmentsSceneLayout.setBottom(hBox);
 
             Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
@@ -441,7 +441,7 @@ public class GUI {
 
     }
 
-    private static Pane getUsersSceneLayout() {
+    private static Pane getManagerUsersSceneLayout() {
         String showUsersButtonText = "عرض المستخدمين";
         Button showUsersButton = new Button(showUsersButtonText);
         showUsersButton.setPrefSize(150, 30);
@@ -467,7 +467,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+                BorderPane usersLayout = (BorderPane) getManagerUsersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -487,7 +487,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showUsersSceneLayout = (BorderPane) getShowUsersSceneLayout();
+            BorderPane showUsersSceneLayout = (BorderPane) getManagerShowUsersSceneLayout();
             showUsersSceneLayout.setBottom(hBox);
 
             Scene showUsersScene = new Scene(showUsersSceneLayout);
@@ -523,7 +523,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+                BorderPane usersLayout = (BorderPane) getManagerUsersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -543,7 +543,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addUserLayout = (BorderPane) getAddUserSceneLayout();
+            BorderPane addUserLayout = (BorderPane) getManagerAddUserSceneLayout();
             addUserLayout.setBottom(hBox);
 
             Scene addUserScene = new Scene(addUserLayout);
@@ -580,7 +580,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane usersLayout = (BorderPane) getUsersSceneLayout();
+                BorderPane usersLayout = (BorderPane) getManagerUsersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -600,7 +600,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editUserLayout = (BorderPane) getEditUserSceneLayout();
+            BorderPane editUserLayout = (BorderPane) getManagerEditUserSceneLayout();
             editUserLayout.setBottom(hBox);
 
             Scene editUserScene = new Scene(editUserLayout);
@@ -631,7 +631,7 @@ public class GUI {
 
     }
 
-    private static Pane getEditUserSceneLayout() {
+    private static Pane getManagerEditUserSceneLayout() {
         ChoiceBox usersChoiceBox = new ChoiceBox();
         Label usersLabel = new Label("اختار المستخدم");
         ArrayList<User> users = Main.myStore.getAllUsers();
@@ -824,7 +824,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddUserSceneLayout() {
+    private static Pane getManagerAddUserSceneLayout() {
         String nodeText;
 
         nodeText = "أسم المستخدم";
@@ -894,7 +894,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowUsersSceneLayout() {
+    private static Pane getManagerShowUsersSceneLayout() {
         TableColumn userName = new TableColumn("أسم المستخدم");
         TableColumn userType = new TableColumn("وظيفة المستخدم");
 
@@ -910,7 +910,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getSuppliesSceneLayout()    {
+    private static Pane getManagerSuppliesSceneLayout()    {
         String showSuppliesButtonText = "عرض التوريدات";
         Button showSuppliesButton = new Button(showSuppliesButtonText);
         showSuppliesButton.setPrefSize(150, 30);
@@ -940,7 +940,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                BorderPane suppliesLayout = (BorderPane) getManagerSuppliesSceneLayout();
                 suppliesLayout.setBottom(hBox);
 
                 Scene suppliesScene = new Scene(suppliesLayout);
@@ -956,7 +956,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showSuppliesSceneLayout = (BorderPane) getShowSuppliesSceneLayout();
+            BorderPane showSuppliesSceneLayout = (BorderPane) getManagerShowSuppliesSceneLayout();
             showSuppliesSceneLayout.setBottom(hBox);
 
             Scene showSuppliesScene = new Scene(showSuppliesSceneLayout);
@@ -997,7 +997,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                BorderPane suppliesLayout = (BorderPane) getManagerSuppliesSceneLayout();
                 suppliesLayout.setBottom(hBox);
 
                 Scene suppliesScene = new Scene(suppliesLayout);
@@ -1014,7 +1014,7 @@ public class GUI {
             hBox.getChildren().add(homeButton);
 
 
-            BorderPane addSupplyLayout = (BorderPane) getAddSupplySceneLayout();
+            BorderPane addSupplyLayout = (BorderPane) getManagerAddSupplySceneLayout();
             addSupplyLayout.setBottom(hBox);
 
             Scene addSupplyScene = new Scene(addSupplyLayout);
@@ -1055,7 +1055,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane suppliesLayout = (BorderPane) getSuppliesSceneLayout();
+                BorderPane suppliesLayout = (BorderPane) getManagerSuppliesSceneLayout();
                 suppliesLayout.setBottom(hBox);
 
                 Scene suppliesScene = new Scene(suppliesLayout);
@@ -1072,7 +1072,7 @@ public class GUI {
             hBox.getChildren().add(homeButton);
 
 
-            BorderPane editSupplyLayout = (BorderPane) getEditSupplySceneLayout();
+            BorderPane editSupplyLayout = (BorderPane) getManagerEditSupplySceneLayout();
             editSupplyLayout.setBottom(hBox);
 
             Scene editSupplyScene = new Scene(editSupplyLayout);
@@ -1102,7 +1102,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddSupplySceneLayout() {
+    private static Pane getManagerAddSupplySceneLayout() {
         Label messageLabel = new Label();
 
         Button submitButton = new Button("أدخل");
@@ -1200,7 +1200,7 @@ public class GUI {
 
                 if(selectedProduct != null && selectedProduct.getProductName().equals("أخري"))
                 {
-                    BorderPane addProductLayout = (BorderPane) getAddProductSceneLayout();
+                    BorderPane addProductLayout = (BorderPane) getManagerAddProductSceneLayout();
 
                     Scene addProductScene = new Scene(addProductLayout);
                     addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
@@ -1334,7 +1334,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditSupplySceneLayout() {
+    private static Pane getManagerEditSupplySceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -1350,7 +1350,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowSuppliesSceneLayout() {
+    private static Pane getManagerShowSuppliesSceneLayout() {
 
         Label startDateLabel = new Label("من");
         DatePicker startDatePicker = new DatePicker();
@@ -1465,7 +1465,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getBillsAndInstalmentsSceneLayout() {
+    private static Pane getManagerBillsAndInstalmentsSceneLayout() {
         String showBillsButtonText = "عرض الفواتير";
         Button showBillsButton = new Button(showBillsButtonText);
         showBillsButton.setPrefSize(150, 30);
@@ -1495,7 +1495,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
                 billsAndInstalmentsLayout.setBottom(hBox);
 
                 Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
@@ -1511,7 +1511,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showBillsSceneLayout = (BorderPane) getShowBillsSceneLayout();
+            BorderPane showBillsSceneLayout = (BorderPane) getManagerShowBillsSceneLayout();
             showBillsSceneLayout.setBottom(hBox);
 
             Scene showBillsScene = new Scene(showBillsSceneLayout);
@@ -1552,7 +1552,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
                 billsAndInstalmentsLayout.setBottom(hBox);
 
                 Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
@@ -1568,7 +1568,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addBillLayout = (BorderPane) getAddBillSceneLayout();
+            BorderPane addBillLayout = (BorderPane) getManagerAddBillSceneLayout();
             addBillLayout.setBottom(hBox);
 
             Scene addBillScene = new Scene(addBillLayout);
@@ -1608,7 +1608,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
                 billsAndInstalmentsLayout.setBottom(hBox);
 
                 Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
@@ -1624,7 +1624,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editBillLayout = (BorderPane) getEditBillSceneLayout();
+            BorderPane editBillLayout = (BorderPane) getManagerEditBillSceneLayout();
             editBillLayout.setBottom(hBox);
 
             Scene editBillScene = new Scene(editBillLayout);
@@ -1665,7 +1665,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
                 billsAndInstalmentsLayout.setBottom(hBox);
 
                 Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
@@ -1681,7 +1681,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showInstalmentsSceneLayout = (BorderPane) getShowInstalmentsSceneLayout();
+            BorderPane showInstalmentsSceneLayout = (BorderPane) getManagerShowInstalmentsSceneLayout();
             showInstalmentsSceneLayout.setBottom(hBox);
 
             Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
@@ -1721,7 +1721,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getBillsAndInstalmentsSceneLayout();
+                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
                 billsAndInstalmentsLayout.setBottom(hBox);
 
                 Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
@@ -1738,7 +1738,7 @@ public class GUI {
             hBox.getChildren().add(homeButton);
 
 
-            BorderPane editInstalmentSceneLayout = (BorderPane) getEditInstalmentSceneLayout();
+            BorderPane editInstalmentSceneLayout = (BorderPane) getManagerEditInstalmentSceneLayout();
             editInstalmentSceneLayout.setBottom(hBox);
 
             Scene editInstalmentScene = new Scene(editInstalmentSceneLayout);
@@ -1772,7 +1772,7 @@ public class GUI {
 
     }
 
-    private static Pane getAddBillSceneLayout() {
+    private static Pane getManagerAddBillSceneLayout() {
         GridPane gridPane = new GridPane();
 
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -2151,7 +2151,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditBillSceneLayout() {
+    private static Pane getManagerEditBillSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -2166,7 +2166,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowBillsSceneLayout() {
+    private static Pane getManagerShowBillsSceneLayout() {
 
         Label startDateLabel = new Label("من");
         DatePicker startDatePicker = new DatePicker();
@@ -2280,7 +2280,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditInstalmentSceneLayout() {
+    private static Pane getManagerEditInstalmentSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -2295,7 +2295,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowInstalmentsSceneLayout() {
+    private static Pane getManagerShowInstalmentsSceneLayout() {
         Label startDateLabel = new Label("من");
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
@@ -2395,7 +2395,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getProductsSceneLayout() {
+    private static Pane getManagerProductsSceneLayout() {
         String showProductsButtonText = "عرض المنتجات";
         Button showProductsButton = new Button(showProductsButtonText);
         showProductsButton.setPrefSize(150, 30);
@@ -2425,7 +2425,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2441,7 +2441,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showProductsSceneLayout = (BorderPane) getShowProductsSceneLayout();
+            BorderPane showProductsSceneLayout = (BorderPane) getManagerShowProductsSceneLayout();
             showProductsSceneLayout.setBottom(hBox);
 
             Scene showProductsScene = new Scene(showProductsSceneLayout);
@@ -2483,7 +2483,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2499,7 +2499,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addProductLayout = (BorderPane) getAddProductSceneLayout();
+            BorderPane addProductLayout = (BorderPane) getManagerAddProductSceneLayout();
             addProductLayout.setBottom(hBox);
 
             Scene addProductScene = new Scene(addProductLayout);
@@ -2540,7 +2540,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2556,7 +2556,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editProductLayout = (BorderPane) getEditProductSceneLayout();
+            BorderPane editProductLayout = (BorderPane) getManagerEditProductSceneLayout();
             editProductLayout.setBottom(hBox);
 
             Scene editProductScene = new Scene(editProductLayout);
@@ -2596,7 +2596,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2612,7 +2612,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showCategoriesSceneLayout = (BorderPane) getShowCategoriesSceneLayout();
+            BorderPane showCategoriesSceneLayout = (BorderPane) getManagerShowCategoriesSceneLayout();
             showCategoriesSceneLayout.setBottom(hBox);
 
             Scene showCategoriesScene = new Scene(showCategoriesSceneLayout);
@@ -2652,7 +2652,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2668,7 +2668,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addCategoryLayout = (BorderPane) getAddCategorySceneLayout();
+            BorderPane addCategoryLayout = (BorderPane) getManagerAddCategorySceneLayout();
             addCategoryLayout.setBottom(hBox);
 
             Scene addCategoryScene = new Scene(addCategoryLayout);
@@ -2710,7 +2710,7 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane productsLayout = (BorderPane) getProductsSceneLayout();
+                BorderPane productsLayout = (BorderPane) getManagerProductsSceneLayout();
                 productsLayout.setBottom(hBox);
 
                 Scene productsScene = new Scene(productsLayout);
@@ -2726,7 +2726,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editCategoryLayout = (BorderPane) getEditCategorySceneLayout();
+            BorderPane editCategoryLayout = (BorderPane) getManagerEditCategorySceneLayout();
             editCategoryLayout.setBottom(hBox);
 
             Scene editCategoryScene = new Scene(editCategoryLayout);
@@ -2759,7 +2759,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddProductSceneLayout() {
+    private static Pane getManagerAddProductSceneLayout() {
         String nodeText;
 
         nodeText = "أسم المنتج";
@@ -2828,7 +2828,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditProductSceneLayout() {
+    private static Pane getManagerEditProductSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -2842,7 +2842,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowProductsSceneLayout() {
+    private static Pane getManagerShowProductsSceneLayout() {
         TableView table = new TableView();
 
         TableColumn productName = new TableColumn("أسم المنتج");
@@ -2905,7 +2905,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddCategorySceneLayout() {
+    private static Pane getManagerAddCategorySceneLayout() {
         TextField categoryNameTextField = new TextField();
         categoryNameTextField.setPrefSize(100, 20);
 
@@ -2958,7 +2958,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditCategorySceneLayout() {
+    private static Pane getManagerEditCategorySceneLayout() {
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -2976,7 +2976,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowCategoriesSceneLayout() {
+    private static Pane getManagerShowCategoriesSceneLayout() {
         TableColumn categoryName = new TableColumn("");
 
         BorderPane borderPane = new BorderPane();
@@ -2987,7 +2987,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getSuppliersSceneLayout() {
+    private static Pane getManagerSuppliersSceneLayout() {
         String showSuppliersButtonText = "عرض الموردين";
         Button showSuppliersButton = new Button(showSuppliersButtonText);
         showSuppliersButton.setPrefSize(150, 30);
@@ -3013,7 +3013,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+                BorderPane suppliersLayout = (BorderPane) getManagerSuppliersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -3033,7 +3033,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showSuppliersSceneLayout = (BorderPane) getShowSuppliersSceneLayout();
+            BorderPane showSuppliersSceneLayout = (BorderPane) getManagerShowSuppliersSceneLayout();
 
             showSuppliersSceneLayout.setBottom(hBox);
             Scene showSuppliersScene = new Scene(showSuppliersSceneLayout);
@@ -3068,7 +3068,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+                BorderPane suppliersLayout = (BorderPane) getManagerSuppliersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -3088,7 +3088,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addSupplierSceneLayout = (BorderPane) getAddSupplierSceneLayout();
+            BorderPane addSupplierSceneLayout = (BorderPane) getManagerAddSupplierSceneLayout();
 
             addSupplierSceneLayout.setBottom(hBox);
             Scene addSuppliersScene = new Scene(addSupplierSceneLayout);
@@ -3124,7 +3124,7 @@ public class GUI {
             previousButton.setPrefSize(180, 30);
             previousButton.setOnAction(actionEvent -> {
                 mainStage.close();
-                BorderPane suppliersLayout = (BorderPane) getSuppliersSceneLayout();
+                BorderPane suppliersLayout = (BorderPane) getManagerSuppliersSceneLayout();
 
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
@@ -3144,7 +3144,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editSupplierSceneLayout = (BorderPane) getEditSupplierSceneLayout();
+            BorderPane editSupplierSceneLayout = (BorderPane) getManagerEditSupplierSceneLayout();
 
             editSupplierSceneLayout.setBottom(hBox);
             Scene editSupplierScene = new Scene(editSupplierSceneLayout);
@@ -3174,7 +3174,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddSupplierSceneLayout() {
+    private static Pane getManagerAddSupplierSceneLayout() {
         String nodeText;
 
         nodeText = "أسم المورد";
@@ -3224,7 +3224,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditSupplierSceneLayout() {
+    private static Pane getManagerEditSupplierSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -3239,7 +3239,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getShowSuppliersSceneLayout() {
+    private static Pane getManagerShowSuppliersSceneLayout() {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
