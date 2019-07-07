@@ -156,7 +156,7 @@ class StoreDatabase extends Database {
         double remainingMoney = totalCost - paidMoney;
 
         done = executeInsertion("insert into instalments (bill_id, guarantor_name, paid_money, remaining_money, instalment_amount, start_date, end_date)" +
-                "values (" + lastBillID + ", '" + guarantorName + "', " + paidMoney + ", " + remainingMoney + ", " + instalmentAmount + ", " + startDate + ", " + endDate + ");");
+                "values (" + lastBillID + ", '" + guarantorName + "', " + paidMoney + ", " + remainingMoney + ", " + instalmentAmount + ", '" + startDate + "', '" + endDate + "');");
         return done;
     }
 
@@ -232,14 +232,13 @@ class StoreDatabase extends Database {
 
         ArrayList<User> users = new ArrayList<>();
 
-        ResultSet resultSet = executeQuery("select * from users;");
+        ResultSet resultSet = executeQuery("select * from users, users_types where user_type = type_id;");
 
         try {
             while (resultSet.next()) {
                 String userName = resultSet.getString("user_name");
-                String userPassword = resultSet.getString("user_password");
-                int userType = resultSet.getInt("user_type");
-                users.add(new User(userName, userPassword, userType));
+                String userType = resultSet.getString("type");
+                users.add(new User(userName, userType));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -416,5 +415,99 @@ class StoreDatabase extends Database {
 
         return instalments;
     }
+    
+    ArrayList<Supplier> getAllSuppliers() {
+        ArrayList<Supplier> suppliers = new ArrayList<>();
 
+        ResultSet resultSet = executeQuery("select * from suppliers;");
+
+        try {
+            while (resultSet.next()) {
+                String supplierName = resultSet.getString("supplier_name");
+                suppliers.add(new Supplier(supplierName));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return suppliers;
+        
+    }
+
+    ArrayList<Bill> getBills(String queryStartDate, String queryEndDate) {
+        ArrayList<Bill> bills = new ArrayList<>();
+        ResultSet resultSet = executeQuery("select * from bills where bill_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
+        try {
+            while (resultSet.next()) {
+                int billID = resultSet.getInt("bill_id");
+                String billDate = resultSet.getString("bill_date");
+                String buyerName = resultSet.getString("buyer_name");
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                String paymentMethod = resultSet.getString("payment_method");
+                Bill bill = new Bill(billID, billDate, buyerName, billTotalCost, paymentMethod);
+                bills.add(bill);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return bills;
+
+    }
+
+    ArrayList<Supply> getSupplies(String queryStartDate, String queryEndDate) {
+        ArrayList<Supply> supplies = new ArrayList<>();
+        ResultSet resultSet = executeQuery("select * from supplies where supply_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
+        try {
+            while (resultSet.next()) {
+                int supplyID = resultSet.getInt("supply_id");
+                String supplyDate = resultSet.getString("supply_date");
+                String supplierName = resultSet.getString("supplier_name");
+                double transportationFees = resultSet.getDouble("transportation_fees");
+                double productsTotalCost = resultSet.getDouble("products_total_cost");
+                double supplyTotalCost = resultSet.getDouble("supply_total_cost");
+
+                Supply supply = new Supply(supplyID, supplyDate, supplierName, transportationFees, productsTotalCost, supplyTotalCost);
+                supplies.add(supply);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return supplies;
+    }
+
+    ArrayList<Instalment> getInstalments(String queryStartDate, String queryEndDate) {
+        ArrayList<Instalment> instalments = new ArrayList<>();
+        ResultSet resultSet = executeQuery("select * from bills, instalments where bills.bill_id = instalments.bill_id and bill_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
+
+        try {
+            while(resultSet.next())
+            {
+                int billID = resultSet.getInt("bill_id");
+                String buyerName = resultSet.getString("buyer_name");
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                double paidMoney = resultSet.getDouble("paid_money");
+                double instalmentAmount = resultSet.getDouble("instalment_amount");
+                String startDate = resultSet.getString("start_date");
+                String endDate = resultSet.getString("end_date");
+
+                Instalment instalment = new Instalment(billID, buyerName, billTotalCost, paidMoney, instalmentAmount, startDate, endDate);
+                instalments.add(instalment);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return instalments;
+    }
+
+
+    public void updateProduct(int id, String productName, int productCategory, int availableQuantity, Double productPrice) {
+        executeUpdate("update products set product_name = '"+ productName +"', category_id = '"+ productCategory + "', available_quantity = '" + availableQuantity + "', selling_price = '" + productPrice + "' where product_id = '" + id + "';");
+
+    }
 }

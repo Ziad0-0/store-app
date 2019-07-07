@@ -139,4 +139,24 @@ public class Store {
         return database.getAllInstalments();
     }
 
+    public ArrayList<Supplier> getAllSuppliers() {
+        return database.getAllSuppliers();
+    }
+
+    public ArrayList<Bill> getBills(String queryStartDate, String queryEndDate) {
+        return database.getBills(queryStartDate, queryEndDate);
+    }
+
+    public ArrayList<Supply> getSupplies(String queryStartDate, String queryEndDate) {
+        return database.getSupplies(queryStartDate, queryEndDate);
+    }
+
+    public ArrayList<Instalment> getInstalments(String queryStartDate, String queryEndDate) {
+        return database.getInstalments(queryStartDate, queryEndDate);
+    }
+
+
+    public void updateProduct(int id, String productName, int productCategory, int availableQuantity, Double productPrice) {
+        database.updateProduct(id, productName, productCategory, availableQuantity, productPrice);
+    }
 }

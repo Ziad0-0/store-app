@@ -5,6 +5,8 @@ import javafx.stage.Stage;
 import nubahome.databse.Store;
 import nubahome.gui.GUI;
 
+import java.util.Locale;
+
 
 public class Main extends Application {
 
@@ -17,7 +19,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-
+        Locale.setDefault(new Locale("ar"));
         myStore = new Store("NubaHome");
         myStore.setupDatabase("com.mysql.jdbc.Driver","jdbc:sqlite:db/nuba_home.db");
         myStore.connectToDatabase();
