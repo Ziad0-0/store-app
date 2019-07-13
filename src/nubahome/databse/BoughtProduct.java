@@ -1,19 +1,16 @@
 package nubahome.databse;
 
-public class BoughtProduct {
-    private String productName;
-    private int boughtQuantity;
-    private double buyingPrice;
+public class BoughtProduct extends Product{
+    int boughtQuantity;
+    double buyingPrice;
 
-    public BoughtProduct(String productName, int boughtQuantity, double buyingPrice) {
-        this.productName = productName;
+    public BoughtProduct(Product product, int boughtQuantity, double buyingPrice) {
+        super(product.productID, product.productName, product.category, product.availableQuantity, product.supplyPrice, product.lastSupplyDate, product.cashSellingPrice, product.instalmentSellingPrice);
+
         this.boughtQuantity = boughtQuantity;
         this.buyingPrice = buyingPrice;
     }
-
-    public String getProductName() {
-        return productName;
-    }
+    
 
     public int getBoughtQuantity() {
         return boughtQuantity;
@@ -22,6 +19,4 @@ public class BoughtProduct {
     public double getBuyingPrice() {
         return buyingPrice;
     }
-
-
 }

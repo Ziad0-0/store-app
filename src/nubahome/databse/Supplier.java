@@ -1,13 +1,23 @@
 package nubahome.databse;
 
 public class Supplier {
-    private String name;
+    int supplierID;
+    String supplierName;
 
-    public Supplier(String name) {
-        this.name = name;
+    public Supplier(int supplierID, String supplierName) {
+        this.supplierID = supplierID;
+        this.supplierName = supplierName;
     }
 
-    public String getName() {
-        return name;
+    public Supplier(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public int getSupplierID() {
+        return supplierID;
     }
 }

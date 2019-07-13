@@ -1,11 +1,11 @@
 package nubahome.gui;
 
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
@@ -18,18 +18,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-
 import nubahome.databse.*;
-import nubahome.main.Main;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 public class GUI {
@@ -73,32 +70,28 @@ public class GUI {
             String userName = userNameTextField.getText();
             String password = passwordField.getText();
 
-            Integer currentUserType = Main.myStore.login(userName,password);
+            boolean isUser =  StoreDatabase.login(userName,password);
 
-            if(currentUserType.equals(Main.myStore.userType("manager")))
-            {
-                userNameTextField.clear();
-                passwordField.clear();
-                System.out.println("manager");
+            if(!isUser)
+                messageLabel.setText("بيانات خاطئة! أعد محاولة الدخول.");
+            else {
+                Scene homeScene = null;
+                UserRole currentUserRole = StoreDatabase.getCurrentUserRole();
+                if (currentUserRole.getRoleName().equals("مدير"))
+                {
+                    System.out.println("مدير");
+                    homeScene = new Scene(getManagerHomeSceneLayout());
+                }
+                else if (currentUserRole.getRoleName().equals("موظف")) {
+                    System.out.println("موظف");
+                    homeScene = new Scene(getClerkHomeSceneLayout());
+                }
+
                 mainStage.close();
                 String sceneTitle = "الواجهة الرئيسية";
                 mainStage.setTitle(sceneTitle);
-                Scene homeScene = new Scene(getManagerHomeSceneLayout());
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            }
-            else if(currentUserType.equals(Main.myStore.userType("clerk")))
-            {
-                //ToDo: implement the clerk scene
                 userNameTextField.clear();
                 passwordField.clear();
-                System.out.println("clerk");
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Scene homeScene = new Scene(getClerkHomeSceneLayout());
                 homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
                 mainStage.setScene(homeScene);
                 System.gc();
@@ -167,11 +160,11 @@ public class GUI {
             mainStage.show();
         });
 
-        String billsAndInstalmentsButtonText = "الفواتير و الأقساط";
-        Button billsAndInstalmentsButton = new Button(billsAndInstalmentsButtonText);
-        billsAndInstalmentsButton.setPrefSize(150, 50);
+        String billsButtonText = "الفواتير";
+        Button billsButton = new Button(billsButtonText);
+        billsButton.setPrefSize(150, 50);
 
-        billsAndInstalmentsButton.setOnAction(actionEvent -> {
+        billsButton.setOnAction(actionEvent -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -190,12 +183,12 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane billsAndInstalmentLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
+            BorderPane billsAndInstalmentLayout = (BorderPane) getManagerBillsSceneLayout();
             billsAndInstalmentLayout.setBottom(hBox);
 
             Scene billsAndInstalmentScene = new Scene(billsAndInstalmentLayout);
             billsAndInstalmentScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة الفواتير و الأقساط");
+            mainStage.setTitle("واجهة الفواتير");
             mainStage.setScene(billsAndInstalmentScene);
             System.gc();
             mainStage.show();
@@ -311,7 +304,7 @@ public class GUI {
 
         gridPane.add(suppliesButton, 0, 0);
         gridPane.add(usersButton, 1, 0);
-        gridPane.add(billsAndInstalmentsButton, 0, 1);
+        gridPane.add(billsButton, 0, 1);
         gridPane.add(productsButton, 1, 1);
         gridPane.add(SuppliersButton, 0, 2);
 
@@ -514,22 +507,26 @@ public class GUI {
     }
 
     private static Pane getManagerEditUserSceneLayout() {
-        ChoiceBox usersChoiceBox = new ChoiceBox();
         Label usersLabel = new Label("اختار المستخدم");
-        ArrayList<User> users = Main.myStore.getAllUsers();
-        ArrayList<String> usersNames = new ArrayList<>();
+        ChoiceBox usersChoiceBox = new ChoiceBox();
+        usersChoiceBox.setConverter(new StringConverter<User>() {
+            @Override
+            public String toString(User u) {
+                return u.getUserName();
+            }
 
-        for(User x : users)
-            usersNames.add(x.getName());
-
-        usersChoiceBox.setItems(FXCollections.observableList(usersNames));
-
-        Button deleteUserButton = new Button("حذف المستخدم");
-        deleteUserButton.setPrefSize(200,50);
-
-        Button updateUserBtutton = new Button("تحديث بيانات المستخدم");
-        updateUserBtutton.setPrefSize(200,50);
-
+            @Override
+            public User fromString(String s) {
+                return null;
+            }
+        });
+        ArrayList<User> users = StoreDatabase.getAllUsers();
+        usersChoiceBox.setItems(FXCollections.observableList(users));
+        
+        usersChoiceBox.setOnAction(actionEvent -> {
+            User selectedUser = (User) usersChoiceBox.getValue();
+            showEditUser(selectedUser);
+        });
         Label messageLabel = new Label();
 
         GridPane gridPane = new GridPane();
@@ -538,165 +535,10 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        Button updatePasswordButton = new Button("تحديث كلمة السر");
-        updatePasswordButton.setPrefSize(180,50);
+        
 
-        Button updateNameButton = new Button("تحديث أسم المستخدم");
-        updateNameButton.setPrefSize(180,50);
-
-        Button updateTypeButton = new Button("تحديث وظيفة المستخدم");
-        updateTypeButton.setPrefSize(180,50);
-
-        deleteUserButton.setOnAction(actionEvent -> {
-            gridPane.getChildren().remove(updateNameButton);
-            gridPane.getChildren().remove(updatePasswordButton);
-            gridPane.getChildren().remove(updateTypeButton);
-            gridPane.getChildren().remove(messageLabel);
-
-            gridPane.add(messageLabel,0,2);
-
-            String message = "";
-            messageLabel.setText(message);
-
-            User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
-            Main.myStore.deleteUser(selectedUser.getName());
-            message = "تم الحذف بنجاح";
-            messageLabel.setText(message);
-
-            ArrayList <User> undeletedUsers = Main.myStore.getAllUsers();
-            ArrayList<String> undeletedUsersNames = new ArrayList<>();
-            for(User x : undeletedUsers)
-                undeletedUsersNames.add(x.getName());
-            usersChoiceBox.setItems(FXCollections.observableList(undeletedUsersNames));
-
-
-            gridPane.getChildren().clear();
-
-            gridPane.add(usersChoiceBox,0,0);
-            gridPane.add(usersLabel,1,0);
-            gridPane.add(deleteUserButton,0,1);
-            gridPane.add(updateUserBtutton,1,1);
-            gridPane.add(messageLabel,0,2);
-
-        });
-
-        updateUserBtutton.setOnAction(actionEvent -> {
-            gridPane.getChildren().remove(messageLabel);
-
-            gridPane.add(updatePasswordButton,0,2);
-            gridPane.add(updateNameButton,1,2);
-            gridPane.add(updateTypeButton,2,2);
-        });
-
-        updateNameButton.setOnAction(actionEvent -> {
-            TextField newNameTextField = new TextField();
-            newNameTextField.setPrefSize(100,20);
-
-            Label newNameLabel = new Label("الأسم الجديد");
-
-            Button submitButton = new Button("أدخل");
-
-            submitButton.setOnAction(event -> {
-                String message = "";
-                messageLabel.setText(message);
-
-                String newName = newNameTextField.getText().trim();
-                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
-                Main.myStore.updateUserName(selectedUser, newName);
-
-                message = "تم التعديل بنجاح";
-                messageLabel.setText(message);
-
-                gridPane.getChildren().clear();
-
-                gridPane.add(usersChoiceBox,0,0);
-                gridPane.add(usersLabel,1,0);
-                gridPane.add(deleteUserButton,0,1);
-                gridPane.add(updateUserBtutton,1,1);
-                gridPane.add(messageLabel,0,2);
-
-            });
-
-            gridPane.add(newNameTextField,0,3);
-            gridPane.add(newNameLabel,1,3);
-            gridPane.add(submitButton,0,4);
-            gridPane.add(messageLabel,0,5);
-        });
-
-        updatePasswordButton.setOnAction(actionEvent -> {
-            TextField newPasswordTextField = new TextField();
-            newPasswordTextField.setPrefSize(100,20);
-
-            Label newPasswordLabel = new Label("كلمة السر الجديدة");
-
-            Button submitButton = new Button("أدخل");
-
-            submitButton.setOnAction(event -> {
-                String message = "";
-                messageLabel.setText(message);
-
-                String newPassword = newPasswordTextField.getText().trim();
-                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
-                Main.myStore.updateUserPassword(selectedUser, newPassword);
-
-                message = "تم التعديل بنجاح";
-                messageLabel.setText(message);
-
-                gridPane.getChildren().clear();
-
-                gridPane.add(usersChoiceBox,0,0);
-                gridPane.add(usersLabel,1,0);
-                gridPane.add(deleteUserButton,0,1);
-                gridPane.add(updateUserBtutton,1,1);
-                gridPane.add(messageLabel,0,2);
-            });
-
-            gridPane.add(newPasswordTextField,0,3);
-            gridPane.add(newPasswordLabel,1,3);
-            gridPane.add(submitButton,0,4);
-            gridPane.add(messageLabel,0,5);
-        });
-
-        updateTypeButton.setOnAction(actionEvent -> {
-            Label newPasswordLabel = new Label("الوظيفة الجديدة");
-
-            ChoiceBox newTypeChoiceBox = new ChoiceBox();
-            ArrayList<String> typesList = Main.myStore.getUserTypes();
-            newTypeChoiceBox.setItems(FXCollections.observableList(typesList));
-
-            Button submitButton = new Button("أدخل");
-            submitButton.setOnAction(event->{
-                String message = "";
-                messageLabel.setText(message);
-
-                int newUserType = newTypeChoiceBox.getSelectionModel().getSelectedIndex()+1;
-                User selectedUser = users.get(usersChoiceBox.getSelectionModel().getSelectedIndex());
-                Main.myStore.updateUserType(selectedUser, newUserType);
-
-                message = "تم التعديل بنجاح";
-                messageLabel.setText(message);
-
-                gridPane.getChildren().clear();
-
-                gridPane.add(usersChoiceBox,0,0);
-                gridPane.add(usersLabel,1,0);
-                gridPane.add(deleteUserButton,0,1);
-                gridPane.add(updateUserBtutton,1,1);
-                gridPane.add(messageLabel,0,2);
-            });
-
-            gridPane.add(newTypeChoiceBox,0,3);
-            gridPane.add(newPasswordLabel,1,3);
-            gridPane.add(submitButton,0,4);
-            gridPane.add(messageLabel,0,5);
-        });
-
-
-        gridPane.add(usersChoiceBox,0,0);
-        gridPane.add(usersLabel,1,0);
-        gridPane.add(deleteUserButton,0,1);
-        gridPane.add(updateUserBtutton,1,1);
-        gridPane.add(messageLabel,0,2);
+        gridPane.add(usersChoiceBox,1,0);
+        gridPane.add(usersLabel,0,0);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -719,11 +561,24 @@ public class GUI {
         TextField userPasswordTextField = new TextField();
         userPasswordTextField.setPrefSize(100,20);
 
-        nodeText = "نوع المستخدم";
+        nodeText = "وظيفة المستخدم";
         Label userTypeLabel = new Label(nodeText);
-        ChoiceBox userTypesChoiceBox = new ChoiceBox();
-        ArrayList<String> typesList = Main.myStore.getUserTypes();
-        userTypesChoiceBox.setItems(FXCollections.observableList(typesList));
+        ChoiceBox usersRolesChoiceBox = new ChoiceBox();
+        ArrayList<UserRole> usersRoles = StoreDatabase.getAllUsersRoles();
+        usersRolesChoiceBox.setItems(FXCollections.observableList(usersRoles));
+        usersRolesChoiceBox.setConverter(new StringConverter<UserRole>() {
+            @Override
+            public String toString(UserRole role) {
+                return role.getRoleName();
+            }
+
+            @Override
+            public UserRole fromString(String s) {
+                return null;
+            }
+        });
+
+
 
         Label messageLabel = new Label();
 
@@ -737,16 +592,14 @@ public class GUI {
 
             String userName = userNameTextField.getText().trim();
             String userPassword = userPasswordTextField.getText().trim();
-            int userType = userTypesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+            UserRole userRole = (UserRole) usersRolesChoiceBox.getValue();
 
-            boolean done = false;
-            done = Main.myStore.addUser(userName,userPassword,userType);
+
+            boolean done = StoreDatabase.addUser(new User(userName, userPassword, userRole));
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
-            }
+                messageLabel.setText("تم إدخال البيانات بنجاح!");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
 
 
         });
@@ -757,12 +610,12 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(userNameTextField,0,0);
-        gridPane.add(userNameLabel,1,0);
-        gridPane.add(userPasswordTextField,0,1);
-        gridPane.add(userPasswordLabel,1,1);
-        gridPane.add(userTypesChoiceBox,0,2);
-        gridPane.add(userTypeLabel,1,2);
+        gridPane.add(userNameTextField,1,0);
+        gridPane.add(userNameLabel,0,0);
+        gridPane.add(userPasswordTextField,1,1);
+        gridPane.add(userPasswordLabel,0,1);
+        gridPane.add(usersRolesChoiceBox,1,2);
+        gridPane.add(userTypeLabel,0,2);
         gridPane.add(submitButton,0,3);
         gridPane.add(messageLabel,0,4);
 
@@ -777,19 +630,28 @@ public class GUI {
     }
 
     private static Pane getManagerShowUsersSceneLayout() {
+        TableColumn userID = new TableColumn("رقم المستخدم");
         TableColumn userName = new TableColumn("أسم المستخدم");
-        TableColumn userType = new TableColumn("وظيفة المستخدم");
+        TableColumn userPassword = new TableColumn("كلمة سر المستخدم");
+        TableColumn userRole = new TableColumn("وظيفة المستخدم");
 
-        userName.setCellValueFactory(new PropertyValueFactory<User, String>("name"));
-        userType.setCellValueFactory(new PropertyValueFactory<User, String>("type"));
+        userID.setCellValueFactory(new PropertyValueFactory<User, Integer>("userID"));
+        userName.setCellValueFactory(new PropertyValueFactory<User, String>("userName"));
+        userPassword.setCellValueFactory(new PropertyValueFactory<User, String>("userPassword"));
+        userRole.setCellValueFactory(cellData -> {
+            User user = (User) ((TableColumn.CellDataFeatures) cellData).getValue();
+            return new SimpleStringProperty(user.getUserRole().getRoleName());
+        });
 
         TableView usersTable = new TableView();
         usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        usersTable.getColumns().add(userID);
         usersTable.getColumns().add(userName);
-        usersTable.getColumns().add(userType);
+        usersTable.getColumns().add(userPassword);
+        usersTable.getColumns().add(userRole);
 
 
-        ArrayList<User> users = Main.myStore.getAllUsers();
+        ArrayList<User> users = StoreDatabase.getAllUsers();
         usersTable.setItems(FXCollections.observableList(users));
 
         BorderPane borderPane = new BorderPane();
@@ -1025,7 +887,18 @@ public class GUI {
 
         Label supplierNameLabel = new Label("أسم المورد");
         ChoiceBox supplierChoiceBox = new ChoiceBox();
-        ArrayList<String> suppliers = Main.myStore.getSuppliers();
+        supplierChoiceBox.setConverter(new StringConverter<Supplier>() {
+            @Override
+            public String toString(Supplier s) {
+                return s.getSupplierName();
+            }
+
+            @Override
+            public Supplier fromString(String s) {
+                return null;
+            }
+        });
+        ArrayList<Supplier> suppliers = StoreDatabase.getAllSuppliers();
         supplierChoiceBox.setItems(FXCollections.observableList(suppliers));
 
         Label transportationFessLabel = new Label( "مصاريف المواصلات");
@@ -1035,14 +908,17 @@ public class GUI {
         Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
         addMoreProductsButton.setPrefSize(120,20);
 
+        Button addNewProductButton = new Button("أضف منتج جديد لقاعدة البيانات");
+        addNewProductButton.setPrefSize(200,20);
+
         ArrayList<Label> productsLabels =new ArrayList<>();
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<Label> categoriesLabels = new ArrayList<>();
-        ArrayList<ChoiceBox> categoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
         ArrayList<Label> boughtQuantitiesLabels = new ArrayList<>();
         ArrayList<TextField> boughtQuantitiesTextFields = new ArrayList<>();
-        ArrayList<Label> unitsPricesLabels = new ArrayList<>();
-        ArrayList<TextField> unitsPricesTextFields = new ArrayList<>();
+        ArrayList<Label> buyingsPricesLabels = new ArrayList<>();
+        ArrayList<TextField> buyingsPricesTextFields = new ArrayList<>();
 
         ScrollPane scrollPane = new ScrollPane();
         GridPane productsGridPane = new GridPane();
@@ -1068,49 +944,29 @@ public class GUI {
             });
 
             Label categoryLabel = new Label("نوع المنتج");
-            ChoiceBox categoriesChoiceBox = new ChoiceBox();
-            ArrayList<String> categoriesList = Main.myStore.getCategories();
-            categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-            categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+            productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                @Override
+                public String toString(ProductCategory c) {
+                    return c.getCategoryName();
+                }
 
                 @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                    int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-                    ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                    productsChoiceBox.setItems(FXCollections.observableList(products));
+                public ProductCategory fromString(String s) {
+                    return null;
                 }
             });
-
-            productsChoiceBox.getSelectionModel().selectedItemProperty().addListener((ChangeListener<Product>) (observableValue, s, t1) -> {
-                Product selectedProduct = (Product) productsChoiceBox.getSelectionModel().getSelectedItem();
-
-                if(selectedProduct != null && selectedProduct.getProductName().equals("أخري"))
-                {
-                    BorderPane addProductLayout = (BorderPane) getManagerAddProductSceneLayout();
-
-                    Scene addProductScene = new Scene(addProductLayout);
-                    addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                    Stage secondaryStage = new Stage();
-                    secondaryStage.setAlwaysOnTop(true);
-                    secondaryStage.setTitle("واجهة إضافة منتج");
-                    secondaryStage.setScene(addProductScene);
-                    System.gc();
-                    secondaryStage.show();
-
-                    secondaryStage.setOnCloseRequest(windowEvent -> {
-                        int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex() + 1;
-                        ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                        productsChoiceBox.setItems(FXCollections.observableList(products));
-                        secondaryStage.close();
-                    });
+            ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+            productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
 
-                }
+            productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+                ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
             });
+
+
 
 
             Label boughtQuantityLabel = new Label("الكمية المشتراة");
@@ -1126,11 +982,11 @@ public class GUI {
             productsLabels.add(productLabel);
             productsChoiceBoxes.add(productsChoiceBox);
             categoriesLabels.add(categoryLabel);
-            categoriesChoiceBoxes.add(categoriesChoiceBox);
+            productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
             boughtQuantitiesLabels.add(boughtQuantityLabel);
             boughtQuantitiesTextFields.add(boughtQuantityTextField);
-            unitsPricesTextFields.add(buyingPriceTextField);
-            unitsPricesLabels.add(buyingPriceLabel);
+            buyingsPricesTextFields.add(buyingPriceTextField);
+            buyingsPricesLabels.add(buyingPriceLabel);
 
 
             int currentProductRow = 0;
@@ -1139,13 +995,13 @@ public class GUI {
 
             int lastProductIndex = numOfProducts -1;
 
-            productsGridPane.add(unitsPricesTextFields.get(lastProductIndex),7,currentProductRow);
-            productsGridPane.add(unitsPricesLabels.get(lastProductIndex),6,currentProductRow);
+            productsGridPane.add(buyingsPricesTextFields.get(lastProductIndex),7,currentProductRow);
+            productsGridPane.add(buyingsPricesLabels.get(lastProductIndex),6,currentProductRow);
             productsGridPane.add(boughtQuantitiesTextFields.get(lastProductIndex),5,currentProductRow);
             productsGridPane.add(boughtQuantitiesLabels.get(lastProductIndex),4,currentProductRow);
             productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),3,currentProductRow);
             productsGridPane.add(productsLabels.get(lastProductIndex),2,currentProductRow);
-            productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
+            productsGridPane.add(productsCategoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
             productsGridPane.add(categoriesLabels.get(lastProductIndex),0,currentProductRow);
 
 
@@ -1158,43 +1014,45 @@ public class GUI {
             messageLabel.setText(message);
 
             String supplyDate = supplyDatePicker.getValue().toString();
-            String supplierName = supplierChoiceBox.getSelectionModel().getSelectedItem().toString();
+            Supplier supplier = (Supplier) supplierChoiceBox.getValue();
+            double transportationFees = Double.parseDouble(transportationFeesTextField.getText().trim());
 
+
+            ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
+            double productsTotalCost = 0;
             int numOfBoughtProducts =  productsChoiceBoxes.size();
-
-            ArrayList<Integer> boughtProductsIDs = new ArrayList<>();
-
-            for(int i = 0; i < numOfBoughtProducts ; i++)
+            for(int i = 0; i < numOfBoughtProducts; i++)
             {
-                Product selectedProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
-                boughtProductsIDs.add(selectedProduct.getID());
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int boughtQuantity = Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim());
+                double buyingPrice = Double.parseDouble(buyingsPricesTextFields.get(i).getText().trim());
+                boughtProducts.add(new BoughtProduct(currentProduct, boughtQuantity, buyingPrice));
+
+                productsTotalCost += (buyingPrice * boughtQuantity);
             }
 
-            ArrayList<Integer> boughtQuantities = new ArrayList<>();
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                boughtQuantities.add(Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim()));
-
-
-            ArrayList<Double> unitsPrices = new ArrayList<>();
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                unitsPrices.add(Double.parseDouble(unitsPricesTextFields.get(i).getText().trim()));
-
-            double productsTotalCost = 0;
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                productsTotalCost += unitsPrices.get(i) * boughtQuantities.get(i);
-
-            double transportationFees = Double.parseDouble(transportationFeesTextField.getText().trim());
             double supplyTotalCost = productsTotalCost + transportationFees;
-            boolean done = false;
 
-            done = Main.myStore.addSupply(supplyDate, supplierName, boughtProductsIDs, boughtQuantities, unitsPrices, transportationFees, productsTotalCost, supplyTotalCost);
+            Supply supply = new Supply(supplyDate, supplier, transportationFees, productsTotalCost, supplyTotalCost, boughtProducts);
+            boolean done = StoreDatabase.addSupply(supply);
+
 
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
 
-            }
+        });
+
+        addNewProductButton.setOnAction(actionEvent -> {
+            BorderPane addProductLayout = (BorderPane) getManagerAddProductSceneLayout();
+
+            Scene addProductScene = new Scene(addProductLayout);
+            addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage secondaryStage = new Stage();
+            secondaryStage.setAlwaysOnTop(true);
+            secondaryStage.setTitle("واجهة إضافة منتج");
+            secondaryStage.setScene(addProductScene);
+            System.gc();
+            secondaryStage.show();
 
         });
 
@@ -1204,12 +1062,14 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(supplyDatePicker, 0,0);
+        gridPane.add(supplyDateLabel,0,0);
+        gridPane.add(supplyDatePicker, 1,0);
         gridPane.add(supplierNameLabel,0,1);
         gridPane.add(supplierChoiceBox,1,1);
         gridPane.add(transportationFessLabel,0,2);
         gridPane.add(transportationFeesTextField,1,2);
         gridPane.add(addMoreProductsButton,0,3);
+        gridPane.add(addNewProductButton, 1, 3);
         gridPane.add(scrollPane,0,4);
         gridPane.add(submitButton,0,5);
         gridPane.add(messageLabel,0,6);
@@ -1311,12 +1171,15 @@ public class GUI {
         TableColumn productsTotalCost = new TableColumn("تكلفة المنتجات");
         TableColumn supplyTotalCost = new TableColumn("التكلفة الكاملة");
 
-        supplyID.setCellValueFactory(new PropertyValueFactory<Supply, Integer>("ID"));
-        supplyDate.setCellValueFactory(new PropertyValueFactory<Supply, String>("date"));
-        supplierName.setCellValueFactory(new PropertyValueFactory<Supply, String>("supplierName"));
+        supplyID.setCellValueFactory(new PropertyValueFactory<Supply, Integer>("supplyID"));
+        supplyDate.setCellValueFactory(new PropertyValueFactory<Supply, String>("supplyDate"));
         productsTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("productsTotalCost"));
         transportationFees.setCellValueFactory(new PropertyValueFactory<Supply, Double>("transportationFees"));
         supplyTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("supplyTotalCost"));
+        supplierName.setCellValueFactory(cellData -> {
+            Supply supply = (Supply) ((TableColumn.CellDataFeatures) cellData).getValue();
+            return new SimpleStringProperty(supply.getSupplier().getSupplierName());
+        });
 
         TableView suppliesTable = new TableView();
         suppliesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -1326,7 +1189,7 @@ public class GUI {
                 if (! row.isEmpty() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
 
                     Supply clickedSupply = row.getItem();
-                    showSupplyDetails(clickedSupply);
+                    showBoughtProducts(clickedSupply);
 
                 }
             });
@@ -1344,10 +1207,9 @@ public class GUI {
             String queryStartDate = startDatePicker.getValue().toString();
             String queryEndDate = endDatePicker.getValue().toString();
 
-            ArrayList<Supply> supplies = Main.myStore.getSupplies(queryStartDate, queryEndDate);
+            ArrayList<Supply> supplies = StoreDatabase.getSupplies(queryStartDate, queryEndDate);
             suppliesTable.setItems(FXCollections.observableList(supplies));
         });
-
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
 
@@ -1357,7 +1219,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getManagerBillsAndInstalmentsSceneLayout() {
+    private static Pane getManagerBillsSceneLayout() {
         String showBillsButtonText = "عرض الفواتير";
         Button showBillsButton = new Button(showBillsButtonText);
         showBillsButton.setPrefSize(150, 30);
@@ -1387,13 +1249,13 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
+                BorderPane billsLayout = (BorderPane) getManagerBillsSceneLayout();
+                billsLayout.setBottom(hBox);
 
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
+                Scene billsScene = new Scene(billsLayout);
+                billsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setTitle("واجهة الفواتير");
+                mainStage.setScene(billsScene);
                 System.gc();
                 mainStage.show();
             });
@@ -1444,13 +1306,13 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
+                BorderPane billsLayout = (BorderPane) getManagerBillsSceneLayout();
+                billsLayout.setBottom(hBox);
 
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
+                Scene billsScene = new Scene(billsLayout);
+                billsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setTitle("واجهة الفواتير");
+                mainStage.setScene(billsScene);
                 System.gc();
                 mainStage.show();
             });
@@ -1500,13 +1362,13 @@ public class GUI {
                 HBox hBox = new HBox();
                 hBox.getChildren().add(homeButton);
 
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
+                BorderPane billsLayout = (BorderPane) getManagerBillsSceneLayout();
+                billsLayout.setBottom(hBox);
 
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
+                Scene billsScene = new Scene(billsLayout);
+                billsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setTitle("واجهة الفواتير");
+                mainStage.setScene(billsScene);
                 System.gc();
                 mainStage.show();
             });
@@ -1528,118 +1390,7 @@ public class GUI {
 
         });
 
-        String showInstalmentsButtonText = "عرض الأقساط";
-        Button showInstalmentsButton = new Button(showInstalmentsButtonText);
-        showInstalmentsButton.setPrefSize(150, 30);
-        showInstalmentsButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getManagerHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane showInstalmentsSceneLayout = (BorderPane) getManagerShowInstalmentsSceneLayout();
-            showInstalmentsSceneLayout.setBottom(hBox);
-
-            Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
-            showInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة عرض الأقساط");
-            mainStage.setScene(showInstalmentsScene);
-            System.gc();
-            mainStage.show();
-        });
-
-        String editInstalmentButtonText = "تعديل قسط";
-        Button editInstalmentButton = new Button(editInstalmentButtonText);
-        editInstalmentButton.setPrefSize(150, 30);
-        editInstalmentButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getManagerHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getManagerBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-
-            BorderPane editInstalmentSceneLayout = (BorderPane) getManagerEditInstalmentSceneLayout();
-            editInstalmentSceneLayout.setBottom(hBox);
-
-            Scene editInstalmentScene = new Scene(editInstalmentSceneLayout);
-            editInstalmentScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة تعديل قسط");
-            mainStage.setScene(editInstalmentScene);
-            System.gc();
-            mainStage.show();
-        });
+        
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -1647,11 +1398,9 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(addBillButton, 2, 0);
-        gridPane.add(showBillsButton, 1, 0);
-        gridPane.add(showInstalmentsButton,0,0);
-        gridPane.add(editInstalmentButton,1,1);
-        gridPane.add(editBillButton, 2, 1);
+        gridPane.add(showBillsButton, 0,0);
+        gridPane.add(addBillButton, 1,0);
+        gridPane.add(editBillButton,2,0);
 
 
 
@@ -1708,11 +1457,11 @@ public class GUI {
 
         nodeText = "وسيلة الدفع";
         Label paymentMethodLabel = new Label(nodeText);
-        ChoiceBox<String> paymentChoiceBox = new ChoiceBox<>();
-        ArrayList<String> paymentChoices = new ArrayList<>();
-        paymentChoices.add("كاش");
-        paymentChoices.add("تقسيط");
-        paymentChoiceBox.setItems(FXCollections.observableList(paymentChoices));
+        ChoiceBox<String> paymentMethodBox = new ChoiceBox<>();
+        ArrayList<String> paymentMethods = new ArrayList<>();
+        paymentMethods.add("كاش");
+        paymentMethods.add("تقسيط");
+        paymentMethodBox.setItems(FXCollections.observableList(paymentMethods));
 
         nodeText = "أسم الضامن";
         Label guarantorNameLabel = new Label(nodeText);
@@ -1720,12 +1469,12 @@ public class GUI {
         guarantorNameTextField.setPrefSize(100,20);
 
         nodeText = "المقدم";
-        Label paidMoneyLabel = new Label(nodeText);
-        TextField paidMoneyTextField = new TextField();
-        paidMoneyTextField.setPrefSize(100,20);
+        Label initialPaymentLabel = new Label(nodeText);
+        TextField initialPaymentTextField = new TextField();
+        initialPaymentTextField.setPrefSize(100,20);
 
-        nodeText = "بداية القسط";
-        Label startOfInstalmentLabel = new Label(nodeText);
+        nodeText = "تاريخ أول القسط";
+        Label firstInstalmentDateLabel = new Label(nodeText);
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -1751,8 +1500,8 @@ public class GUI {
             }
         });
 
-        nodeText = "نهاية القسط";
-        Label endOfInstalmentLabel = new Label(nodeText);
+        nodeText = "تاريخ أخر القسط";
+        Label lastInstalmentDateLabel = new Label(nodeText);
         DatePicker endDatePicker = new DatePicker();
         endDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -1790,7 +1539,7 @@ public class GUI {
         ArrayList<Label> productsLabels =new ArrayList<>();
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<Label> categoriesLabels = new ArrayList<>();
-        ArrayList<ChoiceBox> categoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
         ArrayList<Label> soldQuantitiesLabels = new ArrayList<>();
         ArrayList<TextField> soldQuantitiesTextFields = new ArrayList<>();
         ArrayList<Label> sellingPricesLabels = new ArrayList<>();
@@ -1807,13 +1556,10 @@ public class GUI {
         Button submitButton = new Button(nodeText);
         submitButton.setPrefSize(50, 20);
         Label messageLabel = new Label();
+        
 
-
-
-        paymentChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String paymentMethod= paymentChoiceBox.getSelectionModel().getSelectedItem();
+        paymentMethodBox.setOnAction(actionEvent ->  {
+                String paymentMethod= paymentMethodBox.getSelectionModel().getSelectedItem();
                 if(paymentMethod.equals("تقسيط"))
                 {
                     gridPane.getChildren().remove(addMoreProductsButton);
@@ -1824,15 +1570,15 @@ public class GUI {
 
                     gridPane.add(guarantorNameLabel,0,3);
                     gridPane.add(guarantorNameTextField,1,3);
-                    gridPane.add(paidMoneyLabel,0,4);
-                    gridPane.add(paidMoneyTextField,1,4);
+                    gridPane.add(initialPaymentLabel,0,4);
+                    gridPane.add(initialPaymentTextField,1,4);
                     gridPane.add(instalmentAmountLabel,0,5);
                     gridPane.add(instalmentAmountTextField,1,5);
 
                     gridPane.add(startDatePicker,1,6);
-                    gridPane.add(startOfInstalmentLabel,0,6);
+                    gridPane.add(firstInstalmentDateLabel,0,6);
                     gridPane.add(endDatePicker,1,7);
-                    gridPane.add(endOfInstalmentLabel,0,7);
+                    gridPane.add(lastInstalmentDateLabel,0,7);
                     gridPane.add(addMoreProductsButton,0,8);
                     gridPane.add(scrollPane,0,9);
                     gridPane.add(submitButton,0,10);
@@ -1844,14 +1590,14 @@ public class GUI {
                 {
                     gridPane.getChildren().remove(guarantorNameLabel);
                     gridPane.getChildren().remove(guarantorNameTextField);
-                    gridPane.getChildren().remove(paidMoneyLabel);
-                    gridPane.getChildren().remove(paidMoneyTextField);
+                    gridPane.getChildren().remove(initialPaymentLabel);
+                    gridPane.getChildren().remove(initialPaymentTextField);
                     gridPane.getChildren().remove(instalmentAmountTextField);
                     gridPane.getChildren().remove(instalmentAmountLabel);
                     gridPane.getChildren().remove(startDatePicker);
-                    gridPane.getChildren().remove(startOfInstalmentLabel);
+                    gridPane.getChildren().remove(firstInstalmentDateLabel);
                     gridPane.getChildren().remove(endDatePicker);
-                    gridPane.getChildren().remove(endOfInstalmentLabel);
+                    gridPane.getChildren().remove(lastInstalmentDateLabel);
                     gridPane.getChildren().remove(addMoreProductsButton);
                     gridPane.getChildren().remove(scrollPane);
                     gridPane.getChildren().remove(submitButton);
@@ -1865,12 +1611,12 @@ public class GUI {
 
 
                 }
-            }
+
         });
 
         addMoreProductsButton.setOnAction(event -> {
 
-            String paymentMethod = paymentChoiceBox.getSelectionModel().getSelectedItem();
+            String paymentMethod = paymentMethodBox.getSelectionModel().getSelectedItem();
 
             if(paymentMethod == null)
                 //ToDo : Show a warning that you must select payment method before choosing products
@@ -1892,27 +1638,27 @@ public class GUI {
                 });
 
                 Label categoryLabel = new Label("نوع المنتج");
-                ChoiceBox categoriesChoiceBox = new ChoiceBox();
-                ArrayList<String> categoriesList = Main.myStore.getCategories();
-
-                categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-
-                categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+                ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+                productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                    @Override
+                    public String toString(ProductCategory c) {
+                        return c.getCategoryName();
+                    }
 
                     @Override
-                    public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                        int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+                    public ProductCategory fromString(String s) {
+                        return null;
+                }
+            });
+                ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+                productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
-                        ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                        productsChoiceBox.setItems(FXCollections.observableList(products));
-
-
-                    }
+                productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                    ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+                    ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                    productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
                 });
-
-
+                
 
                 Label soldQuantityLabel = new Label("الكمية المباعة");
                 TextField soldQuantityTextField = new TextField();
@@ -1926,7 +1672,7 @@ public class GUI {
                 productsLabels.add(productLabel);
                 productsChoiceBoxes.add(productsChoiceBox);
                 categoriesLabels.add(categoryLabel);
-                categoriesChoiceBoxes.add(categoriesChoiceBox);
+                productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
                 soldQuantitiesLabels.add(soldQuantityLabel);
                 soldQuantitiesTextFields.add(soldQuantityTextField);
                 sellingPricesTextFields.add(sellingPriceTextField);
@@ -1946,7 +1692,7 @@ public class GUI {
                 productsGridPane.add(soldQuantitiesLabels.get(lastProductIndex),4,currentProductRow);
                 productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),3,currentProductRow);
                 productsGridPane.add(productsLabels.get(lastProductIndex),2,currentProductRow);
-                productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
+                productsGridPane.add(productsCategoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
                 productsGridPane.add(categoriesLabels.get(lastProductIndex),0,currentProductRow);
 
             }
@@ -1964,58 +1710,51 @@ public class GUI {
 
             String billDate = billDatePicker.getValue().toString();
             String buyerName = buyerNameTextField.getText().trim();
-            String paymentChoice = paymentChoiceBox.getValue();
+            String paymentMethod = paymentMethodBox.getValue();
+
+
+
+            ArrayList<SoldProduct> soldProducts = new ArrayList<>();
 
             int numOfSoldProducts =  productsChoiceBoxes.size();
-
-            ArrayList<Integer> soldProductsIDs = new ArrayList<>();
-
+            double productsTotalCost = 0;
             for(int i = 0; i < numOfSoldProducts; i++)
             {
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int soldQuantity = Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim());
+                double sellingPrice = Double.parseDouble(sellingPricesTextFields.get(i).getText().trim());
+                soldProducts.add(new SoldProduct(currentProduct, soldQuantity, sellingPrice));
 
-                Product selectedProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
-
-                soldProductsIDs.add(selectedProduct.getID());
+                productsTotalCost += (sellingPrice * soldQuantity);
             }
 
-            ArrayList<Integer> soldQuantities = new ArrayList<>();
-            for(int i = 0; i < numOfSoldProducts; i++)
-                soldQuantities.add(Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim()));
+
+            double billTotalCost = productsTotalCost;
 
 
-            ArrayList<Double> sellingPrices = new ArrayList<>();
-            for(int i = 0; i < numOfSoldProducts; i++)
-                sellingPrices.add(Double.parseDouble(sellingPricesTextFields.get(i).getText().trim()));
-
-            double totalCost = 0;
-            for(int i = 0; i < numOfSoldProducts; i++)
-                totalCost += sellingPrices.get(i) * soldQuantities.get(i);
-
-            boolean done = false;
-
-            if(paymentChoice.equals("تقسيط"))
+            Bill bill;
+            if(paymentMethod.equals("تقسيط"))
             {
                 String guarantorName = guarantorNameTextField.getText().trim();
-                double paidMoney = Double.parseDouble(paidMoneyTextField.getText().trim());
-
+                double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
+                double remainingMoney = billTotalCost - initialPayment;
                 double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
-                String startDate = startDatePicker.getValue().toString();
-                String endDate = endDatePicker.getValue().toString();
-                System.out.println(startDate + " " + endDate);
-                done = Main.myStore.addInstalment(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+                String firstInstalmentDate = startDatePicker.getValue().toString();
+                String lastInstalmentDate = endDatePicker.getValue().toString();
+                InstalmentsPayment instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
+
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, instalmentsPayment);
             }
             else
-                done = Main.myStore.addBill(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, "كاش");
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
 
 
+            boolean done = StoreDatabase.addBill(bill);
 
-            //done = Main.myStore.addBill();
+
+            //done = StoreDatabase.addBill();
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
-            }
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
 
         });
 
@@ -2025,7 +1764,7 @@ public class GUI {
         gridPane.add(buyerNameLabel,0,1);
         gridPane.add(buyerNameTextField,1,1);
         gridPane.add(paymentMethodLabel,0,2);
-        gridPane.add(paymentChoiceBox,1,2);
+        gridPane.add(paymentMethodBox,1,2);
         gridPane.add(addMoreProductsButton,0,3);
         gridPane.add(scrollPane,0,4);
         gridPane.add(submitButton,0,5);
@@ -2129,7 +1868,7 @@ public class GUI {
                 if (! row.isEmpty() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
 
                     Bill clickedBill = row.getItem();
-                    showBillDetails(clickedBill);
+                    showSoldProducts(clickedBill);
 
                 }
             });
@@ -2142,10 +1881,10 @@ public class GUI {
         TableColumn billTotalCost = new TableColumn("التكلفة الكلية");
         TableColumn paymentMethod = new TableColumn("وسيلة الدفع");
 
-        billID.setCellValueFactory( new PropertyValueFactory<Bill, Integer>("ID"));
+        billID.setCellValueFactory( new PropertyValueFactory<Bill, Integer>("billID"));
         buyerName.setCellValueFactory( new PropertyValueFactory<Bill, String>("buyerName"));
-        billDate.setCellValueFactory( new PropertyValueFactory<Bill, Date>("date"));
-        billTotalCost.setCellValueFactory( new PropertyValueFactory<Bill, Double>("totalCost"));
+        billDate.setCellValueFactory( new PropertyValueFactory<Bill, Date>("billDate"));
+        billTotalCost.setCellValueFactory( new PropertyValueFactory<Bill, Double>("billTotalCost"));
         paymentMethod.setCellValueFactory(new PropertyValueFactory<Bill, String>("paymentMethod"));
 
         billsTable.getColumns().add(billID);
@@ -2159,7 +1898,7 @@ public class GUI {
             String queryStartDate = startDatePicker.getValue().toString();
             String queryEndDate = endDatePicker.getValue().toString();
 
-            ArrayList<Bill> bills = Main.myStore.getBills(queryStartDate, queryEndDate);
+            ArrayList<Bill> bills = StoreDatabase.getBills(queryStartDate, queryEndDate);
             billsTable.setItems(FXCollections.observableList(bills));
         });
 
@@ -2168,124 +1907,6 @@ public class GUI {
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setTop(topHBox);
         borderPane.setCenter(billsTable);
-
-        return borderPane;
-    }
-
-    private static Pane getManagerEditInstalmentSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
-    }
-
-    private static Pane getManagerShowInstalmentsSceneLayout() {
-        Label startDateLabel = new Label("من");
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                startDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        Label endDateLabel = new Label("إلي");
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                endDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        Button showInstalmentsButton = new Button("أعرض الأقساط");
-
-
-        HBox topHBox = new HBox();
-
-        topHBox.setSpacing(20);
-        topHBox.getChildren().add(startDateLabel);
-        topHBox.getChildren().add(startDatePicker);
-        topHBox.getChildren().add(endDateLabel);
-        topHBox.getChildren().add(endDatePicker);
-        topHBox.getChildren().add(showInstalmentsButton);
-
-        TableView instalmentsTable = new TableView();
-        instalmentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn buyerName = new TableColumn("أسم العميل");
-        buyerName.setCellValueFactory(new PropertyValueFactory<Instalment, String>("buyerName"));
-
-        TableColumn billID = new TableColumn("رقم الفاتورة");
-        billID.setCellValueFactory( new PropertyValueFactory<Instalment, Integer>("billID"));
-
-        TableColumn instalmentAmount = new TableColumn("حجم القسط");
-        instalmentAmount.setCellValueFactory(new PropertyValueFactory<Instalment, Double>("instalmentAmount"));
-
-        TableColumn endOfInstalments = new TableColumn("نهاية الأقساط");
-        endOfInstalments.setCellValueFactory(new PropertyValueFactory<Instalment, String>("endDate"));
-
-        instalmentsTable.getColumns().add(billID);
-        instalmentsTable.getColumns().add(buyerName);
-        instalmentsTable.getColumns().add(endOfInstalments);
-        instalmentsTable.getColumns().add(instalmentAmount);
-
-
-        showInstalmentsButton.setOnAction(actionEvent -> {
-            String queryStartDate = startDatePicker.getValue().toString();
-            String queryEndDate = endDatePicker.getValue().toString();
-
-            ArrayList<Instalment> instalments = Main.myStore.getInstalments(queryStartDate, queryEndDate);
-            System.out.println(instalments.size());
-            instalmentsTable.setItems(FXCollections.observableList(instalments));
-        });
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setTop(topHBox);
-        borderPane.setCenter(instalmentsTable);
 
         return borderPane;
     }
@@ -2507,13 +2128,13 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane showCategoriesSceneLayout = (BorderPane) getManagerShowCategoriesSceneLayout();
-            showCategoriesSceneLayout.setBottom(hBox);
+            BorderPane showProductsCategoriesSceneLayout = (BorderPane) getManagerShowProductsCategoriesSceneLayout();
+            showProductsCategoriesSceneLayout.setBottom(hBox);
 
-            Scene showCategoriesScene = new Scene(showCategoriesSceneLayout);
-            showCategoriesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Scene showProductsCategoriesScene = new Scene(showProductsCategoriesSceneLayout);
+            showProductsCategoriesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             mainStage.setTitle( "واجهة عرض الأنواع");
-            mainStage.setScene(showCategoriesScene);
+            mainStage.setScene(showProductsCategoriesScene);
             System.gc();
             mainStage.show();
         });
@@ -2563,7 +2184,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane addCategoryLayout = (BorderPane) getManagerAddCategorySceneLayout();
+            BorderPane addCategoryLayout = (BorderPane) getManagerAddProductsCategorySceneLayout();
             addCategoryLayout.setBottom(hBox);
 
             Scene addCategoryScene = new Scene(addCategoryLayout);
@@ -2621,7 +2242,7 @@ public class GUI {
             hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editCategoryLayout = (BorderPane) getManagerEditCategorySceneLayout();
+            BorderPane editCategoryLayout = (BorderPane) getManagerEditProductsCategorySceneLayout();
             editCategoryLayout.setBottom(hBox);
 
             Scene editCategoryScene = new Scene(editCategoryLayout);
@@ -2664,10 +2285,20 @@ public class GUI {
 
         nodeText = "نوع المنتج";
         Label productCategoryLabel = new Label(nodeText);
-        ChoiceBox categoriesChoiceBox = new ChoiceBox();
-        ArrayList<String> categoriesList = Main.myStore.getCategories();
-        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
+        ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+        productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+            @Override
+            public String toString(ProductCategory c) {
+                return c.getCategoryName();
+            }
 
+            @Override
+            public ProductCategory fromString(String s) {
+                return null;
+            }
+        });
+        ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+        productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
 
         Label messageLabel = new Label();
@@ -2682,21 +2313,18 @@ public class GUI {
             messageLabel.setText(message);
 
             String productName = productNameTextField.getText().trim();
-
-            int productCategory = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-            Double productPrice = 0.0;
-
+            ProductCategory category = (ProductCategory) productsCategoriesChoiceBox.getValue();
             int availableQuantity = 0;
+            double supplyPrice = 0;
+            String lastSupplyDate = "";
+            double cashSellingPrice = 0;
+            double instalmentSellingPrice = 0;
 
-            boolean done = false;
-            done = Main.myStore.addProduct(productName, productCategory, availableQuantity, productPrice);
+            Product product = new Product(productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice,instalmentSellingPrice);
+
+            boolean done = StoreDatabase.addProduct(product);
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
-            }
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
 
 
         });
@@ -2709,7 +2337,7 @@ public class GUI {
 
         gridPane.add(productNameLabel,0,0);
         gridPane.add(productNameTextField,1,0);
-        gridPane.add(categoriesChoiceBox,1,1);
+        gridPane.add(productsCategoriesChoiceBox,1,1);
         gridPane.add(productCategoryLabel,0,1);
         gridPane.add(submitButton,0,4);
         gridPane.add(messageLabel,0,5);
@@ -2745,33 +2373,38 @@ public class GUI {
         });
 
         Label categoryLabel = new Label("نوع المنتج");
-        ChoiceBox categoriesChoiceBox = new ChoiceBox();
-        ArrayList<String> categoriesList = Main.myStore.getCategories();
-
-        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-        categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+        productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+            @Override
+            public String toString(ProductCategory c) {
+                return c.getCategoryName();
+            }
 
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-                ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                productsChoiceBox.setItems(FXCollections.observableList(products));
-
-
+            public ProductCategory fromString(String s) {
+                return null;
             }
         });
+        ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+        productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+
+        productsCategoriesChoiceBox.setOnAction(actionEvent -> {
+            ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+            ArrayList<Product> products = StoreDatabase.getProductsInCategory(selectedCategory);
+            productsChoiceBox.setItems(FXCollections.observableList(products));
+        });
+
+
+       
 
         Button editProductButton = new Button("تعديل المنتج");
         editProductButton.setPrefSize(100,20);
         editProductButton.setOnAction(actionEvent -> {
-            Product toEditProduct = (Product) productsChoiceBox.getSelectionModel().getSelectedItem();
+            Product toEditProduct = (Product) productsChoiceBox.getValue();
             showEditProduct(toEditProduct);
         });
         gridPane.add(categoryLabel, 0,0);
-        gridPane.add(categoriesChoiceBox, 1,0);
+        gridPane.add(productsCategoriesChoiceBox, 1,0);
         gridPane.add(productLabel,2,0);
         gridPane.add(productsChoiceBox,3,0);
         gridPane.add(editProductButton,0,1);
@@ -2784,69 +2417,77 @@ public class GUI {
     }
 
     private static Pane getManagerShowProductsSceneLayout() {
-        TableView table = new TableView();
-
         TableColumn productName = new TableColumn("أسم المنتج");
-        TableColumn productBuyingPrice = new TableColumn("سعر شراء");
-        TableColumn lastBuyingDate = new TableColumn("تاريخ أخر شراء");
+        productName.setCellValueFactory(new PropertyValueFactory<Product, String>("productName"));
+        
         TableColumn productAvailableQuantity = new TableColumn("الكمية المتوفرة");
-        TableColumn productSellingPrice = new TableColumn("سعر كاش");
-        TableColumn productInstallmentPrice = new TableColumn("سعر تقسيط");
+        productAvailableQuantity.setCellValueFactory(new PropertyValueFactory<Product, Integer>("availableQuantity"));
+        
+        TableColumn productSupplyPrice = new TableColumn("سعر توريد");
+        productSupplyPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("supplyPrice"));
+        
+        TableColumn lastSupplyDate = new TableColumn("تاريخ أخر توريد");
+        lastSupplyDate.setCellValueFactory(new PropertyValueFactory<Product, String>("lastSupplyDate"));
+        
+        TableColumn cashSellingPrice = new TableColumn("سعر بيع كاش");
+        cashSellingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("cashSellingPrice"));
+        
+        TableColumn instalmentSellingPrice = new TableColumn("سعر بيع تقسيط");
+        instalmentSellingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("instalmentSellingPrice"));
 
-        table.getColumns().add(productName);
-        table.getColumns().add(productAvailableQuantity);
-        table.getColumns().add(productBuyingPrice);
-        table.getColumns().add(lastBuyingDate);
-        table.getColumns().add(productSellingPrice);
-        table.getColumns().add(productInstallmentPrice);
+        TableView productsTable = new TableView();
+        productsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        productsTable.getColumns().add(productName);
+        productsTable.getColumns().add(productAvailableQuantity);
+        productsTable.getColumns().add(productSupplyPrice);
+        productsTable.getColumns().add(lastSupplyDate);
+        productsTable.getColumns().add(cashSellingPrice);
+        productsTable.getColumns().add(instalmentSellingPrice);
 
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 
 
         Label productCategoryLabel = new Label("نوع المنتج");
-        ChoiceBox productsCategroriesChoiceBox = new ChoiceBox();
-        ArrayList<String> productsCategories = Main.myStore.getCategories();
-        productsCategroriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
-
-        productsCategroriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+        productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                int categoryID = number2.intValue() + 1;
+            public String toString(ProductCategory c) {
+                return c.getCategoryName();
+            }
 
-                ObservableList<Product> productsList = FXCollections.observableList(Main.myStore.getProductsInCategory(categoryID));
-
-                productName.setCellValueFactory(new PropertyValueFactory<Product, String>("productName"));
-                productAvailableQuantity.setCellValueFactory(new PropertyValueFactory<Product, Integer>("availableQuantity"));
-                productBuyingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("buyingPrice"));
-                lastBuyingDate.setCellValueFactory(new PropertyValueFactory<Product, String>("lastBuyingDate"));
-                productSellingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("sellingPrice"));
-                productInstallmentPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("installmentPrice"));
-
-                table.setItems(productsList);
+            @Override
+            public ProductCategory fromString(String s) {
+                return null;
             }
         });
-
+        ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+        productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+        
+        productsCategoriesChoiceBox.setOnAction(actionEvent -> {
+            ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+            ArrayList<Product> products = StoreDatabase.getProductsInCategory(selectedCategory);
+            productsTable.setItems(FXCollections.observableList(products));
+        });
 
 
         HBox topHBox = new HBox();
 
         topHBox.setSpacing(20);
         topHBox.getChildren().add(productCategoryLabel);
-        topHBox.getChildren().add(productsCategroriesChoiceBox);
+        topHBox.getChildren().add(productsCategoriesChoiceBox);
 
 
         BorderPane borderPane = new BorderPane();
 
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setTop(topHBox);
-        borderPane.setCenter(table);
+        borderPane.setCenter(productsTable);
 
         return borderPane;
     }
 
-    private static Pane getManagerAddCategorySceneLayout() {
+    private static Pane getManagerAddProductsCategorySceneLayout() {
         TextField categoryNameTextField = new TextField();
         categoryNameTextField.setPrefSize(100, 20);
 
@@ -2863,14 +2504,12 @@ public class GUI {
             String message = "";
             messageLabel.setText(message);
             String categoryName = categoryNameTextField.getText();
-            boolean done = false;
-            done = Main.myStore.addCategory(categoryName);
-            if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
 
-            }
+            ProductCategory category = new ProductCategory(categoryName);
+            boolean done = StoreDatabase.addProductCategory(category);
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
 
 
         });
@@ -2899,7 +2538,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getManagerEditCategorySceneLayout() {
+    private static Pane getManagerEditProductsCategorySceneLayout() {
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -2917,7 +2556,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getManagerShowCategoriesSceneLayout() {
+    private static Pane getManagerShowProductsCategoriesSceneLayout() {
         TableColumn categoryName = new TableColumn("");
 
         BorderPane borderPane = new BorderPane();
@@ -3136,14 +2775,11 @@ public class GUI {
             messageLabel.setText(message);
 
             String supplierName = supplierNameTextField.getText();
+            Supplier supplier = new Supplier(supplierName);
+            boolean done = StoreDatabase.addSupplier(supplier);
 
-            boolean done = false;
-            done = Main.myStore.addSupplier(supplierName);
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-            }
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
         });
 
 
@@ -3191,7 +2827,7 @@ public class GUI {
         suppliersTable.getColumns().add(supplierName);
 
 
-        ArrayList<Supplier> suppliers = Main.myStore.getAllSuppliers();
+        ArrayList<Supplier> suppliers = StoreDatabase.getAllSuppliers();
         suppliersTable.setItems(FXCollections.observableList(suppliers));
 
         BorderPane borderPane = new BorderPane();
@@ -3201,421 +2837,111 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getClerkHomeSceneLayout() {
-        String suppliesButtonText = "التوريدات";
-        Button suppliesButton = new Button(suppliesButtonText);
-        suppliesButton.setPrefSize(150, 50);
-
-        suppliesButton.setOnAction(actionEvent -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(event -> {
-                mainStage.close();
-                mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.getChildren().add(homeButton);
-
-            BorderPane suppliesLayout = (BorderPane) getClerkSuppliesSceneLayout();
-            suppliesLayout.setBottom(hBox);
-
-            Scene suppliesScene = new Scene(suppliesLayout);
-            suppliesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة التوريدات");
-            mainStage.setScene(suppliesScene);
-            System.gc();
-            mainStage.show();
+    private static void showSoldProducts(Bill bill) {
+        TableColumn productNameCol = new TableColumn("أسم المنتج");
+        productNameCol.setCellValueFactory(cellData -> {
+            SoldProduct soldProduct = (SoldProduct) ((TableColumn.CellDataFeatures) cellData).getValue();
+            return new SimpleStringProperty(soldProduct.getProductName());
         });
 
-        String billsAndInstalmentsButtonText = "الفواتير و الأقساط";
-        Button billsAndInstalmentsButton = new Button(billsAndInstalmentsButtonText);
-        billsAndInstalmentsButton.setPrefSize(150, 50);
+        TableColumn soldQuantityCol = new TableColumn("الكمية المباعة");
+        soldQuantityCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, Integer>("soldQuantity"));
 
-        billsAndInstalmentsButton.setOnAction(actionEvent -> {
-            mainStage.close();
+        TableColumn sellingPriceCol = new TableColumn("سعر بيع الوحدة");
+        sellingPriceCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, Double>("sellingPrice"));
 
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(event -> {
-                mainStage.close();
-                mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
+        TableView<SoldProduct> billDetailsTable = new TableView<>();
+        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        billDetailsTable.getColumns().setAll(productNameCol, soldQuantityCol, sellingPriceCol);
 
-            HBox hBox = new HBox();
-            hBox.getChildren().add(homeButton);
+        billDetailsTable.setItems(FXCollections.observableList(bill.getSoldProducts()));
 
-            BorderPane billsAndInstalmentLayout = (BorderPane) getClerkBillsAndInstalmentsSceneLayout();
-            billsAndInstalmentLayout.setBottom(hBox);
-
-            Scene billsAndInstalmentScene = new Scene(billsAndInstalmentLayout);
-            billsAndInstalmentScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة الفواتير و الأقساط");
-            mainStage.setScene(billsAndInstalmentScene);
-            System.gc();
-            mainStage.show();
-        });
-
-        String productsButtonText = "المنتجات";
-        Button productsButton = new Button(productsButtonText);
-        productsButton.setPrefSize(150, 50);
-
-        productsButton.setOnAction(actionEvent -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(event -> {
-                mainStage.close();
-                mainStage.setTitle("الواجهة الرئيسية");
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.getChildren().add(homeButton);
-
-            BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-            productsLayout.setBottom(hBox);
-
-            Scene productsScene = new Scene(productsLayout);
-            productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة المنتجات");
-            mainStage.setScene(productsScene);
-            System.gc();
-            mainStage.show();
-        });
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-       gridPane.add(billsAndInstalmentsButton, 0,0);
-       gridPane.add(suppliesButton,1,0);
-       gridPane.add(productsButton,2,0);
+        Stage secondaryStage = new Stage();
+        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.setMaximized(true);
+        secondaryStage.setTitle("واجهة إضافة منتج");
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setCenter(billDetailsTable);
 
-        return borderPane;
-
+        Scene scene = new Scene(borderPane);
+        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        secondaryStage.setScene(scene);
+        System.gc();
+        secondaryStage.show();
     }
 
-    private static Pane getClerkSuppliesSceneLayout() {
-        String addSupplyButtonText = "إضافة توريد";
-        Button addSupplyButton = new Button(addSupplyButtonText);
-        addSupplyButton.setPrefSize(150, 30);
-        addSupplyButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane suppliesLayout = (BorderPane) getClerkSuppliesSceneLayout();
-                suppliesLayout.setBottom(hBox);
-
-                Scene suppliesScene = new Scene(suppliesLayout);
-                suppliesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة التوريدات");
-                mainStage.setScene(suppliesScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-
-            BorderPane addSupplyLayout = (BorderPane) getClerkAddSupplySceneLayout();
-            addSupplyLayout.setBottom(hBox);
-
-            Scene addSupplyScene = new Scene(addSupplyLayout);
-            addSupplyScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle( "واجهة إضافة توريد");
-            mainStage.setScene(addSupplyScene);
-            System.gc();
-            mainStage.show();
+    private static void showBoughtProducts(Supply supply) {
+        TableColumn productNameCol = new TableColumn("أسم المنتج");
+        productNameCol.setCellValueFactory(cellData -> {
+            BoughtProduct boughtProduct = (BoughtProduct) ((TableColumn.CellDataFeatures) cellData).getValue();
+            return new SimpleStringProperty(boughtProduct.getProductName());
         });
 
+        TableColumn boughtQuantityCol = new TableColumn("الكمية المشتراة");
+        boughtQuantityCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, Integer>("boughtQuantity"));
 
-        String editSupplyButtonText = "تعديل توريد";
-        Button editSupplyButton = new Button(editSupplyButtonText);
-        editSupplyButton.setPrefSize(150, 30);
-        editSupplyButton.setOnAction(event -> {
-            mainStage.close();
+        TableColumn buyingPriceCol = new TableColumn("سعر شراء الوحدة");
+        buyingPriceCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, Double>("buyingPrice"));
 
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
+        TableView<BoughtProduct> billDetailsTable = new TableView<>();
+        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        billDetailsTable.getColumns().setAll(productNameCol, boughtQuantityCol, buyingPriceCol);
 
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
+        billDetailsTable.setItems(FXCollections.observableList(supply.getBoughtProducts()));
 
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane suppliesLayout = (BorderPane) getClerkSuppliesSceneLayout();
-                suppliesLayout.setBottom(hBox);
-
-                Scene suppliesScene = new Scene(suppliesLayout);
-                suppliesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة التوريدات");
-                mainStage.setScene(suppliesScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-
-            BorderPane editSupplyLayout = (BorderPane) getClerkEditSupplySceneLayout();
-            editSupplyLayout.setBottom(hBox);
-
-            Scene editSupplyScene = new Scene(editSupplyLayout);
-            editSupplyScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة تعديل توريد");
-            mainStage.setScene(editSupplyScene);
-            System.gc();
-            mainStage.show();
-        });
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editSupplyButton, 0, 0);
-        gridPane.add(addSupplyButton, 1, 0);
-
+        Stage secondaryStage = new Stage();
+        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.setMaximized(true);
+        secondaryStage.setTitle("واجهة تفاصيل التوريدات");
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setCenter(billDetailsTable);
 
-
-        return borderPane;
+        Scene scene = new Scene(borderPane);
+        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        secondaryStage.setScene(scene);
+        System.gc();
+        secondaryStage.show();
     }
 
-    private static Pane getClerkAddSupplySceneLayout() {
+    private static void showEditProduct(Product toEditProduct) {
+        String nodeText;
+
+        nodeText = "أسم المنتج";
+        Label productNameLabel = new Label(nodeText);
+        TextField productNameTextField = new TextField();
+        productNameTextField.setPrefSize(100, 20);
+        productNameTextField.setText(toEditProduct.getProductName());
+
+        nodeText = "نوع المنتج";
+        Label productCategoryLabel = new Label(nodeText);
+        ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+        productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+            @Override
+            public String toString(ProductCategory c) {
+                return c.getCategoryName();
+            }
+
+            @Override
+            public ProductCategory fromString(String s) {
+                return null;
+            }
+        });
+        ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+        productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+        productsCategoriesChoiceBox.setValue(toEditProduct.getCategory());
+
+
         Label messageLabel = new Label();
 
-        Button submitButton = new Button("أدخل");
-        submitButton.setPrefSize(100, 20);
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
 
-        Label supplyDateLabel = new Label("تاريخ التوريد");
-        DatePicker supplyDatePicker = new DatePicker();
-        supplyDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                supplyDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        Label supplierNameLabel = new Label("أسم المورد");
-        ChoiceBox supplierChoiceBox = new ChoiceBox();
-        ArrayList<String> suppliers = Main.myStore.getSuppliers();
-        supplierChoiceBox.setItems(FXCollections.observableList(suppliers));
-
-        Label transportationFessLabel = new Label( "مصاريف المواصلات");
-        TextField transportationFeesTextField = new TextField();
-        transportationFeesTextField.setPrefSize(100,20);
-
-        Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
-        addMoreProductsButton.setPrefSize(120,20);
-
-        ArrayList<Label> productsLabels =new ArrayList<>();
-        ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
-        ArrayList<Label> categoriesLabels = new ArrayList<>();
-        ArrayList<ChoiceBox> categoriesChoiceBoxes = new ArrayList<>();
-        ArrayList<Label> boughtQuantitiesLabels = new ArrayList<>();
-        ArrayList<TextField> boughtQuantitiesTextFields = new ArrayList<>();
-        ArrayList<Label> unitsPricesLabels = new ArrayList<>();
-        ArrayList<TextField> unitsPricesTextFields = new ArrayList<>();
-
-        ScrollPane scrollPane = new ScrollPane();
-        GridPane productsGridPane = new GridPane();
-        productsGridPane.setHgap(10);
-        productsGridPane.setVgap(10);
-        productsGridPane.setPadding(new Insets(10, 10, 10, 10));
-        scrollPane.setContent(productsGridPane);
-
-        addMoreProductsButton.setOnAction(event -> {
-
-            Label productLabel = new Label("أسم المنتج");
-            ChoiceBox productsChoiceBox = new ChoiceBox();
-            productsChoiceBox.setConverter(new StringConverter<Product>() {
-                @Override
-                public String toString(Product p) {
-                    return p.getProductName();
-                }
-
-                @Override
-                public Product fromString(String s) {
-                    return null;
-                }
-            });
-
-            Label categoryLabel = new Label("نوع المنتج");
-            ChoiceBox categoriesChoiceBox = new ChoiceBox();
-            ArrayList<String> categoriesList = Main.myStore.getCategories();
-            categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-            categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-
-                @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                    int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-                    ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                    productsChoiceBox.setItems(FXCollections.observableList(products));
-                }
-            });
-
-            productsChoiceBox.getSelectionModel().selectedItemProperty().addListener((ChangeListener<Product>) (observableValue, s, t1) -> {
-                Product selectedProduct = (Product) productsChoiceBox.getSelectionModel().getSelectedItem();
-
-                if(selectedProduct != null && selectedProduct.getProductName().equals("أخري"))
-                {
-                    BorderPane addProductLayout = (BorderPane) getClerkAddProductSceneLayout();
-
-                    Scene addProductScene = new Scene(addProductLayout);
-                    addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                    Stage secondaryStage = new Stage();
-                    secondaryStage.setAlwaysOnTop(true);
-                    secondaryStage.setTitle("واجهة إضافة منتج");
-                    secondaryStage.setScene(addProductScene);
-                    System.gc();
-                    secondaryStage.show();
-
-                    secondaryStage.setOnCloseRequest(windowEvent -> {
-                        int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex() + 1;
-                        ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                        productsChoiceBox.setItems(FXCollections.observableList(products));
-                        secondaryStage.close();
-                    });
-
-
-                }
-            });
-
-
-            Label boughtQuantityLabel = new Label("الكمية المشتراة");
-            TextField boughtQuantityTextField = new TextField();
-            boughtQuantityTextField.setPrefSize(100,20);
-
-
-            Label buyingPriceLabel = new Label( "سعر الوحدة");
-            TextField buyingPriceTextField = new TextField();
-            buyingPriceTextField.setPrefSize(100,20);
-
-
-            productsLabels.add(productLabel);
-            productsChoiceBoxes.add(productsChoiceBox);
-            categoriesLabels.add(categoryLabel);
-            categoriesChoiceBoxes.add(categoriesChoiceBox);
-            boughtQuantitiesLabels.add(boughtQuantityLabel);
-            boughtQuantitiesTextFields.add(boughtQuantityTextField);
-            unitsPricesTextFields.add(buyingPriceTextField);
-            unitsPricesLabels.add(buyingPriceLabel);
-
-
-            int currentProductRow = 0;
-            int numOfProducts = productsLabels.size();
-            currentProductRow += numOfProducts;
-
-            int lastProductIndex = numOfProducts -1;
-
-            productsGridPane.add(unitsPricesTextFields.get(lastProductIndex),7,currentProductRow);
-            productsGridPane.add(unitsPricesLabels.get(lastProductIndex),6,currentProductRow);
-            productsGridPane.add(boughtQuantitiesTextFields.get(lastProductIndex),5,currentProductRow);
-            productsGridPane.add(boughtQuantitiesLabels.get(lastProductIndex),4,currentProductRow);
-            productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),3,currentProductRow);
-            productsGridPane.add(productsLabels.get(lastProductIndex),2,currentProductRow);
-            productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
-            productsGridPane.add(categoriesLabels.get(lastProductIndex),0,currentProductRow);
-
-
-        });
+        Stage secondaryStage = new Stage();
 
         submitButton.setOnAction(event -> {
             //ToDo: complete the add product function
@@ -3623,44 +2949,38 @@ public class GUI {
             String message = "";
             messageLabel.setText(message);
 
-            String supplyDate = supplyDatePicker.getValue().toString();
-            String supplierName = supplierChoiceBox.getSelectionModel().getSelectedItem().toString();
+            int productID = toEditProduct.getProductID();
+            String productName = productNameTextField.getText().trim();
+            ProductCategory productCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+            int availableQuantity = toEditProduct.getAvailableQuantity();
+            double supplyPrice = toEditProduct.getSupplyPrice();
+            String lastSupplyDate = toEditProduct.getLastSupplyDate();
+            double cashSellingPrice = toEditProduct.getCashSellingPrice();
+            double instalmentSellingPrice = toEditProduct.getInstalmentSellingPrice();
 
-            int numOfBoughtProducts =  productsChoiceBoxes.size();
+            Product toUpdateProduct = new Product(productID, productName, productCategory, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice, instalmentSellingPrice);
 
-            ArrayList<Integer> boughtProductsIDs = new ArrayList<>();
-
-            for(int i = 0; i < numOfBoughtProducts ; i++)
-            {
-                Product selectedProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
-                boughtProductsIDs.add(selectedProduct.getID());
-            }
-
-            ArrayList<Integer> boughtQuantities = new ArrayList<>();
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                boughtQuantities.add(Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim()));
-
-
-            ArrayList<Double> unitsPrices = new ArrayList<>();
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                unitsPrices.add(Double.parseDouble(unitsPricesTextFields.get(i).getText().trim()));
-
-            double productsTotalCost = 0;
-            for(int i = 0; i < numOfBoughtProducts; i++)
-                productsTotalCost += unitsPrices.get(i) * boughtQuantities.get(i);
-
-            double transportationFees = Double.parseDouble(transportationFeesTextField.getText().trim());
-            double supplyTotalCost = productsTotalCost + transportationFees;
-            boolean done = false;
-
-            done = Main.myStore.addSupply(supplyDate, supplierName, boughtProductsIDs, boughtQuantities, unitsPrices, transportationFees, productsTotalCost, supplyTotalCost);
-
+            boolean done = StoreDatabase.updateProduct(toUpdateProduct);
             if(done)
             {
                 message = "تم الإدخال بنجاح";
                 messageLabel.setText(message);
-
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                secondaryStage.close();
             }
+            else
+            {
+                message = "حدث خطأ إثناء إدخال البيانات!";
+                messageLabel.setText(message);
+            }
+
+
+
+
 
         });
 
@@ -3670,54 +2990,44 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(supplyDatePicker, 0,0);
-        gridPane.add(supplierNameLabel,0,1);
-        gridPane.add(supplierChoiceBox,1,1);
-        gridPane.add(transportationFessLabel,0,2);
-        gridPane.add(transportationFeesTextField,1,2);
-        gridPane.add(addMoreProductsButton,0,3);
-        gridPane.add(scrollPane,0,4);
-        gridPane.add(submitButton,0,5);
-        gridPane.add(messageLabel,0,6);
+        gridPane.add(productNameLabel,0,0);
+        gridPane.add(productNameTextField,1,0);
+        gridPane.add(productsCategoriesChoiceBox,1,1);
+        gridPane.add(productCategoryLabel,0,1);
+        gridPane.add(submitButton,0,4);
+        gridPane.add(messageLabel,0,5);
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-
         borderPane.setCenter(gridPane);
 
+        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.setMaximized(true);
+        secondaryStage.setTitle("واجهة تعديل منتج");
 
-        return borderPane;
+        Scene scene = new Scene(borderPane);
+        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        secondaryStage.setScene(scene);
+        System.gc();
+        secondaryStage.show();
     }
 
-    private static Pane getClerkEditSupplySceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
+    private static void showEditUser(User toEditUser) {
     }
+    
+    private static Pane getClerkHomeSceneLayout() {
+        Button addSuppliesButton = new Button("إضافة توريدات");
+        addSuppliesButton.setPrefSize(150, 50);
 
-    private static Pane getClerkBillsAndInstalmentsSceneLayout() {
-        String addBillButtonText = "إضافة فاتورة";
-        Button addBillButton = new Button(addBillButtonText);
-        addBillButton.setPrefSize(150, 30);
-        addBillButton.setOnAction(event -> {
+        addSuppliesButton.setOnAction(actionEvent -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
             homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
+            homeButton.setOnAction(event -> {
                 mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
+                mainStage.setTitle("الواجهة الرئيسية");
                 Pane homeLayout = getClerkHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
@@ -3726,29 +3036,40 @@ public class GUI {
                 mainStage.show();
             });
 
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
+            HBox hBox = new HBox();
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addSupplyLayout = (BorderPane) getClerkAddSupplySceneLayout();
+            addSupplyLayout.setBottom(hBox);
+
+            Scene addSupplyScene = new Scene(addSupplyLayout);
+            addSupplyScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            mainStage.setTitle("واجهة إضافة التوريدات");
+            mainStage.setScene(addSupplyScene);
+            System.gc();
+            mainStage.show();
+        });
+
+        Button addBillsButton = new Button("إضافة فواتير");
+        addBillsButton.setPrefSize(150, 50);
+
+        addBillsButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
                 mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getClerkBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getClerkHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setScene(homeScene);
                 System.gc();
                 mainStage.show();
             });
 
             HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
             BorderPane addBillLayout = (BorderPane) getClerkAddBillSceneLayout();
@@ -3756,24 +3077,23 @@ public class GUI {
 
             Scene addBillScene = new Scene(addBillLayout);
             addBillScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة إضافة الفاتورة");
+            mainStage.setTitle("واجهة إضافة الفواتير");
             mainStage.setScene(addBillScene);
             System.gc();
             mainStage.show();
         });
 
-        String editBillButtonText = "تعديل فاتورة";
-        Button editBillButton = new Button(editBillButtonText);
-        editBillButton.setPrefSize(150, 30);
-        editBillButton.setOnAction(event -> {
+        Button addProductsButton = new Button("إضافة منتجات");
+        addProductsButton.setPrefSize(150, 50);
+
+        addProductsButton.setOnAction(actionEvent -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
             homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
+            homeButton.setOnAction(event -> {
                 mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
+                mainStage.setTitle("الواجهة الرئيسية");
                 Pane homeLayout = getClerkHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
@@ -3782,111 +3102,31 @@ public class GUI {
                 mainStage.show();
             });
 
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getClerkBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
-                System.gc();
-                mainStage.show();
-            });
-
             HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
-            BorderPane editBillLayout = (BorderPane) getClerkEditBillSceneLayout();
-            editBillLayout.setBottom(hBox);
+            BorderPane addProductLayout = (BorderPane) getClerkAddProductsCategorySceneLayout();
+            addProductLayout.setBottom(hBox);
 
-            Scene editBillScene = new Scene(editBillLayout);
-            editBillScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle( "واجهة تعديل الفاتورة");
-            mainStage.setScene(editBillScene);
-            System.gc();
-            mainStage.show();
-
-        });
-
-        String showInstalmentsButtonText = "عرض الأقساط";
-        Button showInstalmentsButton = new Button(showInstalmentsButtonText);
-        showInstalmentsButton.setPrefSize(150, 30);
-        showInstalmentsButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getClerkBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane showInstalmentsSceneLayout = (BorderPane) getClerkShowInstalmentsSceneLayout();
-            showInstalmentsSceneLayout.setBottom(hBox);
-
-            Scene showInstalmentsScene = new Scene(showInstalmentsSceneLayout);
-            showInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة عرض الأقساط");
-            mainStage.setScene(showInstalmentsScene);
+            Scene addProductScene = new Scene(addProductLayout);
+            addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            mainStage.setTitle("واجهة المنتجات");
+            mainStage.setScene(addProductScene);
             System.gc();
             mainStage.show();
         });
 
-        String editInstalmentButtonText = "تعديل قسط";
-        Button editInstalmentButton = new Button(editInstalmentButtonText);
-        editInstalmentButton.setPrefSize(150, 30);
-        editInstalmentButton.setOnAction(event -> {
+        Button addSuppliersButton = new Button("إضافة موردين");
+        addSuppliersButton.setPrefSize(150, 50);
+
+        addSuppliersButton.setOnAction(actionEvent -> {
             mainStage.close();
 
             Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
             homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
+            homeButton.setOnAction(event -> {
                 mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
+                mainStage.setTitle("الواجهة الرئيسية");
                 Pane homeLayout = getClerkHomeSceneLayout();
                 Scene homeScene = new Scene(homeLayout);
                 homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
@@ -3895,39 +3135,49 @@ public class GUI {
                 mainStage.show();
             });
 
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
+            HBox hBox = new HBox();
+            hBox.getChildren().add(homeButton);
+
+            BorderPane addSupplierLayout = (BorderPane) getClerkAddSupplierSceneLayout();
+            addSupplierLayout.setBottom(hBox);
+
+            Scene addSupplierScene = new Scene(addSupplierLayout);
+            addSupplierScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            mainStage.setTitle("واجهة المنتجات");
+            mainStage.setScene(addSupplierScene);
+            System.gc();
+            mainStage.show();
+        });
+
+        Button addProductsCategoriesButton = new Button("إضافة أنواع منتجات");
+        addProductsCategoriesButton.setPrefSize(150, 50);
+
+        addProductsCategoriesButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
                 mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane billsAndInstalmentsLayout = (BorderPane) getClerkBillsAndInstalmentsSceneLayout();
-                billsAndInstalmentsLayout.setBottom(hBox);
-
-                Scene billsAndInstalmentsScene = new Scene(billsAndInstalmentsLayout);
-                billsAndInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة الفواتير و الأقساط");
-                mainStage.setScene(billsAndInstalmentsScene);
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getClerkHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setScene(homeScene);
                 System.gc();
                 mainStage.show();
             });
 
             HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
             hBox.getChildren().add(homeButton);
 
+            BorderPane addProductsCategoryLayout = (BorderPane) getClerkAddProductsCategorySceneLayout();
+            addProductsCategoryLayout.setBottom(hBox);
 
-            BorderPane editInstalmentSceneLayout = (BorderPane) getClerkEditInstalmentSceneLayout();
-            editInstalmentSceneLayout.setBottom(hBox);
-
-            Scene editInstalmentScene = new Scene(editInstalmentSceneLayout);
-            editInstalmentScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة تعديل قسط");
-            mainStage.setScene(editInstalmentScene);
+            Scene addProductsCategoryScene = new Scene(addProductsCategoryLayout);
+            addProductsCategoryScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            mainStage.setTitle("واجهة المستخدمين");
+            mainStage.setScene(addProductsCategoryScene);
             System.gc();
             mainStage.show();
         });
@@ -3938,11 +3188,140 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(addBillButton, 0, 0);
-        gridPane.add(showInstalmentsButton,1,0);
-        gridPane.add(editInstalmentButton,0,1);
-        gridPane.add(editBillButton, 1, 1);
+        gridPane.add(addBillsButton, 0,0);
+        gridPane.add(addSuppliesButton, 1,0);
+        gridPane.add(addProductsButton, 2,0);
+        gridPane.add(addProductsCategoriesButton,3,0);
+        gridPane.add(addSuppliersButton, 4,0);
 
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+        return borderPane;
+
+    }
+
+    private static Pane getClerkAddProductsCategorySceneLayout() {
+        TextField categoryNameTextField = new TextField();
+        categoryNameTextField.setPrefSize(100, 20);
+
+        String nodeText = "أسم النوع";
+        Label categoryNameLabel = new Label(nodeText);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+            //ToDo: complete the add category function
+            String message = "";
+            messageLabel.setText(message);
+            String categoryName = categoryNameTextField.getText();
+
+            ProductCategory category = new ProductCategory(categoryName);
+            boolean done = StoreDatabase.addProductCategory(category);
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+        });
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(categoryNameTextField, 0, 0);
+        gridPane.add(categoryNameLabel, 1, 0);
+        gridPane.add(submitButton, 0, 1);
+        gridPane.add(messageLabel, 0, 2);
+
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+
+        borderPane.setCenter(gridPane);
+
+
+
+
+        return borderPane;
+    }
+
+    private static Pane getClerkAddProductSceneLayout() {
+        String nodeText;
+
+        nodeText = "أسم المنتج";
+        Label productNameLabel = new Label(nodeText);
+        TextField productNameTextField = new TextField();
+        productNameTextField.setPrefSize(100, 20);
+
+        nodeText = "نوع المنتج";
+        Label productCategoryLabel = new Label(nodeText);
+        ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+        productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+            @Override
+            public String toString(ProductCategory c) {
+                return c.getCategoryName();
+            }
+
+            @Override
+            public ProductCategory fromString(String s) {
+                return null;
+            }
+        });
+        ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+        productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+            //ToDo: complete the add product function
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String productName = productNameTextField.getText().trim();
+            ProductCategory category = (ProductCategory) productsCategoriesChoiceBox.getValue();
+            int availableQuantity = 0;
+            double supplyPrice = 0;
+            String lastSupplyDate = "";
+            double cashSellingPrice = 0;
+            double instalmentSellingPrice = 0;
+
+            Product product = new Product(productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice,instalmentSellingPrice);
+
+            boolean done = StoreDatabase.addProduct(product);
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(productNameLabel,0,0);
+        gridPane.add(productNameTextField,1,0);
+        gridPane.add(productsCategoriesChoiceBox,1,1);
+        gridPane.add(productCategoryLabel,0,1);
+        gridPane.add(submitButton,0,4);
+        gridPane.add(messageLabel,0,5);
 
 
         BorderPane borderPane = new BorderPane();
@@ -3951,7 +3330,55 @@ public class GUI {
 
 
         return borderPane;
+    }
 
+    private static Pane getClerkAddSupplierSceneLayout() {
+        String nodeText;
+
+        nodeText = "أسم المورد";
+        Label supplierNameLabel = new Label(nodeText);
+        TextField supplierNameTextField = new TextField();
+        supplierNameTextField.setPrefSize(200, 20);
+
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(100, 20);
+        submitButton.setOnAction(event -> {
+
+            //ToDo: complete the add supplier function
+            String message = "";
+            messageLabel.setText(message);
+
+            String supplierName = supplierNameTextField.getText();
+            Supplier supplier = new Supplier(supplierName);
+            boolean done = StoreDatabase.addSupplier(supplier);
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+        });
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(supplierNameLabel,0,0);
+        gridPane.add(supplierNameTextField,1,0);
+        gridPane.add(submitButton,0,1);
+        gridPane.add(messageLabel,0,2);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+        return borderPane;
     }
 
     private static Pane getClerkAddBillSceneLayout() {
@@ -3998,11 +3425,11 @@ public class GUI {
 
         nodeText = "وسيلة الدفع";
         Label paymentMethodLabel = new Label(nodeText);
-        ChoiceBox<String> paymentChoiceBox = new ChoiceBox<>();
-        ArrayList<String> paymentChoices = new ArrayList<>();
-        paymentChoices.add("كاش");
-        paymentChoices.add("تقسيط");
-        paymentChoiceBox.setItems(FXCollections.observableList(paymentChoices));
+        ChoiceBox<String> paymentMethodBox = new ChoiceBox<>();
+        ArrayList<String> paymentMethods = new ArrayList<>();
+        paymentMethods.add("كاش");
+        paymentMethods.add("تقسيط");
+        paymentMethodBox.setItems(FXCollections.observableList(paymentMethods));
 
         nodeText = "أسم الضامن";
         Label guarantorNameLabel = new Label(nodeText);
@@ -4010,12 +3437,12 @@ public class GUI {
         guarantorNameTextField.setPrefSize(100,20);
 
         nodeText = "المقدم";
-        Label paidMoneyLabel = new Label(nodeText);
-        TextField paidMoneyTextField = new TextField();
-        paidMoneyTextField.setPrefSize(100,20);
+        Label initialPaymentLabel = new Label(nodeText);
+        TextField initialPaymentTextField = new TextField();
+        initialPaymentTextField.setPrefSize(100,20);
 
-        nodeText = "بداية القسط";
-        Label startOfInstalmentLabel = new Label(nodeText);
+        nodeText = "تاريخ أول القسط";
+        Label firstInstalmentDateLabel = new Label(nodeText);
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -4041,8 +3468,8 @@ public class GUI {
             }
         });
 
-        nodeText = "نهاية القسط";
-        Label endOfInstalmentLabel = new Label(nodeText);
+        nodeText = "تاريخ أخر القسط";
+        Label lastInstalmentDateLabel = new Label(nodeText);
         DatePicker endDatePicker = new DatePicker();
         endDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -4080,7 +3507,7 @@ public class GUI {
         ArrayList<Label> productsLabels =new ArrayList<>();
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<Label> categoriesLabels = new ArrayList<>();
-        ArrayList<ChoiceBox> categoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
         ArrayList<Label> soldQuantitiesLabels = new ArrayList<>();
         ArrayList<TextField> soldQuantitiesTextFields = new ArrayList<>();
         ArrayList<Label> sellingPricesLabels = new ArrayList<>();
@@ -4099,68 +3526,65 @@ public class GUI {
         Label messageLabel = new Label();
 
 
-
-        paymentChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String paymentMethod= paymentChoiceBox.getSelectionModel().getSelectedItem();
-                if(paymentMethod.equals("تقسيط"))
-                {
-                    gridPane.getChildren().remove(addMoreProductsButton);
-                    gridPane.getChildren().remove(scrollPane);
-                    gridPane.getChildren().remove(submitButton);
-                    gridPane.getChildren().remove(messageLabel);
+        paymentMethodBox.setOnAction(actionEvent ->  {
+            String paymentMethod= paymentMethodBox.getSelectionModel().getSelectedItem();
+            if(paymentMethod.equals("تقسيط"))
+            {
+                gridPane.getChildren().remove(addMoreProductsButton);
+                gridPane.getChildren().remove(scrollPane);
+                gridPane.getChildren().remove(submitButton);
+                gridPane.getChildren().remove(messageLabel);
 
 
-                    gridPane.add(guarantorNameLabel,0,3);
-                    gridPane.add(guarantorNameTextField,1,3);
-                    gridPane.add(paidMoneyLabel,0,4);
-                    gridPane.add(paidMoneyTextField,1,4);
-                    gridPane.add(instalmentAmountLabel,0,5);
-                    gridPane.add(instalmentAmountTextField,1,5);
+                gridPane.add(guarantorNameLabel,0,3);
+                gridPane.add(guarantorNameTextField,1,3);
+                gridPane.add(initialPaymentLabel,0,4);
+                gridPane.add(initialPaymentTextField,1,4);
+                gridPane.add(instalmentAmountLabel,0,5);
+                gridPane.add(instalmentAmountTextField,1,5);
 
-                    gridPane.add(startDatePicker,1,6);
-                    gridPane.add(startOfInstalmentLabel,0,6);
-                    gridPane.add(endDatePicker,1,7);
-                    gridPane.add(endOfInstalmentLabel,0,7);
-                    gridPane.add(addMoreProductsButton,0,8);
-                    gridPane.add(scrollPane,0,9);
-                    gridPane.add(submitButton,0,10);
-                    gridPane.add(messageLabel,0,11);
-
-
-                }
-                else
-                {
-                    gridPane.getChildren().remove(guarantorNameLabel);
-                    gridPane.getChildren().remove(guarantorNameTextField);
-                    gridPane.getChildren().remove(paidMoneyLabel);
-                    gridPane.getChildren().remove(paidMoneyTextField);
-                    gridPane.getChildren().remove(instalmentAmountTextField);
-                    gridPane.getChildren().remove(instalmentAmountLabel);
-                    gridPane.getChildren().remove(startDatePicker);
-                    gridPane.getChildren().remove(startOfInstalmentLabel);
-                    gridPane.getChildren().remove(endDatePicker);
-                    gridPane.getChildren().remove(endOfInstalmentLabel);
-                    gridPane.getChildren().remove(addMoreProductsButton);
-                    gridPane.getChildren().remove(scrollPane);
-                    gridPane.getChildren().remove(submitButton);
-                    gridPane.getChildren().remove(messageLabel);
+                gridPane.add(startDatePicker,1,6);
+                gridPane.add(firstInstalmentDateLabel,0,6);
+                gridPane.add(endDatePicker,1,7);
+                gridPane.add(lastInstalmentDateLabel,0,7);
+                gridPane.add(addMoreProductsButton,0,8);
+                gridPane.add(scrollPane,0,9);
+                gridPane.add(submitButton,0,10);
+                gridPane.add(messageLabel,0,11);
 
 
-                    gridPane.add(addMoreProductsButton,0,3);
-                    gridPane.add(scrollPane,0,4);
-                    gridPane.add(submitButton,0,5);
-                    gridPane.add(messageLabel,0,6);
-
-
-                }
             }
+            else
+            {
+                gridPane.getChildren().remove(guarantorNameLabel);
+                gridPane.getChildren().remove(guarantorNameTextField);
+                gridPane.getChildren().remove(initialPaymentLabel);
+                gridPane.getChildren().remove(initialPaymentTextField);
+                gridPane.getChildren().remove(instalmentAmountTextField);
+                gridPane.getChildren().remove(instalmentAmountLabel);
+                gridPane.getChildren().remove(startDatePicker);
+                gridPane.getChildren().remove(firstInstalmentDateLabel);
+                gridPane.getChildren().remove(endDatePicker);
+                gridPane.getChildren().remove(lastInstalmentDateLabel);
+                gridPane.getChildren().remove(addMoreProductsButton);
+                gridPane.getChildren().remove(scrollPane);
+                gridPane.getChildren().remove(submitButton);
+                gridPane.getChildren().remove(messageLabel);
+
+
+                gridPane.add(addMoreProductsButton,0,3);
+                gridPane.add(scrollPane,0,4);
+                gridPane.add(submitButton,0,5);
+                gridPane.add(messageLabel,0,6);
+
+
+            }
+
         });
 
         addMoreProductsButton.setOnAction(event -> {
 
-            String paymentMethod = paymentChoiceBox.getSelectionModel().getSelectedItem();
+            String paymentMethod = paymentMethodBox.getSelectionModel().getSelectedItem();
 
             if(paymentMethod == null)
                 //ToDo : Show a warning that you must select payment method before choosing products
@@ -4182,26 +3606,26 @@ public class GUI {
                 });
 
                 Label categoryLabel = new Label("نوع المنتج");
-                ChoiceBox categoriesChoiceBox = new ChoiceBox();
-                ArrayList<String> categoriesList = Main.myStore.getCategories();
-
-                categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-
-                categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+                ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+                productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                    @Override
+                    public String toString(ProductCategory c) {
+                        return c.getCategoryName();
+                    }
 
                     @Override
-                    public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                        int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-                        ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
-
-                        productsChoiceBox.setItems(FXCollections.observableList(products));
-
-
+                    public ProductCategory fromString(String s) {
+                        return null;
                     }
                 });
+                ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+                productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
+                productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                    ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+                    ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                    productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
+                });
 
 
                 Label soldQuantityLabel = new Label("الكمية المباعة");
@@ -4216,7 +3640,7 @@ public class GUI {
                 productsLabels.add(productLabel);
                 productsChoiceBoxes.add(productsChoiceBox);
                 categoriesLabels.add(categoryLabel);
-                categoriesChoiceBoxes.add(categoriesChoiceBox);
+                productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
                 soldQuantitiesLabels.add(soldQuantityLabel);
                 soldQuantitiesTextFields.add(soldQuantityTextField);
                 sellingPricesTextFields.add(sellingPriceTextField);
@@ -4236,7 +3660,7 @@ public class GUI {
                 productsGridPane.add(soldQuantitiesLabels.get(lastProductIndex),4,currentProductRow);
                 productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),3,currentProductRow);
                 productsGridPane.add(productsLabels.get(lastProductIndex),2,currentProductRow);
-                productsGridPane.add(categoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
+                productsGridPane.add(productsCategoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
                 productsGridPane.add(categoriesLabels.get(lastProductIndex),0,currentProductRow);
 
             }
@@ -4254,58 +3678,51 @@ public class GUI {
 
             String billDate = billDatePicker.getValue().toString();
             String buyerName = buyerNameTextField.getText().trim();
-            String paymentChoice = paymentChoiceBox.getValue();
+            String paymentMethod = paymentMethodBox.getValue();
+
+
+
+            ArrayList<SoldProduct> soldProducts = new ArrayList<>();
 
             int numOfSoldProducts =  productsChoiceBoxes.size();
-
-            ArrayList<Integer> soldProductsIDs = new ArrayList<>();
-
+            double productsTotalCost = 0;
             for(int i = 0; i < numOfSoldProducts; i++)
             {
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int soldQuantity = Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim());
+                double sellingPrice = Double.parseDouble(sellingPricesTextFields.get(i).getText().trim());
+                soldProducts.add(new SoldProduct(currentProduct, soldQuantity, sellingPrice));
 
-                Product selectedProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
-
-                soldProductsIDs.add(selectedProduct.getID());
+                productsTotalCost += (sellingPrice * soldQuantity);
             }
 
-            ArrayList<Integer> soldQuantities = new ArrayList<>();
-            for(int i = 0; i < numOfSoldProducts; i++)
-                soldQuantities.add(Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim()));
+
+            double billTotalCost = productsTotalCost;
 
 
-            ArrayList<Double> sellingPrices = new ArrayList<>();
-            for(int i = 0; i < numOfSoldProducts; i++)
-                sellingPrices.add(Double.parseDouble(sellingPricesTextFields.get(i).getText().trim()));
-
-            double totalCost = 0;
-            for(int i = 0; i < numOfSoldProducts; i++)
-                totalCost += sellingPrices.get(i) * soldQuantities.get(i);
-
-            boolean done = false;
-
-            if(paymentChoice.equals("تقسيط"))
+            Bill bill;
+            if(paymentMethod.equals("تقسيط"))
             {
                 String guarantorName = guarantorNameTextField.getText().trim();
-                double paidMoney = Double.parseDouble(paidMoneyTextField.getText().trim());
-
+                double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
+                double remainingMoney = billTotalCost - initialPayment;
                 double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
-                String startDate = startDatePicker.getValue().toString();
-                String endDate = endDatePicker.getValue().toString();
-                System.out.println(startDate + " " + endDate);
-                done = Main.myStore.addInstalment(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, guarantorName, paidMoney, instalmentAmount, startDate, endDate);
+                String firstInstalmentDate = startDatePicker.getValue().toString();
+                String lastInstalmentDate = endDatePicker.getValue().toString();
+                InstalmentsPayment instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
+
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, instalmentsPayment);
             }
             else
-                done = Main.myStore.addBill(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, "كاش");
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
 
 
+            boolean done = StoreDatabase.addBill(bill);
 
-            //done = Main.myStore.addBill();
             if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
-            }
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
 
         });
 
@@ -4315,7 +3732,7 @@ public class GUI {
         gridPane.add(buyerNameLabel,0,1);
         gridPane.add(buyerNameTextField,1,1);
         gridPane.add(paymentMethodLabel,0,2);
-        gridPane.add(paymentChoiceBox,1,2);
+        gridPane.add(paymentMethodBox,1,2);
         gridPane.add(addMoreProductsButton,0,3);
         gridPane.add(scrollPane,0,4);
         gridPane.add(submitButton,0,5);
@@ -4330,887 +3747,208 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getClerkEditBillSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkEditInstalmentSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkShowInstalmentsSceneLayout() {
-        Label startDateLabel = new Label("من");
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                startDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        Label endDateLabel = new Label("إلي");
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                endDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        Button showInstalmentsButton = new Button("أعرض الأقساط");
-
-
-        HBox topHBox = new HBox();
-
-        topHBox.setSpacing(20);
-        topHBox.getChildren().add(startDateLabel);
-        topHBox.getChildren().add(startDatePicker);
-        topHBox.getChildren().add(endDateLabel);
-        topHBox.getChildren().add(endDatePicker);
-        topHBox.getChildren().add(showInstalmentsButton);
-
-        TableView instalmentsTable = new TableView();
-        instalmentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn buyerName = new TableColumn("أسم العميل");
-        buyerName.setCellValueFactory(new PropertyValueFactory<Instalment, String>("buyerName"));
-
-        TableColumn billID = new TableColumn("رقم الفاتورة");
-        billID.setCellValueFactory( new PropertyValueFactory<Instalment, Integer>("billID"));
-
-        TableColumn instalmentAmount = new TableColumn("حجم القسط");
-        instalmentAmount.setCellValueFactory(new PropertyValueFactory<Instalment, Double>("instalmentAmount"));
-
-        TableColumn endOfInstalments = new TableColumn("نهاية الأقساط");
-        endOfInstalments.setCellValueFactory(new PropertyValueFactory<Instalment, String>("endDate"));
-
-        instalmentsTable.getColumns().add(billID);
-        instalmentsTable.getColumns().add(buyerName);
-        instalmentsTable.getColumns().add(endOfInstalments);
-        instalmentsTable.getColumns().add(instalmentAmount);
-
-
-        showInstalmentsButton.setOnAction(actionEvent -> {
-            String queryStartDate = startDatePicker.getValue().toString();
-            String queryEndDate = endDatePicker.getValue().toString();
-
-            ArrayList<Instalment> instalments = Main.myStore.getInstalments(queryStartDate, queryEndDate);
-            System.out.println(instalments.size());
-            instalmentsTable.setItems(FXCollections.observableList(instalments));
-        });
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setTop(topHBox);
-        borderPane.setCenter(instalmentsTable);
-
-        return borderPane;
-    }
-
-    private static Pane getClerkProductsSceneLayout() {
-        String showProductsButtonText = "عرض المنتجات";
-        Button showProductsButton = new Button(showProductsButtonText);
-        showProductsButton.setPrefSize(150, 30);
-        showProductsButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane showProductsSceneLayout = (BorderPane) getClerkShowProductsSceneLayout();
-            showProductsSceneLayout.setBottom(hBox);
-
-            Scene showProductsScene = new Scene(showProductsSceneLayout);
-            showProductsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle( "واجهة عرض المنتجات");
-            mainStage.setScene(showProductsScene);
-            System.gc();
-            mainStage.show();
-
-        });
-
-
-        String addProductButtonText = "إضافة منتج";
-        Button addProductButton = new Button(addProductButtonText);
-        addProductButton.setPrefSize(150, 30);
-        addProductButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane addProductLayout = (BorderPane) getClerkAddProductSceneLayout();
-            addProductLayout.setBottom(hBox);
-
-            Scene addProductScene = new Scene(addProductLayout);
-            addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle( "واجهة إضافة منتج");
-            mainStage.setScene(addProductScene);
-            System.gc();
-            mainStage.show();
-        });
-
-
-        String editProductButtonText = "تعديل منتج";
-        Button editProductButton = new Button(editProductButtonText);
-        editProductButton.setPrefSize(150, 30);
-        editProductButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane editProductLayout = (BorderPane) getClerkEditProductSceneLayout();
-            editProductLayout.setBottom(hBox);
-
-            Scene editProductScene = new Scene(editProductLayout);
-            editProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة تعديل منتج");
-            mainStage.setScene(editProductScene);
-            System.gc();
-            mainStage.show();
-        });
-
-        String showCategoriesButtonText = "عرض الأنواع";
-        Button showCategoriesButton = new Button(showCategoriesButtonText);
-        showCategoriesButton.setPrefSize(150, 30);
-        showCategoriesButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane showCategoriesSceneLayout = (BorderPane) getClerkShowCategoriesSceneLayout();
-            showCategoriesSceneLayout.setBottom(hBox);
-
-            Scene showCategoriesScene = new Scene(showCategoriesSceneLayout);
-            showCategoriesScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle( "واجهة عرض الأنواع");
-            mainStage.setScene(showCategoriesScene);
-            System.gc();
-            mainStage.show();
-        });
-
-        String addCategoryButtonText = "إضافة نوع";
-        Button addCategoryButton = new Button(addCategoryButtonText);
-        addCategoryButton.setPrefSize(150, 30);
-        addCategoryButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane addCategoryLayout = (BorderPane) getClerkAddCategorySceneLayout();
-            addCategoryLayout.setBottom(hBox);
-
-            Scene addCategoryScene = new Scene(addCategoryLayout);
-            addCategoryScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-
-            mainStage.setTitle( "واجهة إضافة نوع");
-            mainStage.setScene(addCategoryScene);
-            System.gc();
-            mainStage.show();
-        });
-
-        String editCategoryButtonText = "تعديل نوع";
-        Button editCategoryButton = new Button(editCategoryButtonText);
-        editCategoryButton.setPrefSize(150, 30);
-        editCategoryButton.setOnAction(event -> {
-            mainStage.close();
-
-            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-            homeButton.setPrefSize(180, 30);
-            homeButton.setOnAction(actionEvent -> {
-                mainStage.close();
-                String sceneTitle = "الواجهة الرئيسية";
-                mainStage.setTitle(sceneTitle);
-                Pane homeLayout = getClerkHomeSceneLayout();
-                Scene homeScene = new Scene(homeLayout);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setScene(homeScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            String previousButtonText = "العودة إلي الواجهة السابقة";
-            Button previousButton = new Button(previousButtonText);
-            previousButton.setPrefSize(180, 30);
-            previousButton.setOnAction(actionEvent -> {
-                mainStage.close();
-
-                HBox hBox = new HBox();
-                hBox.getChildren().add(homeButton);
-
-                BorderPane productsLayout = (BorderPane) getClerkProductsSceneLayout();
-                productsLayout.setBottom(hBox);
-
-                Scene productsScene = new Scene(productsLayout);
-                productsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-                mainStage.setTitle("واجهة المنتجات");
-                mainStage.setScene(productsScene);
-                System.gc();
-                mainStage.show();
-            });
-
-            HBox hBox = new HBox();
-            hBox.setSpacing(10);
-            hBox.getChildren().add(previousButton);
-            hBox.getChildren().add(homeButton);
-
-            BorderPane editCategoryLayout = (BorderPane) getClerkEditCategorySceneLayout();
-            editCategoryLayout.setBottom(hBox);
-
-            Scene editCategoryScene = new Scene(editCategoryLayout);
-            editCategoryScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            mainStage.setTitle("واجهة تعديل نوع");
-            mainStage.setScene(editCategoryScene);
-            System.gc();
-            mainStage.show();
-        });
-
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.add(editProductButton, 0, 0);
-        gridPane.add(addProductButton, 1, 0);
-        gridPane.add(showProductsButton, 2, 0);
-        gridPane.add(editCategoryButton, 0, 1);
-        gridPane.add(addCategoryButton, 1, 1);
-        gridPane.add(showCategoriesButton, 2, 1);
-
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkAddProductSceneLayout() {
-        String nodeText;
-
-        nodeText = "أسم المنتج";
-        Label productNameLabel = new Label(nodeText);
-        TextField productNameTextField = new TextField();
-        productNameTextField.setPrefSize(100, 20);
-
-        nodeText = "نوع المنتج";
-        Label productCategoryLabel = new Label(nodeText);
-        ChoiceBox categoriesChoiceBox = new ChoiceBox();
-        ArrayList<String> categoriesList = Main.myStore.getCategories();
-        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-
-
-
+    private static Pane getClerkAddSupplySceneLayout() {
         Label messageLabel = new Label();
 
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
-        submitButton.setOnAction(event -> {
-            //ToDo: complete the add product function
+        Button submitButton = new Button("أدخل");
+        submitButton.setPrefSize(100, 20);
 
-            String message = "";
-            messageLabel.setText(message);
-
-            String productName = productNameTextField.getText().trim();
-
-            int productCategory = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-            Double productPrice = 0.0;
-
-            int availableQuantity = 0;
-
-            boolean done = false;
-            done = Main.myStore.addProduct(productName, productCategory, availableQuantity, productPrice);
-            if(done)
+        Label supplyDateLabel = new Label("تاريخ التوريد");
+        DatePicker supplyDatePicker = new DatePicker();
+        supplyDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
             {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
+                supplyDatePicker.setPromptText(pattern.toLowerCase());
             }
 
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
 
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
         });
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        gridPane.add(productNameLabel,0,0);
-        gridPane.add(productNameTextField,1,0);
-        gridPane.add(categoriesChoiceBox,1,1);
-        gridPane.add(productCategoryLabel,0,1);
-        gridPane.add(submitButton,0,4);
-        gridPane.add(messageLabel,0,5);
-
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkEditProductSceneLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        Label productLabel = new Label("أسم المنتج");
-        ChoiceBox productsChoiceBox = new ChoiceBox();
-        productsChoiceBox.setConverter(new StringConverter<Product>() {
+        Label supplierNameLabel = new Label("أسم المورد");
+        ChoiceBox supplierChoiceBox = new ChoiceBox();
+        supplierChoiceBox.setConverter(new StringConverter<Supplier>() {
             @Override
-            public String toString(Product p) {
-                return p.getProductName();
+            public String toString(Supplier s) {
+                return s.getSupplierName();
             }
 
             @Override
-            public Product fromString(String s) {
+            public Supplier fromString(String s) {
                 return null;
             }
         });
+        ArrayList<Supplier> suppliers = StoreDatabase.getAllSuppliers();
+        supplierChoiceBox.setItems(FXCollections.observableList(suppliers));
 
-        Label categoryLabel = new Label("نوع المنتج");
-        ChoiceBox categoriesChoiceBox = new ChoiceBox();
-        ArrayList<String> categoriesList = Main.myStore.getCategories();
+        Label transportationFessLabel = new Label( "مصاريف المواصلات");
+        TextField transportationFeesTextField = new TextField();
+        transportationFeesTextField.setPrefSize(100,20);
 
-        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
+        Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
+        addMoreProductsButton.setPrefSize(120,20);
 
-        categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        Button addNewProductButton = new Button("أضف منتج جديد لقاعدة البيانات");
+        addNewProductButton.setPrefSize(200,20);
 
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                int categoryID = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
+        ArrayList<Label> productsLabels =new ArrayList<>();
+        ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
+        ArrayList<Label> categoriesLabels = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<Label> boughtQuantitiesLabels = new ArrayList<>();
+        ArrayList<TextField> boughtQuantitiesTextFields = new ArrayList<>();
+        ArrayList<Label> buyingsPricesLabels = new ArrayList<>();
+        ArrayList<TextField> buyingsPricesTextFields = new ArrayList<>();
 
-                ArrayList<Product> products = Main.myStore.getProductsInCategory(categoryID);
+        ScrollPane scrollPane = new ScrollPane();
+        GridPane productsGridPane = new GridPane();
+        productsGridPane.setHgap(10);
+        productsGridPane.setVgap(10);
+        productsGridPane.setPadding(new Insets(10, 10, 10, 10));
+        scrollPane.setContent(productsGridPane);
 
-                productsChoiceBox.setItems(FXCollections.observableList(products));
+        addMoreProductsButton.setOnAction(event -> {
 
+            Label productLabel = new Label("أسم المنتج");
+            ChoiceBox productsChoiceBox = new ChoiceBox();
+            productsChoiceBox.setConverter(new StringConverter<Product>() {
+                @Override
+                public String toString(Product p) {
+                    return p.getProductName();
+                }
 
-            }
-        });
+                @Override
+                public Product fromString(String s) {
+                    return null;
+                }
+            });
 
-        Button editProductButton = new Button("تعديل المنتج");
-        editProductButton.setPrefSize(100,20);
-        editProductButton.setOnAction(actionEvent -> {
-            Product toEditProduct = (Product) productsChoiceBox.getSelectionModel().getSelectedItem();
-            showEditProduct(toEditProduct);
-        });
-        gridPane.add(categoryLabel, 0,0);
-        gridPane.add(categoriesChoiceBox, 1,0);
-        gridPane.add(productLabel,2,0);
-        gridPane.add(productsChoiceBox,3,0);
-        gridPane.add(editProductButton,0,1);
+            Label categoryLabel = new Label("نوع المنتج");
+            ChoiceBox productsCategoriesChoiceBox = new ChoiceBox();
+            productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                @Override
+                public String toString(ProductCategory c) {
+                    return c.getCategoryName();
+                }
 
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-
-        return borderPane;
-    }
-
-    private static Pane getClerkShowProductsSceneLayout() {
-        TableView table = new TableView();
-
-        TableColumn productName = new TableColumn("أسم المنتج");
-        TableColumn productBuyingPrice = new TableColumn("سعر شراء");
-        TableColumn lastBuyingDate = new TableColumn("تاريخ أخر شراء");
-        TableColumn productAvailableQuantity = new TableColumn("الكمية المتوفرة");
-        TableColumn productSellingPrice = new TableColumn("سعر كاش");
-        TableColumn productInstallmentPrice = new TableColumn("سعر تقسيط");
-
-        table.getColumns().add(productName);
-        table.getColumns().add(productAvailableQuantity);
-        table.getColumns().add(productBuyingPrice);
-        table.getColumns().add(lastBuyingDate);
-        table.getColumns().add(productSellingPrice);
-        table.getColumns().add(productInstallmentPrice);
-
-
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
+                @Override
+                public ProductCategory fromString(String s) {
+                    return null;
+                }
+            });
+            ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+            productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
 
-        Label productCategoryLabel = new Label("نوع المنتج");
-        ChoiceBox productsCategroriesChoiceBox = new ChoiceBox();
-        ArrayList<String> productsCategories = Main.myStore.getCategories();
-        productsCategroriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
-
-        productsCategroriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                int categoryID = number2.intValue() + 1;
-
-                ObservableList<Product> productsList = FXCollections.observableList(Main.myStore.getProductsInCategory(categoryID));
-
-                productName.setCellValueFactory(new PropertyValueFactory<Product, String>("productName"));
-                productAvailableQuantity.setCellValueFactory(new PropertyValueFactory<Product, Integer>("availableQuantity"));
-                productBuyingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("buyingPrice"));
-                lastBuyingDate.setCellValueFactory(new PropertyValueFactory<Product, String>("lastBuyingDate"));
-                productSellingPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("sellingPrice"));
-                productInstallmentPrice.setCellValueFactory(new PropertyValueFactory<Product, Double>("installmentPrice"));
-
-                table.setItems(productsList);
-            }
-        });
+            productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                ProductCategory selectedCategory = (ProductCategory) productsCategoriesChoiceBox.getValue();
+                ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
+            });
 
 
 
-        HBox topHBox = new HBox();
 
-        topHBox.setSpacing(20);
-        topHBox.getChildren().add(productCategoryLabel);
-        topHBox.getChildren().add(productsCategroriesChoiceBox);
+            Label boughtQuantityLabel = new Label("الكمية المشتراة");
+            TextField boughtQuantityTextField = new TextField();
+            boughtQuantityTextField.setPrefSize(100,20);
 
 
-        BorderPane borderPane = new BorderPane();
+            Label buyingPriceLabel = new Label( "سعر الوحدة");
+            TextField buyingPriceTextField = new TextField();
+            buyingPriceTextField.setPrefSize(100,20);
 
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setTop(topHBox);
-        borderPane.setCenter(table);
 
-        return borderPane;
-    }
+            productsLabels.add(productLabel);
+            productsChoiceBoxes.add(productsChoiceBox);
+            categoriesLabels.add(categoryLabel);
+            productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
+            boughtQuantitiesLabels.add(boughtQuantityLabel);
+            boughtQuantitiesTextFields.add(boughtQuantityTextField);
+            buyingsPricesTextFields.add(buyingPriceTextField);
+            buyingsPricesLabels.add(buyingPriceLabel);
 
-    private static Pane getClerkAddCategorySceneLayout() {
-        TextField categoryNameTextField = new TextField();
-        categoryNameTextField.setPrefSize(100, 20);
 
-        String nodeText = "أسم النوع";
-        Label categoryNameLabel = new Label(nodeText);
+            int currentProductRow = 0;
+            int numOfProducts = productsLabels.size();
+            currentProductRow += numOfProducts;
 
-        Label messageLabel = new Label();
+            int lastProductIndex = numOfProducts -1;
 
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
-        submitButton.setOnAction(event -> {
-            //ToDo: complete the add category function
-            String message = "";
-            messageLabel.setText(message);
-            String categoryName = categoryNameTextField.getText();
-            boolean done = false;
-            done = Main.myStore.addCategory(categoryName);
-            if(done)
-            {
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
-
-            }
+            productsGridPane.add(buyingsPricesTextFields.get(lastProductIndex),7,currentProductRow);
+            productsGridPane.add(buyingsPricesLabels.get(lastProductIndex),6,currentProductRow);
+            productsGridPane.add(boughtQuantitiesTextFields.get(lastProductIndex),5,currentProductRow);
+            productsGridPane.add(boughtQuantitiesLabels.get(lastProductIndex),4,currentProductRow);
+            productsGridPane.add(productsChoiceBoxes.get(lastProductIndex),3,currentProductRow);
+            productsGridPane.add(productsLabels.get(lastProductIndex),2,currentProductRow);
+            productsGridPane.add(productsCategoriesChoiceBoxes.get(lastProductIndex),1,currentProductRow);
+            productsGridPane.add(categoriesLabels.get(lastProductIndex),0,currentProductRow);
 
 
         });
 
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        gridPane.add(categoryNameTextField, 0, 0);
-        gridPane.add(categoryNameLabel, 1, 0);
-        gridPane.add(submitButton, 0, 1);
-        gridPane.add(messageLabel, 0, 2);
-
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-
-        borderPane.setCenter(gridPane);
-
-
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkEditCategorySceneLayout() {
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-
-        borderPane.setCenter(gridPane);
-
-
-
-        return borderPane;
-    }
-
-    private static Pane getClerkShowCategoriesSceneLayout() {
-        TableColumn categoryName = new TableColumn("");
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-
-
-
-        return borderPane;
-    }
-
-    private static void showBillDetails(Bill bill) {
-        TableColumn productNameCol = new TableColumn("أسم المنتج");
-        productNameCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, String>("productName"));
-
-        TableColumn soldQuantityCol = new TableColumn("الكمية المباعة");
-        soldQuantityCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, Integer>("soldQuantity"));
-
-        TableColumn sellingPriceCol = new TableColumn("سعر بيع الوحدة");
-        sellingPriceCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, Double>("sellingPrice"));
-
-        TableView<SoldProduct> billDetailsTable = new TableView<>();
-        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        billDetailsTable.getColumns().setAll(productNameCol, soldQuantityCol, sellingPriceCol);
-
-        ArrayList<SoldProduct> soldProducts = Main.myStore.getBillSoldProducts(bill.getID());
-        billDetailsTable.setItems(FXCollections.observableList(soldProducts));
-
-        Stage secondaryStage = new Stage();
-        secondaryStage.setAlwaysOnTop(true);
-        secondaryStage.setMaximized(true);
-        secondaryStage.setTitle("واجهة إضافة منتج");
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(billDetailsTable);
-
-        Scene scene = new Scene(borderPane);
-        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        secondaryStage.setScene(scene);
-        System.gc();
-        secondaryStage.show();
-    }
-
-    private static void showSupplyDetails(Supply supply) {
-        TableColumn productNameCol = new TableColumn("أسم المنتج");
-        productNameCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, String>("productName"));
-
-        TableColumn boughtQuantityCol = new TableColumn("الكمية المشتراة");
-        boughtQuantityCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, Integer>("boughtQuantity"));
-
-        TableColumn buyingPriceCol = new TableColumn("سعر شراء الوحدة");
-        buyingPriceCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, Double>("buyingPrice"));
-
-        TableView<BoughtProduct> billDetailsTable = new TableView<>();
-        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        billDetailsTable.getColumns().setAll(productNameCol, boughtQuantityCol, buyingPriceCol);
-
-        ArrayList<BoughtProduct> boughtProducts = Main.myStore.getSupplyBoughtProducts(supply.getID());
-        billDetailsTable.setItems(FXCollections.observableList(boughtProducts));
-
-        Stage secondaryStage = new Stage();
-        secondaryStage.setAlwaysOnTop(true);
-        secondaryStage.setMaximized(true);
-        secondaryStage.setTitle("واجهة تفاصيل التوريدات");
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(billDetailsTable);
-
-        Scene scene = new Scene(borderPane);
-        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        secondaryStage.setScene(scene);
-        System.gc();
-        secondaryStage.show();
-    }
-
-    private static void showEditProduct(Product toEditProduct) {
-        String nodeText;
-
-        nodeText = "أسم المنتج";
-        Label productNameLabel = new Label(nodeText);
-        TextField productNameTextField = new TextField();
-        productNameTextField.setPrefSize(100, 20);
-        productNameTextField.setText(toEditProduct.getProductName());
-
-        nodeText = "نوع المنتج";
-        Label productCategoryLabel = new Label(nodeText);
-        ChoiceBox categoriesChoiceBox = new ChoiceBox();
-        ArrayList<String> categoriesList = Main.myStore.getCategories();
-        categoriesChoiceBox.setItems(FXCollections.observableList(categoriesList));
-        categoriesChoiceBox.setValue(categoriesList.get(toEditProduct.getCategoryID()));
-
-
-        Label messageLabel = new Label();
-
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
         submitButton.setOnAction(event -> {
             //ToDo: complete the add product function
 
             String message = "";
             messageLabel.setText(message);
 
-            String productName = productNameTextField.getText().trim();
-
-            int productCategory = categoriesChoiceBox.getSelectionModel().getSelectedIndex()+1;
-
-            Double productPrice = 0.0;
-
-            int availableQuantity = 0;
-
-            boolean done = false;
-            Main.myStore.updateProduct(toEditProduct.getID(), productName, productCategory, availableQuantity, productPrice);
-
-                message = "تم الإدخال بنجاح";
-                messageLabel.setText(message);
+            String supplyDate = supplyDatePicker.getValue().toString();
+            Supplier supplier = (Supplier) supplierChoiceBox.getValue();
+            double transportationFees = Double.parseDouble(transportationFeesTextField.getText().trim());
 
 
+            ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
+            double productsTotalCost = 0;
+            int numOfBoughtProducts =  productsChoiceBoxes.size();
+            for(int i = 0; i < numOfBoughtProducts; i++)
+            {
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int boughtQuantity = Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim());
+                double buyingPrice = Double.parseDouble(buyingsPricesTextFields.get(i).getText().trim());
+                boughtProducts.add(new BoughtProduct(currentProduct, boughtQuantity, buyingPrice));
 
+                productsTotalCost += (buyingPrice * boughtQuantity);
+            }
+
+            double supplyTotalCost = productsTotalCost + transportationFees;
+
+            Supply supply = new Supply(supplyDate, supplier, transportationFees, productsTotalCost, supplyTotalCost, boughtProducts);
+            boolean done = StoreDatabase.addSupply(supply);
+
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+        });
+
+        addNewProductButton.setOnAction(actionEvent -> {
+            BorderPane addProductLayout = (BorderPane) getClerkAddProductSceneLayout();
+
+            Scene addProductScene = new Scene(addProductLayout);
+            addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage secondaryStage = new Stage();
+            secondaryStage.setAlwaysOnTop(true);
+            secondaryStage.setTitle("واجهة إضافة منتج");
+            secondaryStage.setScene(addProductScene);
+            System.gc();
+            secondaryStage.show();
 
         });
 
@@ -5220,28 +3958,27 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(productNameLabel,0,0);
-        gridPane.add(productNameTextField,1,0);
-        gridPane.add(categoriesChoiceBox,1,1);
-        gridPane.add(productCategoryLabel,0,1);
-        gridPane.add(submitButton,0,4);
-        gridPane.add(messageLabel,0,5);
-
+        gridPane.add(supplyDateLabel,0,0);
+        gridPane.add(supplyDatePicker, 1,0);
+        gridPane.add(supplierNameLabel,0,1);
+        gridPane.add(supplierChoiceBox,1,1);
+        gridPane.add(transportationFessLabel,0,2);
+        gridPane.add(transportationFeesTextField,1,2);
+        gridPane.add(addMoreProductsButton,0,3);
+        gridPane.add(addNewProductButton, 1, 3);
+        gridPane.add(scrollPane,0,4);
+        gridPane.add(submitButton,0,5);
+        gridPane.add(messageLabel,0,6);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
+
         borderPane.setCenter(gridPane);
 
-        Stage secondaryStage = new Stage();
-        secondaryStage.setAlwaysOnTop(true);
-        secondaryStage.setMaximized(true);
-        secondaryStage.setTitle("واجهة تعديل منتج");
 
-        Scene scene = new Scene(borderPane);
-        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        secondaryStage.setScene(scene);
-        System.gc();
-        secondaryStage.show();
+        return borderPane;
     }
+
+
 
 }

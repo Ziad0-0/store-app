@@ -2,28 +2,29 @@ package nubahome.main;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import nubahome.databse.Store;
+import nubahome.databse.StoreDatabase;
 import nubahome.gui.GUI;
 
 import java.util.Locale;
 
 
 public class Main extends Application {
-
-    public static Store myStore;
+    
 
     @Override
     public void start(Stage primaryStage) {
-
         GUI.open(primaryStage);
     }
 
     public static void main(String[] args) {
+        //set app language to arabic
         Locale.setDefault(new Locale("ar"));
-        myStore = new Store("NubaHome");
-        myStore.setupDatabase("com.mysql.jdbc.Driver","jdbc:sqlite:db/nuba_home.db");
-        myStore.connectToDatabase();
-        myStore.initializeUserTypes();
+
+        StoreDatabase.setDatabaseURL("jdbc:sqlite:db/nuba_home.db");
+        StoreDatabase.connect();
+
         Application.launch(args);
     }
+
+
 }

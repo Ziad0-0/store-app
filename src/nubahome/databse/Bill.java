@@ -1,39 +1,91 @@
 package nubahome.databse;
 
-import java.util.Date;
+import java.util.ArrayList;
+
 
 public class Bill {
-    private int ID;
-    private String date;
-    private String buyerName;
-    private double totalCost;
-    private String paymentMethod;
+    int billID;
+    String billDate;
+    String buyerName;
+    double productsTotalCost;
+    double billTotalCost;
+    String paymentMethod;
+    ArrayList<SoldProduct> soldProducts;
+    InstalmentsPayment instalmentsPayment;
 
-    public Bill(int ID, String date, String buyerName, double totalCost, String paymentMethod) {
-        this.ID = ID;
-        this.date = date;
+
+    public Bill(String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
+        this.billDate = billDate;
         this.buyerName = buyerName;
-        this.totalCost = totalCost;
+        this.productsTotalCost = productsTotalCost;
+        this.billTotalCost = billTotalCost;
         this.paymentMethod = paymentMethod;
+        this.soldProducts = soldProducts;
+        this.instalmentsPayment = null;
     }
 
-    public int getID() {
-        return ID;
+    public Bill(String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, InstalmentsPayment instalmentsPayment) {
+        this.billDate = billDate;
+        this.buyerName = buyerName;
+        this.productsTotalCost = productsTotalCost;
+        this.billTotalCost = billTotalCost;
+        this.paymentMethod = paymentMethod;
+        this.soldProducts = soldProducts;
+        this.instalmentsPayment = instalmentsPayment;
     }
 
-    public String getDate() {
-        return date;
+    public Bill(int billID, String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, InstalmentsPayment instalmentsPayment) {
+        this.billID = billID;
+        this.billDate = billDate;
+        this.buyerName = buyerName;
+        this.productsTotalCost = productsTotalCost;
+        this.billTotalCost = billTotalCost;
+        this.paymentMethod = paymentMethod;
+        this.soldProducts = soldProducts;
+        this.instalmentsPayment = instalmentsPayment;
+    }
+
+    public Bill(int billID, String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
+        this.billID = billID;
+        this.billDate = billDate;
+        this.buyerName = buyerName;
+        this.productsTotalCost = productsTotalCost;
+        this.billTotalCost = billTotalCost;
+        this.paymentMethod = paymentMethod;
+        this.soldProducts = soldProducts;
+        this.instalmentsPayment = null;
+    }
+
+    public int getBillID() {
+        return billID;
+    }
+
+    public String getBillDate() {
+        return billDate;
     }
 
     public String getBuyerName() {
         return buyerName;
     }
 
-    public double getTotalCost() {
-        return totalCost;
+    public double getProductsTotalCost() {
+        return productsTotalCost;
+    }
+
+    public double getBillTotalCost() {
+        return billTotalCost;
     }
 
     public String getPaymentMethod() {
         return paymentMethod;
     }
+
+    public ArrayList<SoldProduct> getSoldProducts() {
+        return soldProducts;
+    }
+
+    public InstalmentsPayment getInstalmentsPayment() {
+        return instalmentsPayment;
+    }
+
 }

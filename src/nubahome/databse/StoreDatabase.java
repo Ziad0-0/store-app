@@ -1,513 +1,784 @@
 package nubahome.databse;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
-class StoreDatabase extends Database {
+public class StoreDatabase {
 
-    private HashMap<String, Integer> userTypes;
-
-    StoreDatabase(String driverURL, String databaseURL) {
-        super(driverURL, databaseURL);
-
+    private static String databaseURL;
+    private static Connection databaseConnection;
+    private static User currentUser;
+    public static void setDatabaseURL(String dbURL) {
+        databaseURL = dbURL;
     }
 
-    void initializeUserTypes() {
-        userTypes = new HashMap<>();
-        ResultSet resultSet = executeQuery("select * from users_types;");
-        String type;
-        Integer type_id;
+    public static void connect() {
         try {
-            while (resultSet.next()) {
-                type = resultSet.getString("type");
-                type_id = resultSet.getInt("type_id");
-                userTypes.put(type, type_id);
+            databaseConnection = DriverManager.getConnection(databaseURL);
+            System.out.println("Connection to SQLite has been established.");
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+    }
+
+    public static void disconnect() {
+
+        try{
+            if(databaseConnection!=null)
+                databaseConnection.close();
+        }catch(SQLException se){
+            se.printStackTrace();
+        }
+    }
+
+    public static boolean login(String userName, String userPassword) {
+        boolean isUser = false;
+        try {
+            String query = "select * from users where user_name = ? and user_password = ?";
+            PreparedStatement preparedStatement= databaseConnection.prepareStatement(query);
+
+            preparedStatement.setString(1, userName);
+            preparedStatement.setString(2, userPassword);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next())
+            {
+                isUser = true;
+                int userID = resultSet.getInt("user_id");
+                int roleID = resultSet.getInt("user_role_id");
+                UserRole userRole = getUserRole(roleID);
+
+                currentUser = new User(userID, userName, userPassword, userRole);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-
+        return isUser;
     }
 
-    Integer userType(String type) {
-        int user_type = userTypes.get(type);
-        return user_type;
+    public static UserRole getCurrentUserRole() {
+        return currentUser.userRole;
     }
 
-    Integer login(String userName, String userPassword) {
-
-        Integer user_type = userTypes.get("NOT_REGISTERED");
-        ResultSet resultSet = executeQuery("select * from users where user_name='" + userName + "';");
-
+    public static UserRole getUserRole(int roleID) {
+        UserRole userRole = null;
         try {
-            if (resultSet.next()) {
-                String databasePassword = resultSet.getString("user_password");
-                if (databasePassword.equals(userPassword))
-                    user_type = resultSet.getInt("user_type");
+            Statement statement = databaseConnection.createStatement();
+            String query = "select * from users_roles where role_id = ?";
+            PreparedStatement preparedStatement= databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, roleID);
 
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next())
+            {
+                String roleName = resultSet.getString("role_name");
+                userRole = new UserRole(roleID, roleName);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
+            return null;
         }
-        return user_type;
+        return userRole;
     }
 
-    boolean addCategory(String categoryName) {
-        boolean done = false;
-        done = executeInsertion("insert into categories (category_name) values ('" + categoryName + "');");
-
-        return done;
-    }
-
-    boolean addSupplier(String supplierName) {
-        boolean done = false;
-        done = executeInsertion("insert into suppliers (supplier_name) values ('" + supplierName + "');");
-        return done;
-    }
-
-    boolean addProduct(String productName, int productCategory, int availableQuantity, Double productPrice) {
-        boolean done = false;
-        done = executeInsertion("insert into products (product_name, category_id, available_quantity, buying_price) " +
-                "values ('" + productName + "', " + productCategory + ", " + availableQuantity + ", " + productPrice +
-                ");");
-        return done;
-    }
-
-    boolean addUser(String userName, String userPassword, int userType) {
-        boolean done = false;
-        done = executeInsertion("insert into users (user_name, user_password, user_type) " +
-                "values ('" + userName + "', '" + userPassword + "', " + userType + ");");
-        return done;
-    }
-
-    ArrayList<String> getCategories() {
-
-        ArrayList<String> catogeries = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select category_name from categories;");
-
+    public static ArrayList<UserRole> getAllUsersRoles() {
+        ArrayList<UserRole> usersRoles = new ArrayList<>();
         try {
-            while (resultSet.next())
-                catogeries.add(resultSet.getString("category_name"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            Statement statement = databaseConnection.createStatement();
+            String query = "select * from users_roles";
+            ResultSet resultSet = statement.executeQuery(query);
 
-        return catogeries;
+            while(resultSet.next())
+            {
+                int roleID = resultSet.getInt("role_id");
+                String roleName = resultSet.getString("role_name");
 
-    }
-
-
-    ArrayList<String> getSuppliers() {
-        ArrayList<String> suppliers = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select supplier_name from  suppliers;");
-
-        try {
-            while (resultSet.next())
-                suppliers.add(resultSet.getString("supplier_name"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return suppliers;
-    }
-
-    boolean addBill(String billDate, String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String paymentMethod) {
-
-        boolean done = false;
-
-        done = executeInsertion("insert into bills (bill_date,buyer_name, bill_total_cost, payment_method) " +
-                "values ('" + billDate + "', '" + buyerName + "', " + totalCost + ", '" + paymentMethod + "');");
-
-        ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
-        int lastBillID = 0;
-        try {
-            if (resultSet.next())
-                lastBillID = resultSet.getInt("bill_id");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
-        for (int i = 0, s = soldQuantities.size(); i < s; i++)
-            done = executeInsertion("insert into bills_details (bill_id, product_id, sold_quantity, selling_price) " +
-                    "values (" + lastBillID + ", " + soldProductsIDs.get(i) + ", " + soldQuantities.get(i) + ", " + sellingPrices.get(i) + ");");
-        return done;
-    }
-
-
-    boolean addInstalment(String billDate, String buyerName, ArrayList<Integer> soldProductsIDs, ArrayList<Integer> soldQuantities, ArrayList<Double> sellingPrices, double totalCost, String guarantorName, double paidMoney, double instalmentAmount, String startDate, String endDate) {
-        boolean done = false;
-
-        done = addBill(billDate, buyerName, soldProductsIDs, soldQuantities, sellingPrices, totalCost, "تقسيط");
-
-        ResultSet resultSet = executeQuery("select bill_id from bills order by bill_id desc limit 1;");
-        int lastBillID = 0;
-        try {
-            if (resultSet.next())
-                lastBillID = resultSet.getInt("bill_id");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        double remainingMoney = totalCost - paidMoney;
-
-        done = executeInsertion("insert into instalments (bill_id, guarantor_name, paid_money, remaining_money, instalment_amount, start_date, end_date)" +
-                "values (" + lastBillID + ", '" + guarantorName + "', " + paidMoney + ", " + remainingMoney + ", " + instalmentAmount + ", '" + startDate + "', '" + endDate + "');");
-        return done;
-    }
-
-    ArrayList<Product> getProductsInCategory(int categoryID) {
-        ArrayList<Product> products = new ArrayList<>();
-
-        ResultSet resultSet = executeQuery("select * from products where category_id=" + categoryID + ";");
-
-        try {
-            while (resultSet.next()) {
-                int productID = resultSet.getInt("product_id");
-                String productName = resultSet.getString("product_name");
-                int availableQuantity = resultSet.getInt("available_quantity");
-                double buyingPrice = resultSet.getDouble("buying_price");
-                String lastBuyingDate = resultSet.getString("last_buying_date");
-                double sellingPrice = resultSet.getDouble("selling_price");
-                double installmentPrice = resultSet.getDouble("installment_price");
-                products.add(new Product(productID, productName, categoryID, availableQuantity, buyingPrice, lastBuyingDate, sellingPrice, installmentPrice));
+                usersRoles.add(new UserRole(roleID, roleName));
             }
+
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return usersRoles;
+        }
+        return usersRoles;
+    }
+
+    public static boolean addUser(User user) {
+        boolean done = false;
+        try {
+
+            String query = "insert into users" + "(user_name, user_password, user_role_id)" + "values (?,?,?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, user.userName);
+            preparedStatement.setString(2, user.userPassword);
+            preparedStatement.setInt(3, user.userRole.roleID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return products;
+        finally {
+            return done;
+        }
 
     }
 
-    int getSoldQuantity(int productID, String startDate, String endDate) {
-        int soldQuantity = 0;
-
-        ResultSet resultSet = executeQuery("select sum(sold_quantity) from bills_details where product_id = " + productID +
-                "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '" + endDate + "');");
-
-        try {
-            if (resultSet.next())
-                soldQuantity += resultSet.getInt("sum(sold_quantity)");
-            return soldQuantity;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return soldQuantity;
-    }
-
-    double getProfit(int productID, String startDate, String endDate) {
-
-        double totalSellingPrice = 0;
-        ResultSet resultSet = executeQuery("select sum(selling_price) from bills_details where product_id = " + productID +
-                "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '" + endDate + "');");
-        try {
-            if (resultSet.next())
-                totalSellingPrice += resultSet.getDouble("sum(selling_price)");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        double totalUnitsPrices = 0;
-        resultSet = executeQuery("select sum(unit_price) from bills_details where product_id = " + productID +
-                "AND bill_id in ( select bill_id from bills where bill_date between '" + startDate + "' AND '" + endDate + "');");
-        try {
-            if (resultSet.next())
-                totalUnitsPrices += resultSet.getDouble("sum(unit_price)");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        double profit = totalSellingPrice - totalUnitsPrices;
-
-        return profit;
-    }
-
-    ArrayList<User> getAllUsers() {
-
+    public static ArrayList<User> getAllUsers() {
         ArrayList<User> users = new ArrayList<>();
 
-        ResultSet resultSet = executeQuery("select * from users, users_types where user_type = type_id;");
-
         try {
-            while (resultSet.next()) {
+            Statement statement =databaseConnection.createStatement();
+            String query = "select * from users";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while(resultSet.next())
+            {
+                int userID = resultSet.getInt("user_id");
                 String userName = resultSet.getString("user_name");
-                String userType = resultSet.getString("type");
-                users.add(new User(userName, userType));
+                String userPassword = resultSet.getString("user_password");
+                int userRoleID = resultSet.getInt("user_role_id");
+                UserRole userRole = getUserRole(userRoleID);
+
+                users.add(new User(userID, userName, userPassword,userRole));
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return users;
         }
 
         return users;
-
     }
 
-    void updateUser(String userName, String userPassword, int userType) {
-        executeUpdate("update users set user_name='" + userName + "', user_password='" + userPassword + "', user_type=" + userType + "where user_name='" + userName + "';");
-
-
-    }
-
-    void deleteUser(String userName) {
-        executeDelete("delete from users where user_name= '" + userName + "';");
-    }
-
-    void updateUserName(User user, String newName) {
-        String oldName = user.getName();
-        executeUpdate("update users set user_name='" + newName + "' where user_name='" + oldName + "';");
-    }
-
-    void updateUserPassword(User user, String newPassword) {
-        String userName = user.getName();
-        executeUpdate("update users set user_password='" + newPassword + "' where user_name='" + userName + "';");
-    }
-
-    void updateUserType(User user, int newType) {
-        String userName = user.getName();
-        executeUpdate("update users set user_type=" + newType + ';');
-    }
-
-    ArrayList<Bill> getAllBills() {
-        ArrayList<Bill> bills = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from bills;");
-        try {
-            while (resultSet.next()) {
-                int billID = resultSet.getInt("bill_id");
-                String billDate = resultSet.getString("bill_date");
-                String buyerName = resultSet.getString("buyer_name");
-                double billTotalCost = resultSet.getDouble("bill_total_cost");
-                String paymentMethod = resultSet.getString("payment_method");
-                Bill bill = new Bill(billID, billDate, buyerName, billTotalCost, paymentMethod);
-                bills.add(bill);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return bills;
-    }
-
-    ArrayList<String> getUserTypes() {
-        ArrayList<String> types = new ArrayList<>();
-        for (String t : userTypes.keySet())
-            types.add(t);
-
-        return types;
-    }
-
-    ArrayList<Supply> getAllSupplies() {
-        ArrayList<Supply> supplies = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from supplies;");
-        try {
-            while (resultSet.next()) {
-                int supplyID = resultSet.getInt("supply_id");
-                String supplyDate = resultSet.getString("supply_date");
-                String supplierName = resultSet.getString("supplier_name");
-                double transportationFees = resultSet.getDouble("transportation_fees");
-                double productsTotalCost = resultSet.getDouble("products_total_cost");
-                double supplyTotalCost = resultSet.getDouble("supply_total_cost");
-
-                Supply supply = new Supply(supplyID, supplyDate, supplierName, transportationFees, productsTotalCost, supplyTotalCost);
-                supplies.add(supply);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
-        return supplies;
-    }
-
-    boolean addSupply(String supplyDate, String supplierName, ArrayList<Integer> boughtProductsIDs, ArrayList<Integer> boughtQuantities, ArrayList<Double> buyingPrices, double transportationFees, double productsTotalCost, double supplyTotalCost) {
-
+    public static boolean addProductCategory(ProductCategory productCategory) {
         boolean done = false;
 
-        done = executeInsertion("insert into supplies (supply_date, supplier_name, transportation_fees, products_total_cost, supply_total_cost) " +
-                "values ('" + supplyDate + "', '" + supplierName + "', " + transportationFees + ", " + productsTotalCost + ", " + supplyTotalCost + ");");
-
-        ResultSet resultSet = executeQuery("select supply_id from supplies order by supply_id desc limit 1;");
-        int lastSupplyID = 0;
         try {
-            if (resultSet.next())
-                lastSupplyID = resultSet.getInt("supply_id");
+            String query = "insert into products_categories" + "(category_name)" + "values (?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, productCategory.categoryName);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-
-        for (int i = 0, s = boughtQuantities.size(); i < s; i++)
-            done = executeInsertion("insert into supplies_details (supply_id, product_id, bought_quantity, buying_price) " +
-                    "values (" + lastSupplyID + ", " + boughtProductsIDs.get(i) + ", " + boughtQuantities.get(i) + ", " + buyingPrices.get(i) + ");");
-        return done;
+        finally {
+            return done;
+        }
     }
 
-    ArrayList<SoldProduct> getBillSoldProducts(int billID) {
-        ArrayList<SoldProduct> soldProducts = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from bills_details, products where bills_details.product_id = products.product_id and bills_details.bill_id=" + billID + ";");
+    public static ProductCategory getProductCategory(int categoryID) {
+        ProductCategory category = null;
 
         try {
-            while (resultSet.next()) {
-                String productName = resultSet.getString("product_name");
-                int soldQuantity = resultSet.getInt("sold_quantity");
-                double sellingPrice = resultSet.getDouble("selling_price");
-                soldProducts.add(new SoldProduct(productName, soldQuantity, sellingPrice));
+            String query = "select * from products_categories where category_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, categoryID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next())
+            {
+                String categoryName = resultSet.getString("category_name");
+                category = new ProductCategory(categoryID, categoryName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return category;
+        }
+        return category;
+    }
+    public static ArrayList<ProductCategory> getAllProductsCategories() {
+        ArrayList<ProductCategory> productCategories = new ArrayList<>();
+        try {
+            Statement statement = databaseConnection.createStatement();
+            String query = "select * from products_categories";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next())
+            {
+                int categoryID = resultSet.getInt("category_id");
+                String categoryName = resultSet.getString("category_name");
+
+                productCategories.add(new ProductCategory(categoryID, categoryName));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return productCategories;
+        }
+
+        return productCategories;
+    }
+
+    public static boolean addProduct(Product product) {
+        boolean done = false;
+
+        try {
+            String query = "insert into products"
+                    + "(product_name, category_id, available_quantity, supply_price, last_supply_date, cash_selling_price, instalment_selling_price)"
+                    + "values (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, product.productName);
+            preparedStatement.setInt(2, product.category.categoryID);
+            preparedStatement.setInt(3, product.availableQuantity);
+            preparedStatement.setDouble(4, product.supplyPrice);
+            preparedStatement.setString(5, product.lastSupplyDate);
+            preparedStatement.setDouble(6, product.cashSellingPrice);
+            preparedStatement.setDouble(7, product.instalmentSellingPrice);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+        }
+    }
+
+    public static boolean updateProduct(Product updatedProduct) {
+        boolean done = false;
+        try {
+            String query = "update products set category_id = ?, available_quantity = ?, supply_price = ?, last_supply_date = ?, cash_selling_price = ?, instalment_selling_price = ? where product_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, updatedProduct.category.categoryID);
+            preparedStatement.setInt(2, updatedProduct.availableQuantity);
+            preparedStatement.setDouble(3, updatedProduct.supplyPrice);
+            preparedStatement.setString(4, updatedProduct.lastSupplyDate);
+            preparedStatement.setDouble(5, updatedProduct.cashSellingPrice);
+            preparedStatement.setDouble(6, updatedProduct.instalmentSellingPrice);
+            preparedStatement.setInt(7, updatedProduct.productID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+        }
+    }
+
+    public static boolean updateProducts(ArrayList<Product> updatedProducts) {
+        boolean done = false;
+        try {
+            databaseConnection.setAutoCommit(false);
+            String query = "update products set category_id = ?, available_quantity = ?, supply_price = ?, last_supply_date = ?, cash_selling_price = ?, instalment_selling_price = ? where product_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+
+            for(Product x : updatedProducts)
+            {
+                preparedStatement.setInt(1, x.category.categoryID);
+                preparedStatement.setInt(2, x.availableQuantity);
+                preparedStatement.setDouble(3, x.supplyPrice);
+                preparedStatement.setString(4, x.lastSupplyDate);
+                preparedStatement.setDouble(5, x.cashSellingPrice);
+                preparedStatement.setDouble(6, x.instalmentSellingPrice);
+                preparedStatement.setInt(7, x.productID);
+
+                preparedStatement.addBatch();
             }
 
 
+            int[] updateCounts = preparedStatement.executeBatch();
+            boolean allInserted = true;
+            for (int i = 0; i < updateCounts.length; i++)
+                if (updateCounts[i] <= 0) {
+                    allInserted = false;
+                    break;
+                }
+
+            if (allInserted)
+                done = true;
+
+            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return soldProducts;
-
+        finally {
+            return done;
+        }
     }
 
-    ArrayList<BoughtProduct> getSupplyBoughtProducts(int supplyID) {
-        ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select products.product_name, supplies_details.bought_quantity, supplies_details.buying_price from supplies_details left join products where supplies_details.product_id = products.product_id and supplies_details.supply_id=" + supplyID + ";");
+    public static ArrayList<Product> getProductsInCategory(ProductCategory category) {
+        ArrayList<Product> products = new ArrayList<>();
+        try
+        {
+            String query = "select * from products where category_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, category.categoryID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+            {
+                int productID = resultSet.getInt("product_id");
+                String productName = resultSet.getString("product_name");
+                int availableQuantity = resultSet.getInt("available_quantity");
+                double supplyPrice = resultSet.getDouble("supply_price");
+                String lastSupplyDate = resultSet.getString("last_supply_date");
+                double cashSellingPrice = resultSet.getDouble("cash_selling_price");
+                double instalmentSellingPrice = resultSet.getDouble("instalment_selling_price");
+
+                products.add(new Product(productID, productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice, instalmentSellingPrice));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return products;
+        }
+
+        return products;
+    }
+
+    public static Product getProduct(int productID) {
+        Product product = null;
 
         try {
-            while (resultSet.next()) {
+            String query = "select * from products where product_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, productID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next())
+            {
                 String productName = resultSet.getString("product_name");
+                int productCategoryID = resultSet.getInt("category_id");
+                ProductCategory category = getProductCategory(productCategoryID);
+                int availableQuantity = resultSet.getInt("available_quantity");
+                double supplyPrice = resultSet.getDouble("supply_price");
+                String lastSupplyDate = resultSet.getString("last_supply_date");
+                double cashSellingPrice = resultSet.getDouble("cash_selling_price");
+                double instalmentSellingPrice = resultSet.getDouble("instalment_selling_price");
+                product = new Product(productID, productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice, instalmentSellingPrice);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return product;
+        }
+        return product;
+    }
+
+    public static ArrayList<BoughtProduct> getBoughtProducts(int supplyID) {
+        ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
+        try
+        {
+            String query = "select * from bought_products where supply_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supplyID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+            {
+                int productID = resultSet.getInt("product_id");
+                Product product = getProduct(productID);
                 int boughtQuantity = resultSet.getInt("bought_quantity");
                 double buyingPrice = resultSet.getDouble("buying_price");
-                boughtProducts.add(new BoughtProduct(productName, boughtQuantity, buyingPrice));
+
+                boughtProducts.add(new BoughtProduct(product, boughtQuantity, buyingPrice));
             }
-
-
         } catch (SQLException e) {
             e.printStackTrace();
+            return boughtProducts;
         }
 
         return boughtProducts;
-
     }
 
-    ArrayList<Instalment> getAllInstalments() {
-        ArrayList<Instalment> instalments = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from bills, instalments where bills.bill_id = instalments.bill_id;");
+    public static ArrayList<SoldProduct> getSoldProducts(int billID) {
+        ArrayList<SoldProduct> soldProducts = new ArrayList<>();
+        try
+        {
+            String query = "select * from sold_products where bill_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, billID);
 
-        try {
-            while(resultSet.next())
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
             {
-                int billID = resultSet.getInt("bill_id");
-                String buyerName = resultSet.getString("buyer_name");
-                double billTotalCost = resultSet.getDouble("bill_total_cost");
-                double paidMoney = resultSet.getDouble("paid_money");
-                double instalmentAmount = resultSet.getDouble("instalment_amount");
-                String startDate = resultSet.getString("start_date");
-                String endDate = resultSet.getString("end_date");
+                int productID = resultSet.getInt("product_id");
+                Product product = getProduct(productID);
+                int soldQuantity = resultSet.getInt("sold_quantity");
+                double sellingPrice = resultSet.getDouble("selling_price");
 
-                Instalment instalment = new Instalment(billID, buyerName, billTotalCost, paidMoney, instalmentAmount, startDate, endDate);
-                instalments.add(instalment);
-
+                soldProducts.add(new SoldProduct(product, soldQuantity, sellingPrice));
             }
         } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
+            return soldProducts;
+        }
 
-
-        return instalments;
+        return soldProducts;
     }
-    
-    ArrayList<Supplier> getAllSuppliers() {
-        ArrayList<Supplier> suppliers = new ArrayList<>();
 
-        ResultSet resultSet = executeQuery("select * from suppliers;");
+    public static boolean addSupplier(Supplier supplier) {
+        try {
+            String query = "insert into suppliers" + "(supplier_name)" + "values (?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, supplier.supplierName);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows <= 0)
+                return false;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    public static Supplier getSupplier(int supplierID) {
+        Supplier supplier = null;
 
         try {
-            while (resultSet.next()) {
+            String query = "select * from suppliers where supplier_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supplierID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next())
+            {
                 String supplierName = resultSet.getString("supplier_name");
-                suppliers.add(new Supplier(supplierName));
+                supplier =  new Supplier(supplierID, supplierName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return supplier;
+        }
+
+        return supplier;
+    }
+
+    public static ArrayList<Supplier> getAllSuppliers() {
+        ArrayList<Supplier> suppliers = new ArrayList<>();
+
+        try {
+            String query = "select * from suppliers";
+            Statement statement = databaseConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next())
+            {
+                int supplierID = resultSet.getInt("supplier_id");
+                String supplierName = resultSet.getString("supplier_name");
+
+                suppliers.add(new Supplier(supplierID, supplierName));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return suppliers;
-        
     }
 
-    ArrayList<Bill> getBills(String queryStartDate, String queryEndDate) {
-        ArrayList<Bill> bills = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from bills where bill_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
+    public static boolean addSupply(Supply supply) {
         try {
-            while (resultSet.next()) {
-                int billID = resultSet.getInt("bill_id");
-                String billDate = resultSet.getString("bill_date");
-                String buyerName = resultSet.getString("buyer_name");
-                double billTotalCost = resultSet.getDouble("bill_total_cost");
-                String paymentMethod = resultSet.getString("payment_method");
-                Bill bill = new Bill(billID, billDate, buyerName, billTotalCost, paymentMethod);
-                bills.add(bill);
+            String query = "insert into supplies"
+                    + "(supplier_id, supply_date, transportation_fees, products_total_cost, supply_total_cost)"
+                    + "values (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supply.supplier.supplierID);
+            preparedStatement.setString(2, supply.supplyDate);
+            preparedStatement.setDouble(3, supply.transportationFees);
+            preparedStatement.setDouble(4, supply.productsTotalCost);
+            preparedStatement.setDouble(5, supply.supplyTotalCost);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows <= 0)
+                return false;
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if(!resultSet.next())
+                return false;
+
+            databaseConnection.setAutoCommit(false);
+
+            supply.supplyID = resultSet.getInt(1);
+            query = "insert into bought_products"
+                    + "(supply_id, product_id, bought_quantity, buying_price)"
+                    + "values (?, ?, ?, ?)";
+
+            for(BoughtProduct x : supply.boughtProducts)
+            {
+                preparedStatement = databaseConnection.prepareStatement(query);
+                preparedStatement.setInt(1,supply.supplyID);
+                preparedStatement.setInt(2, x.productID);
+                preparedStatement.setInt(3, x.boughtQuantity);
+                preparedStatement.setDouble(4, x.supplyPrice);
+
+                preparedStatement.addBatch();
+
             }
+
+            int[] updateCounts = preparedStatement.executeBatch();
+
+            for (int i = 0; i < updateCounts.length; i++)
+                if (updateCounts[i] <= 0)
+                    return false;
+
+
+            ArrayList<Product> toUpdateProducts = new ArrayList<>();
+            for(BoughtProduct x : supply.boughtProducts)
+            {
+                int productID = x.productID;
+                String productName = x.productName;
+                ProductCategory category = x.category;
+                int availableQuantity = x.availableQuantity + x.boughtQuantity;
+                double supplyPrice = x.buyingPrice;
+                String lastSupplyDate = supply.supplyDate;
+                double cashSellingPrice = x.cashSellingPrice;
+                double instalmentSellingPrice = x.instalmentSellingPrice;
+
+                toUpdateProducts.add(new Product(productID, productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice, instalmentSellingPrice));
+            }
+
+
+            boolean areUpdated = updateProducts(toUpdateProducts);
+            if(!areUpdated)
+                return false;
+
+            preparedStatement.close();
+
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
 
-        return bills;
-
+        finally {
+            try {
+                databaseConnection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    ArrayList<Supply> getSupplies(String queryStartDate, String queryEndDate) {
+    public static ArrayList<Supply> getSupplies(String queryStartDate, String queryEndDate) {
         ArrayList<Supply> supplies = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from supplies where supply_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
         try {
-            while (resultSet.next()) {
+            String query = "select * from supplies where supply_date between ? and ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, queryStartDate);
+            preparedStatement.setString(2, queryEndDate);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
                 int supplyID = resultSet.getInt("supply_id");
                 String supplyDate = resultSet.getString("supply_date");
-                String supplierName = resultSet.getString("supplier_name");
+                int supplierID = resultSet.getInt("supplier_id");
+                Supplier supplier = getSupplier(supplierID);
                 double transportationFees = resultSet.getDouble("transportation_fees");
                 double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double supplyTotalCost = resultSet.getDouble("supply_total_cost");
-
-                Supply supply = new Supply(supplyID, supplyDate, supplierName, transportationFees, productsTotalCost, supplyTotalCost);
-                supplies.add(supply);
+                ArrayList<BoughtProduct> boughtProducts = getBoughtProducts(supplyID);
+                supplies.add(new Supply(supplyID, supplyDate, supplier, transportationFees, productsTotalCost, supplyTotalCost, boughtProducts));
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return supplies;
         }
-
 
         return supplies;
     }
 
-    ArrayList<Instalment> getInstalments(String queryStartDate, String queryEndDate) {
-        ArrayList<Instalment> instalments = new ArrayList<>();
-        ResultSet resultSet = executeQuery("select * from bills, instalments where bills.bill_id = instalments.bill_id and bill_date between '" + queryStartDate +"' and '" + queryEndDate + "';");
-
+    public static boolean addBill(Bill bill) {
         try {
+            //insert bill data
+            String query = "insert into bills"
+                    + "(buyer_name, bill_date, products_total_cost, bill_total_cost, payment_method)"
+                    + "values (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, bill.buyerName);
+            preparedStatement.setString(2, bill.billDate);
+            preparedStatement.setDouble(3, bill.productsTotalCost);
+            preparedStatement.setDouble(4, bill.billTotalCost);
+            preparedStatement.setString(5, bill.paymentMethod);
+
+            int numOfRows = preparedStatement.executeUpdate();
+
+            if(numOfRows <= 0)
+                return false;
+
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if(!resultSet.next())
+                return false;
+
+            bill.billID = resultSet.getInt(1);
+
+
+            //insert instalment payment data
+            if(bill.getPaymentMethod() == "تقسيط")
+            {
+                query = "insert into instalments_payments"
+                        + "(bill_id, guarantor_name, initial_payment, remaining_money, instalment_amount, first_instalment_date, last_instalment_date)"
+                        + "values (?, ?, ?, ?, ?, ?, ?)";
+                preparedStatement = databaseConnection.prepareStatement(query);
+
+                preparedStatement.setInt(1, bill.billID);
+                preparedStatement.setString(2, bill.getInstalmentsPayment().guarantorName);
+                preparedStatement.setDouble(3, bill.getInstalmentsPayment().initialPayment);
+                preparedStatement.setDouble(4, bill.getInstalmentsPayment().remainingMoney);
+                preparedStatement.setDouble(5, bill.getInstalmentsPayment().initialPayment);
+                preparedStatement.setString(6, bill.getInstalmentsPayment().firstInstalmentDate);
+                preparedStatement.setString(7, bill.getInstalmentsPayment().lastInstalmentDate);
+
+                numOfRows = preparedStatement.executeUpdate();
+
+                if(numOfRows <= 0)
+                    return false;
+            }
+
+            databaseConnection.setAutoCommit(false);
+
+            query = "insert into sold_products"
+                    + "(bill_id, product_id, sold_quantity, selling_price)"
+                    + "values (?, ?, ?, ?)";
+
+            preparedStatement = databaseConnection.prepareStatement(query);
+            for (SoldProduct x : bill.soldProducts) {
+                preparedStatement.setInt(1, bill.billID);
+                preparedStatement.setInt(2, x.productID);
+                preparedStatement.setInt(3, x.soldQuantity);
+                preparedStatement.setDouble(4, x.sellingPrice);
+
+                preparedStatement.addBatch();
+            }
+
+            int[] updateCounts = preparedStatement.executeBatch();
+
+            for (int i = 0; i < updateCounts.length; i++)
+                if (updateCounts[i] <= 0)
+                    return false;
+
+
+
+            ArrayList<Product> toUpdateProducts = new ArrayList<>();
+            for(SoldProduct x : bill.soldProducts)
+            {
+                int productID = x.productID;
+                String productName = x.productName;
+                ProductCategory category = x.category;
+                int availableQuantity = x.availableQuantity - x.soldQuantity;
+                double supplyPrice = x.supplyPrice;
+                String lastSupplyDate = x.lastSupplyDate;
+                double cashSellingPrice = x.cashSellingPrice;
+                double instalmentSellingPrice = x.getInstalmentSellingPrice();
+
+                toUpdateProducts.add(new Product(productID, productName, category, availableQuantity, supplyPrice, lastSupplyDate, cashSellingPrice, instalmentSellingPrice));
+            }
+
+
+            boolean areUpdated = updateProducts(toUpdateProducts);
+            if(!areUpdated)
+                return false;
+
+            preparedStatement.close();
+
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        finally {
+            try {
+                databaseConnection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static ArrayList<Bill> getBills(String queryStartDate, String queryEndDate) {
+        ArrayList<Bill> bills = new ArrayList<>();
+        try {
+            String query = "select * from bills where bill_date between ? and ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, queryStartDate);
+            preparedStatement.setString(2, queryEndDate);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next())
             {
                 int billID = resultSet.getInt("bill_id");
+                String billDate = resultSet.getString("bill_date");
                 String buyerName = resultSet.getString("buyer_name");
+                double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double billTotalCost = resultSet.getDouble("bill_total_cost");
-                double paidMoney = resultSet.getDouble("paid_money");
-                double instalmentAmount = resultSet.getDouble("instalment_amount");
-                String startDate = resultSet.getString("start_date");
-                String endDate = resultSet.getString("end_date");
-
-                Instalment instalment = new Instalment(billID, buyerName, billTotalCost, paidMoney, instalmentAmount, startDate, endDate);
-                instalments.add(instalment);
-
+                String paymentMethod = resultSet.getString("payment_method");
+                ArrayList<SoldProduct> soldProducts = getSoldProducts(billID);
+                if(paymentMethod.equals("كاش"))
+                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts));
+                else
+                {
+                    InstalmentsPayment instalmentsPayment = getInstalmentsPayment(billID);
+                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, instalmentsPayment));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return bills;
         }
 
+        return bills;
+    }
+    
+    public static InstalmentsPayment getInstalmentsPayment(int billID) {
+        InstalmentsPayment instalmentsPayment = null;
 
-        return instalments;
+        try {
+            String query = "select * from instalments_payments where bill_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, billID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next())
+            {
+                String guarantorName = resultSet.getString("guarantor_name");
+                double initialPayment = resultSet.getDouble("initial_payment");
+                double remainingMoney = resultSet.getDouble("remaining_money");
+                double instalmentAmount = resultSet.getDouble("instalment_amount");
+                String firstInstalmentDate = resultSet.getString("first_instalment_date");
+                String lastInstalmentDate = resultSet.getString("last_instalment_date");
+
+                instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return instalmentsPayment;
+        }
+        return instalmentsPayment;
     }
 
 
-    public void updateProduct(int id, String productName, int productCategory, int availableQuantity, Double productPrice) {
-        executeUpdate("update products set product_name = '"+ productName +"', category_id = '"+ productCategory + "', available_quantity = '" + availableQuantity + "', selling_price = '" + productPrice + "' where product_id = '" + id + "';");
-
-    }
 }

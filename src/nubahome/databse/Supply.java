@@ -1,32 +1,45 @@
 package nubahome.databse;
 
-public class Supply {
-    private int ID;
-    private String date;
-    private String supplierName;
-    private double transportationFees;
-    private double productsTotalCost;
-    private double supplyTotalCost;
+import java.util.ArrayList;
 
-    public Supply(int ID, String date, String supplierName, double transportationFees, double productsTotalCost, double supplyTotalCost) {
-        this.ID = ID;
-        this.date = date;
-        this.supplierName = supplierName;
+public class Supply {
+    int supplyID;
+    String supplyDate;
+    Supplier supplier;
+    double transportationFees;
+    double productsTotalCost;
+    double supplyTotalCost;
+    ArrayList<BoughtProduct> boughtProducts;
+
+    public Supply(String supplyDate, Supplier supplier, double transportationFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
+        this.supplyDate = supplyDate;
+        this.supplier = supplier;
         this.transportationFees = transportationFees;
         this.productsTotalCost = productsTotalCost;
         this.supplyTotalCost = supplyTotalCost;
+        this.boughtProducts = boughtProducts;
     }
 
-    public int getID() {
-        return ID;
+    public Supply(int supplyID, String supplyDate, Supplier supplier, double transportationFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
+        this.supplyID = supplyID;
+        this.supplyDate = supplyDate;
+        this.supplier = supplier;
+        this.transportationFees = transportationFees;
+        this.productsTotalCost = productsTotalCost;
+        this.supplyTotalCost = supplyTotalCost;
+        this.boughtProducts = boughtProducts;
     }
 
-    public String getDate() {
-        return date;
+    public int getSupplyID() {
+        return supplyID;
     }
 
-    public String getSupplierName() {
-        return supplierName;
+    public String getSupplyDate() {
+        return supplyDate;
+    }
+
+    public Supplier getSupplier() {
+        return supplier;
     }
 
     public double getTransportationFees() {
@@ -39,5 +52,9 @@ public class Supply {
 
     public double getSupplyTotalCost() {
         return supplyTotalCost;
+    }
+
+    public ArrayList<BoughtProduct> getBoughtProducts() {
+        return boughtProducts;
     }
 }
