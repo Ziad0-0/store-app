@@ -1,7 +1,12 @@
 package nubahome.databse;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class StoreDatabase {
@@ -639,18 +644,18 @@ public class StoreDatabase {
             //insert instalment payment data
             if(bill.getPaymentMethod() == "تقسيط")
             {
-                query = "insert into instalments_payments"
-                        + "(bill_id, guarantor_name, initial_payment, remaining_money, instalment_amount, first_instalment_date, last_instalment_date)"
+                query = "insert into bills_instalments_details"
+                        + "(bill_id, guarantor_name, initial_payment, remaining_money, instalment_amount, upcoming_instalment_date, remaining_instalments_number)"
                         + "values (?, ?, ?, ?, ?, ?, ?)";
                 preparedStatement = databaseConnection.prepareStatement(query);
 
                 preparedStatement.setInt(1, bill.billID);
-                preparedStatement.setString(2, bill.getInstalmentsPayment().guarantorName);
-                preparedStatement.setDouble(3, bill.getInstalmentsPayment().initialPayment);
-                preparedStatement.setDouble(4, bill.getInstalmentsPayment().remainingMoney);
-                preparedStatement.setDouble(5, bill.getInstalmentsPayment().initialPayment);
-                preparedStatement.setString(6, bill.getInstalmentsPayment().firstInstalmentDate);
-                preparedStatement.setString(7, bill.getInstalmentsPayment().lastInstalmentDate);
+                preparedStatement.setString(2, bill.getBillInstalmentsDetails().guarantorName);
+                preparedStatement.setDouble(3, bill.getBillInstalmentsDetails().initialPayment);
+                preparedStatement.setDouble(4, bill.getBillInstalmentsDetails().remainingMoney);
+                preparedStatement.setDouble(5, bill.getBillInstalmentsDetails().initialPayment);
+                preparedStatement.setString(6, bill.getBillInstalmentsDetails().upcomingInstalmentDate);
+                preparedStatement.setInt(7, bill.getBillInstalmentsDetails().remainingInstalmentsNumber);
 
                 numOfRows = preparedStatement.executeUpdate();
 
@@ -741,8 +746,8 @@ public class StoreDatabase {
                     bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts));
                 else
                 {
-                    InstalmentsPayment instalmentsPayment = getInstalmentsPayment(billID);
-                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, instalmentsPayment));
+                    BillInstalmentsDetails billInstalmentsDetails = getBillInstalmentsDetails(billID);
+                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
                 }
             }
         } catch (SQLException e) {
@@ -752,12 +757,73 @@ public class StoreDatabase {
 
         return bills;
     }
-    
-    public static InstalmentsPayment getInstalmentsPayment(int billID) {
-        InstalmentsPayment instalmentsPayment = null;
+
+    public static ArrayList<Bill> getUpcomingInstalments(String queryStartDate, String queryEndDate) {
+        ArrayList<Bill> bills = new ArrayList<>();
+        try {
+            String query = "select * from bills b inner join bills_instalments_details d on b.bill_id = d.bill_id where d.upcoming_instalment_date between ? and ? and d.remaining_instalments_number > 0";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, queryStartDate);
+            preparedStatement.setString(2, queryEndDate);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
+                int billID = resultSet.getInt("bill_id");
+                String billDate = resultSet.getString("bill_date");
+                String buyerName = resultSet.getString("buyer_name");
+                double productsTotalCost = resultSet.getDouble("products_total_cost");
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                String paymentMethod = resultSet.getString("payment_method");
+                ArrayList<SoldProduct> soldProducts = getSoldProducts(billID);
+                String guarantorName = resultSet.getString("guarantor_name");
+                double initialPayment = resultSet.getDouble("initial_payment");
+                double remainingMoney = resultSet.getDouble("remaining_money");
+                double instalmentAmount = resultSet.getDouble("instalment_amount");
+                String upcomingInstalmentDate = resultSet.getString("upcoming_instalment_date");
+                int remainingInstalmentsNumber = resultSet.getInt("remaining_instalments_number");
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
+                bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return bills;
+        }
+
+        return bills;
+    }
+
+    public static boolean updateBillInstalmentsDetails(BillInstalmentsDetails billInstalmentsDetails, int billID) {
+        boolean done = false;
+        try {
+            String query = "update bills_instalments_details set guarantor_name = ?, initial_payment = ?, remaining_money = ?, instalment_amount = ?, upcoming_instalment_date = ?, remaining_instalments_number = ? where bill_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, billInstalmentsDetails.guarantorName);
+            preparedStatement.setDouble(2, billInstalmentsDetails.initialPayment);
+            preparedStatement.setDouble(3, billInstalmentsDetails.remainingMoney);
+            preparedStatement.setDouble(4, billInstalmentsDetails.initialPayment);
+            preparedStatement.setString(5, billInstalmentsDetails.upcomingInstalmentDate);
+            preparedStatement.setInt(6, billInstalmentsDetails.remainingInstalmentsNumber);
+            preparedStatement.setInt(7, billID);
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+        }
+    }
+
+    public static BillInstalmentsDetails getBillInstalmentsDetails(int billID) {
+        BillInstalmentsDetails billInstalmentsDetails = null;
 
         try {
-            String query = "select * from instalments_payments where bill_id = ?";
+            String query = "select * from bills_instalments_details where bill_id = ?";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
             preparedStatement.setInt(1, billID);
 
@@ -768,17 +834,50 @@ public class StoreDatabase {
                 double initialPayment = resultSet.getDouble("initial_payment");
                 double remainingMoney = resultSet.getDouble("remaining_money");
                 double instalmentAmount = resultSet.getDouble("instalment_amount");
-                String firstInstalmentDate = resultSet.getString("first_instalment_date");
-                String lastInstalmentDate = resultSet.getString("last_instalment_date");
+                String upcomingInstalmentDate = resultSet.getString("upcoming_instalment_date");
+                int remainingInstalmentsNumber = resultSet.getInt("remaining_instalments_number");
 
-                instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
+                billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return instalmentsPayment;
+            return billInstalmentsDetails;
         }
-        return instalmentsPayment;
+        return billInstalmentsDetails;
     }
 
 
+    public static boolean addPaidInstalment(PaidInstalment paidInstalment, BillInstalmentsDetails billInstalmentsDetails, int billID) {
+        try {
+
+            String query = "insert into paid_instalments" + "(instalment_due_date, payment_date, paid_amount, bill_id)" + "values (?,?,?,?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, paidInstalment.getInstalmentDueDate());
+            preparedStatement.setString(2, paidInstalment.getPaymentDate());
+            preparedStatement.setDouble(3, paidInstalment.getPaidAmount());
+            preparedStatement.setInt(4, billID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if (numOfRows <= 0)
+                return false;
+            if(billInstalmentsDetails.remainingInstalmentsNumber > 0)
+            {
+                billInstalmentsDetails.remainingInstalmentsNumber--;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate upcomingInstalmentDate = LocalDate.parse(billInstalmentsDetails.upcomingInstalmentDate, formatter);
+                upcomingInstalmentDate = upcomingInstalmentDate.plusMonths(1);
+                billInstalmentsDetails.upcomingInstalmentDate = upcomingInstalmentDate.toString();
+                boolean done = updateBillInstalmentsDetails(billInstalmentsDetails, billID);
+                if(!done)
+                    return false;
+            }
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
 }

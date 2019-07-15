@@ -1,6 +1,8 @@
 package nubahome.gui;
 
 
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,7 +19,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import nubahome.databse.*;
@@ -26,6 +30,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 
@@ -40,7 +45,7 @@ public class GUI {
 
         String sceneTitle = "تسجيل الدخول";
         mainStage.setTitle(sceneTitle);
-        Scene loginScene = new Scene(getLoginLayout());
+        Scene loginScene = new Scene(getClerkHomeSceneLayout());
         loginScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         mainStage.setScene(loginScene);
         mainStage.show();
@@ -1048,7 +1053,7 @@ public class GUI {
             Scene addProductScene = new Scene(addProductLayout);
             addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage secondaryStage = new Stage();
-            secondaryStage.setAlwaysOnTop(true);
+            secondaryStage.initModality(Modality.APPLICATION_MODAL);
             secondaryStage.setTitle("واجهة إضافة منتج");
             secondaryStage.setScene(addProductScene);
             System.gc();
@@ -1473,8 +1478,8 @@ public class GUI {
         TextField initialPaymentTextField = new TextField();
         initialPaymentTextField.setPrefSize(100,20);
 
-        nodeText = "تاريخ أول القسط";
-        Label firstInstalmentDateLabel = new Label(nodeText);
+        nodeText = "تاريخ القسط القادم";
+        Label upcomingInstalmentDateLabel = new Label(nodeText);
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -1500,32 +1505,10 @@ public class GUI {
             }
         });
 
-        nodeText = "تاريخ أخر القسط";
-        Label lastInstalmentDateLabel = new Label(nodeText);
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                billDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
+        nodeText = "عدد الأقساط المتبقية";
+        Label remainingInstalmentsNumberLabel = new Label(nodeText);
+        TextField remainingInstalmentsNumberTextField = new TextField();
+        remainingInstalmentsNumberTextField.setPrefSize(50,20);
 
         nodeText = "كمية القسط";
         Label instalmentAmountLabel = new Label(nodeText);
@@ -1576,9 +1559,9 @@ public class GUI {
                     gridPane.add(instalmentAmountTextField,1,5);
 
                     gridPane.add(startDatePicker,1,6);
-                    gridPane.add(firstInstalmentDateLabel,0,6);
-                    gridPane.add(endDatePicker,1,7);
-                    gridPane.add(lastInstalmentDateLabel,0,7);
+                    gridPane.add(upcomingInstalmentDateLabel,0,6);
+                    gridPane.add(remainingInstalmentsNumberTextField,1,7);
+                    gridPane.add(remainingInstalmentsNumberLabel,0,7);
                     gridPane.add(addMoreProductsButton,0,8);
                     gridPane.add(scrollPane,0,9);
                     gridPane.add(submitButton,0,10);
@@ -1595,9 +1578,9 @@ public class GUI {
                     gridPane.getChildren().remove(instalmentAmountTextField);
                     gridPane.getChildren().remove(instalmentAmountLabel);
                     gridPane.getChildren().remove(startDatePicker);
-                    gridPane.getChildren().remove(firstInstalmentDateLabel);
-                    gridPane.getChildren().remove(endDatePicker);
-                    gridPane.getChildren().remove(lastInstalmentDateLabel);
+                    gridPane.getChildren().remove(upcomingInstalmentDateLabel);
+                    gridPane.getChildren().remove(remainingInstalmentsNumberTextField);
+                    gridPane.getChildren().remove(remainingInstalmentsNumberLabel);
                     gridPane.getChildren().remove(addMoreProductsButton);
                     gridPane.getChildren().remove(scrollPane);
                     gridPane.getChildren().remove(submitButton);
@@ -1739,11 +1722,11 @@ public class GUI {
                 double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
                 double remainingMoney = billTotalCost - initialPayment;
                 double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
-                String firstInstalmentDate = startDatePicker.getValue().toString();
-                String lastInstalmentDate = endDatePicker.getValue().toString();
-                InstalmentsPayment instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
+                String upcomingInstalmentDate = startDatePicker.getValue().toString();
+                int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
 
-                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, instalmentsPayment);
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, billInstalmentsDetails);
             }
             else
                 bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
@@ -1795,7 +1778,6 @@ public class GUI {
     }
 
     private static Pane getManagerShowBillsSceneLayout() {
-
         Label startDateLabel = new Label("من");
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
@@ -2857,7 +2839,7 @@ public class GUI {
         billDetailsTable.setItems(FXCollections.observableList(bill.getSoldProducts()));
 
         Stage secondaryStage = new Stage();
-        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.initModality(Modality.APPLICATION_MODAL);
         secondaryStage.setMaximized(true);
         secondaryStage.setTitle("واجهة إضافة منتج");
 
@@ -2892,7 +2874,7 @@ public class GUI {
         billDetailsTable.setItems(FXCollections.observableList(supply.getBoughtProducts()));
 
         Stage secondaryStage = new Stage();
-        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.initModality(Modality.APPLICATION_MODAL);
         secondaryStage.setMaximized(true);
         secondaryStage.setTitle("واجهة تفاصيل التوريدات");
 
@@ -3002,7 +2984,7 @@ public class GUI {
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(gridPane);
 
-        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.initModality(Modality.APPLICATION_MODAL);
         secondaryStage.setMaximized(true);
         secondaryStage.setTitle("واجهة تعديل منتج");
 
@@ -3105,7 +3087,7 @@ public class GUI {
             HBox hBox = new HBox();
             hBox.getChildren().add(homeButton);
 
-            BorderPane addProductLayout = (BorderPane) getClerkAddProductsCategorySceneLayout();
+            BorderPane addProductLayout = (BorderPane) getClerkAddProductSceneLayout();
             addProductLayout.setBottom(hBox);
 
             Scene addProductScene = new Scene(addProductLayout);
@@ -3182,6 +3164,38 @@ public class GUI {
             mainStage.show();
         });
 
+        Button showUpcomingInstalmentsButton = new Button("عرض الأقساط القادمة");
+        showUpcomingInstalmentsButton.setPrefSize(150,50);
+
+        showUpcomingInstalmentsButton.setOnAction(actionEvent -> {
+            mainStage.close();
+
+            Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+            homeButton.setPrefSize(180, 30);
+            homeButton.setOnAction(event -> {
+                mainStage.close();
+                mainStage.setTitle("الواجهة الرئيسية");
+                Pane homeLayout = getClerkHomeSceneLayout();
+                Scene homeScene = new Scene(homeLayout);
+                homeScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                mainStage.setScene(homeScene);
+                System.gc();
+                mainStage.show();
+            });
+
+            HBox hBox = new HBox();
+            hBox.getChildren().add(homeButton);
+
+            BorderPane showUpcomingInstalmentsLayout = (BorderPane) getClerkShowUpcomingInstalmentsSceneLayout();
+            showUpcomingInstalmentsLayout.setBottom(hBox);
+
+            Scene showUpcomingInstalmentsScene = new Scene(showUpcomingInstalmentsLayout);
+            showUpcomingInstalmentsScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            mainStage.setTitle("واجهة الأقساط القادمة");
+            mainStage.setScene(showUpcomingInstalmentsScene);
+            System.gc();
+            mainStage.show();
+        });
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -3191,8 +3205,9 @@ public class GUI {
         gridPane.add(addBillsButton, 0,0);
         gridPane.add(addSuppliesButton, 1,0);
         gridPane.add(addProductsButton, 2,0);
-        gridPane.add(addProductsCategoriesButton,3,0);
-        gridPane.add(addSuppliersButton, 4,0);
+        gridPane.add(showUpcomingInstalmentsButton,0,1);
+        gridPane.add(addProductsCategoriesButton,1,1);
+        gridPane.add(addSuppliersButton, 2,1);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -3237,8 +3252,8 @@ public class GUI {
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.add(categoryNameTextField, 0, 0);
-        gridPane.add(categoryNameLabel, 1, 0);
+        gridPane.add(categoryNameTextField, 1, 0);
+        gridPane.add(categoryNameLabel, 0, 0);
         gridPane.add(submitButton, 0, 1);
         gridPane.add(messageLabel, 0, 2);
 
@@ -3441,8 +3456,8 @@ public class GUI {
         TextField initialPaymentTextField = new TextField();
         initialPaymentTextField.setPrefSize(100,20);
 
-        nodeText = "تاريخ أول القسط";
-        Label firstInstalmentDateLabel = new Label(nodeText);
+        nodeText = "تاريخ القسط القادم";
+        Label upcomingInstalmentDateLabel = new Label(nodeText);
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
@@ -3468,32 +3483,10 @@ public class GUI {
             }
         });
 
-        nodeText = "تاريخ أخر القسط";
-        Label lastInstalmentDateLabel = new Label(nodeText);
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                billDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
+        nodeText = "عدد الأقساط المتبقية";
+        Label remainingInstalmentsNumberLabel = new Label(nodeText);
+        TextField remainingInstalmentsNumberTextField = new TextField();
+        remainingInstalmentsNumberTextField.setPrefSize(50,20);
 
         nodeText = "كمية القسط";
         Label instalmentAmountLabel = new Label(nodeText);
@@ -3544,9 +3537,9 @@ public class GUI {
                 gridPane.add(instalmentAmountTextField,1,5);
 
                 gridPane.add(startDatePicker,1,6);
-                gridPane.add(firstInstalmentDateLabel,0,6);
-                gridPane.add(endDatePicker,1,7);
-                gridPane.add(lastInstalmentDateLabel,0,7);
+                gridPane.add(upcomingInstalmentDateLabel,0,6);
+                gridPane.add(remainingInstalmentsNumberTextField,1,7);
+                gridPane.add(remainingInstalmentsNumberLabel,0,7);
                 gridPane.add(addMoreProductsButton,0,8);
                 gridPane.add(scrollPane,0,9);
                 gridPane.add(submitButton,0,10);
@@ -3563,9 +3556,9 @@ public class GUI {
                 gridPane.getChildren().remove(instalmentAmountTextField);
                 gridPane.getChildren().remove(instalmentAmountLabel);
                 gridPane.getChildren().remove(startDatePicker);
-                gridPane.getChildren().remove(firstInstalmentDateLabel);
-                gridPane.getChildren().remove(endDatePicker);
-                gridPane.getChildren().remove(lastInstalmentDateLabel);
+                gridPane.getChildren().remove(upcomingInstalmentDateLabel);
+                gridPane.getChildren().remove(remainingInstalmentsNumberTextField);
+                gridPane.getChildren().remove(remainingInstalmentsNumberLabel);
                 gridPane.getChildren().remove(addMoreProductsButton);
                 gridPane.getChildren().remove(scrollPane);
                 gridPane.getChildren().remove(submitButton);
@@ -3707,11 +3700,10 @@ public class GUI {
                 double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
                 double remainingMoney = billTotalCost - initialPayment;
                 double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
-                String firstInstalmentDate = startDatePicker.getValue().toString();
-                String lastInstalmentDate = endDatePicker.getValue().toString();
-                InstalmentsPayment instalmentsPayment = new InstalmentsPayment(guarantorName, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate);
-
-                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, instalmentsPayment);
+                String upcomingInstalmentDate = startDatePicker.getValue().toString();
+                int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
+                bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts, billInstalmentsDetails);
             }
             else
                 bill = new Bill(billDate, buyerName, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
@@ -3719,10 +3711,10 @@ public class GUI {
 
             boolean done = StoreDatabase.addBill(bill);
 
+
+            //done = StoreDatabase.addBill();
             if(done)
                 messageLabel.setText("!تم إدخال البيانات بنجاح");
-            else
-                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
 
         });
 
@@ -3738,10 +3730,11 @@ public class GUI {
         gridPane.add(submitButton,0,5);
         gridPane.add(messageLabel,0,6);
 
+        ScrollPane pane = new ScrollPane(gridPane);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
+        borderPane.setCenter(pane);
 
 
         return borderPane;
@@ -3944,7 +3937,7 @@ public class GUI {
             Scene addProductScene = new Scene(addProductLayout);
             addProductScene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage secondaryStage = new Stage();
-            secondaryStage.setAlwaysOnTop(true);
+            secondaryStage.initModality(Modality.APPLICATION_MODAL);
             secondaryStage.setTitle("واجهة إضافة منتج");
             secondaryStage.setScene(addProductScene);
             System.gc();
@@ -3977,6 +3970,194 @@ public class GUI {
 
 
         return borderPane;
+    }
+
+    private static Pane getClerkShowUpcomingInstalmentsSceneLayout() {
+        Label startDateLabel = new Label("من");
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                startDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        Label endDateLabel = new Label("إلي");
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                endDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        Button showInstalmentsButton = new Button("أعرض الأقساط");
+
+        HBox topHBox = new HBox();
+        topHBox.setSpacing(20);
+
+        topHBox.getChildren().add(startDateLabel);
+        topHBox.getChildren().add(startDatePicker);
+        topHBox.getChildren().add(endDateLabel);
+        topHBox.getChildren().add(endDatePicker);
+        topHBox.getChildren().add(showInstalmentsButton);
+
+
+        TableView instalmentsBillsTable = new TableView();
+        instalmentsBillsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        instalmentsBillsTable.setRowFactory(tableView -> {
+            TableRow<Bill> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (! row.isEmpty() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+
+                    Bill clickedBill = row.getItem();
+                    showSoldProducts(clickedBill);
+
+                }
+            });
+            return row ;
+        });
+
+        TableColumn<Bill, String> buyerNameColumn = new TableColumn<>("أسم العميل");
+        TableColumn<Bill, Double> instalmentAmountColumn = new TableColumn<>("حجم القسط");
+        TableColumn<Bill, String> instalmentDueDateColumn = new TableColumn<>("تاريخ إستحقاق القسط");
+        TableColumn<Bill, Integer> remainingInstalmentsNumber = new TableColumn<>("عدد الأقساط المتبقية");
+
+        buyerNameColumn.setCellValueFactory( new PropertyValueFactory<>("buyerName"));
+        instalmentAmountColumn.setCellValueFactory(cellData -> {
+            Bill instalmentBill = (Bill) ((TableColumn.CellDataFeatures) cellData).getValue();
+            BillInstalmentsDetails billInstalmentsDetails = instalmentBill.getBillInstalmentsDetails();
+            return new SimpleObjectProperty<>(billInstalmentsDetails.getInstalmentAmount());
+        });
+        instalmentDueDateColumn.setCellValueFactory(cellData -> {
+            Bill instalmentBill = (Bill) ((TableColumn.CellDataFeatures) cellData).getValue();
+            BillInstalmentsDetails billInstalmentsDetails = instalmentBill.getBillInstalmentsDetails();
+            return new SimpleStringProperty(billInstalmentsDetails.getUpcomingInstalmentDate());
+        });
+        remainingInstalmentsNumber.setCellValueFactory(cellData -> {
+            Bill instalmentBill = (Bill) ((TableColumn.CellDataFeatures) cellData).getValue();
+            BillInstalmentsDetails billInstalmentsDetails = instalmentBill.getBillInstalmentsDetails();
+            return new SimpleObjectProperty<>(billInstalmentsDetails.getRemainingInstalmentsNumber());
+        });
+
+        instalmentsBillsTable.getColumns().add(buyerNameColumn);
+        instalmentsBillsTable.getColumns().add(instalmentAmountColumn);
+        instalmentsBillsTable.getColumns().add(instalmentDueDateColumn);
+        instalmentsBillsTable.getColumns().add(remainingInstalmentsNumber);
+
+        
+        showInstalmentsButton.setOnAction(event -> {
+            String queryStartDate = startDatePicker.getValue().toString();
+            String queryEndDate = endDatePicker.getValue().toString();
+
+            ArrayList<Bill> upcomingInstalments = StoreDatabase.getUpcomingInstalments(queryStartDate, queryEndDate);
+            instalmentsBillsTable.setItems(FXCollections.observableList(upcomingInstalments));
+        });
+        
+        instalmentsBillsTable.setRowFactory(tableView -> {
+            TableRow<Bill> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (! row.isEmpty() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+
+                    Bill clickedBill = row.getItem();
+                    showPayInstalment(clickedBill);
+
+                }
+            });
+            return row ;
+        });
+        
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(topHBox);
+        borderPane.setCenter(instalmentsBillsTable);
+
+        return borderPane;
+    }
+
+    private static void showPayInstalment(Bill bill) {
+        Label payInstalmentLabel = new Label("هل تريد دفع هذا القسط؟");
+        Button yesButton = new Button("نعم");
+        Button noButton = new Button("لا");
+        Label messageLabel = new Label();
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(15));
+        gridPane.add(payInstalmentLabel, 0,0);
+        gridPane.add(yesButton,0, 1);
+        gridPane.add(noButton, 2, 1);
+        gridPane.add(messageLabel, 1,2);
+
+        Scene scene = new Scene(gridPane);
+        scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+        Stage secondaryStage = new Stage();
+
+        yesButton.setOnAction(actionEvent -> {
+            String instalmentDueDate = bill.getBillInstalmentsDetails().getUpcomingInstalmentDate();
+            String paymentDate = LocalDate.now().toString();
+            double paidAmount = bill.getBillInstalmentsDetails().getInstalmentAmount();
+
+            PaidInstalment paidInstalment = new PaidInstalment(instalmentDueDate, paymentDate, paidAmount);
+            boolean done = StoreDatabase.addPaidInstalment(paidInstalment, bill.getBillInstalmentsDetails(), bill.getBillID());
+            if(done)
+            {
+                messageLabel.setText("");
+                messageLabel.setText("تم إدخال البيانات بنجاح!");
+
+            }
+            else
+            {
+                messageLabel.setText("");
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
+            }
+        });
+        
+        noButton.setOnAction(actionEvent -> {
+            secondaryStage.close();
+        });
+        
+
+
+        secondaryStage.initModality(Modality.APPLICATION_MODAL);
+        secondaryStage.initStyle(StageStyle.DECORATED);
+        secondaryStage.setTitle("تأكيد دفع القسط");
+        secondaryStage.setScene(scene);
+        secondaryStage.show();
     }
 
 
