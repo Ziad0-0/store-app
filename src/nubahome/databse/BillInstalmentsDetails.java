@@ -1,24 +1,26 @@
 package nubahome.databse;
 
 public class BillInstalmentsDetails {
-    String guarantorName;
+    Customer guarantor;
     double initialPayment;
     double remainingMoney;
     double instalmentAmount;
-    String upcomingInstalmentDate;
+    String firstInstalmentDate;
+    String lastInstalmentDate;
     int remainingInstalmentsNumber;
 
-    public BillInstalmentsDetails(String guarantorName, double initialPayment, double remainingMoney, double instalmentAmount, String upcomingInstalmentDate, int remainingInstalmentsNumber) {
-        this.guarantorName = guarantorName;
+    public BillInstalmentsDetails(Customer guarantor, double initialPayment, double remainingMoney, double instalmentAmount, String firstInstalmentDate, String lastInstalmentDate, int remainingInstalmentsNumber) {
+        this.guarantor = guarantor;
         this.initialPayment = initialPayment;
         this.remainingMoney = remainingMoney;
         this.instalmentAmount = instalmentAmount;
-        this.upcomingInstalmentDate = upcomingInstalmentDate;
+        this.firstInstalmentDate = firstInstalmentDate;
+        this.lastInstalmentDate = lastInstalmentDate;
         this.remainingInstalmentsNumber = remainingInstalmentsNumber;
     }
 
-    public String getGuarantorName() {
-        return guarantorName;
+    public Customer getGuarantor() {
+        return guarantor;
     }
 
     public double getInitialPayment() {
@@ -33,8 +35,12 @@ public class BillInstalmentsDetails {
         return instalmentAmount;
     }
 
-    public String getUpcomingInstalmentDate() {
-        return upcomingInstalmentDate;
+    public String getFirstInstalmentDate() {
+        return firstInstalmentDate;
+    }
+
+    public String getLastInstalmentDate() {
+        return lastInstalmentDate;
     }
 
     public int getRemainingInstalmentsNumber() {

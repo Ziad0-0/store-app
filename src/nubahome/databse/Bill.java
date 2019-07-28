@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Bill {
     int billID;
     String billDate;
-    String buyerName;
+    Customer buyer;
     double productsTotalCost;
     double billTotalCost;
     String paymentMethod;
@@ -14,9 +14,9 @@ public class Bill {
     BillInstalmentsDetails billInstalmentsDetails;
 
 
-    public Bill(String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
+    public Bill(String billDate, Customer buyer, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
         this.billDate = billDate;
-        this.buyerName = buyerName;
+        this.buyer = buyer;
         this.productsTotalCost = productsTotalCost;
         this.billTotalCost = billTotalCost;
         this.paymentMethod = paymentMethod;
@@ -24,9 +24,9 @@ public class Bill {
         this.billInstalmentsDetails = null;
     }
 
-    public Bill(String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, BillInstalmentsDetails billInstalmentsDetails) {
+    public Bill(String billDate, Customer buyer, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, BillInstalmentsDetails billInstalmentsDetails) {
         this.billDate = billDate;
-        this.buyerName = buyerName;
+        this.buyer = buyer;
         this.productsTotalCost = productsTotalCost;
         this.billTotalCost = billTotalCost;
         this.paymentMethod = paymentMethod;
@@ -34,10 +34,10 @@ public class Bill {
         this.billInstalmentsDetails = billInstalmentsDetails;
     }
 
-    public Bill(int billID, String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, BillInstalmentsDetails billInstalmentsDetails) {
+    public Bill(int billID, String billDate, Customer buyer, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts, BillInstalmentsDetails billInstalmentsDetails) {
         this.billID = billID;
         this.billDate = billDate;
-        this.buyerName = buyerName;
+        this.buyer = buyer;
         this.productsTotalCost = productsTotalCost;
         this.billTotalCost = billTotalCost;
         this.paymentMethod = paymentMethod;
@@ -45,10 +45,10 @@ public class Bill {
         this.billInstalmentsDetails = billInstalmentsDetails;
     }
 
-    public Bill(int billID, String billDate, String buyerName, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
+    public Bill(int billID, String billDate, Customer buyer, double productsTotalCost, double billTotalCost, String paymentMethod, ArrayList<SoldProduct> soldProducts) {
         this.billID = billID;
         this.billDate = billDate;
-        this.buyerName = buyerName;
+        this.buyer = buyer;
         this.productsTotalCost = productsTotalCost;
         this.billTotalCost = billTotalCost;
         this.paymentMethod = paymentMethod;
@@ -64,8 +64,8 @@ public class Bill {
         return billDate;
     }
 
-    public String getBuyerName() {
-        return buyerName;
+    public Customer getBuyer() {
+        return buyer;
     }
 
     public double getProductsTotalCost() {

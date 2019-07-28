@@ -11,9 +11,9 @@ import java.util.Date;
 
 public class StoreDatabase {
 
-    private static String databaseURL;
-    private static Connection databaseConnection;
-    private static User currentUser;
+    public static String databaseURL;
+    public static Connection databaseConnection;
+    public static User currentUser;
     public static void setDatabaseURL(String dbURL) {
         databaseURL = dbURL;
     }
@@ -168,6 +168,76 @@ public class StoreDatabase {
 
         return users;
     }
+    
+    public static Customer getCustomer(int customerID) {
+        Customer customer = null;
+
+        try {
+            String query = "select * from customers where customer_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, customerID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next())
+            {
+                String customerName = resultSet.getString("customer_name");
+                String customerTelephone = resultSet.getString("customer_telephone");
+                String customerAddress = resultSet.getString("customer_address");
+                customer = new Customer(customerID, customerName, customerTelephone, customerAddress);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return customer;
+        }
+        return customer;
+    }
+
+    public static ArrayList<Customer> getActiveCustomers() {
+        ArrayList<Customer> customers = new ArrayList<>();
+
+        try {
+            String query = "select * from customers "
+                    + "inner join bills on customer_id = buyer_id "
+                    + "inner join bills_instalments_details on bills.bill_id = bills_instalments_details.bill_id "
+                    + "where remaining_instalments_number > 0";
+            Statement statement = databaseConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next())
+            {
+                int customerID = resultSet.getInt("customer_id");
+                String customerName = resultSet.getString("customer_name");
+                String customerTelephone = resultSet.getString("customer_telephone");
+                String customerAddress = resultSet.getString("customer_address");
+                customers.add(new Customer(customerID, customerName, customerTelephone, customerAddress));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customers;
+    }
+
+    public static ArrayList<Customer> getAllCustomers() {
+        ArrayList<Customer> customers = new ArrayList<>();
+
+        try {
+            String query = "select * from customers";
+            Statement statement = databaseConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next())
+            {
+                int customerID = resultSet.getInt("customer_id");
+                String customerName = resultSet.getString("customer_name");
+                String customerTelephone = resultSet.getString("customer_telephone");
+                String customerAddress = resultSet.getString("customer_address");
+                customers.add(new Customer(customerID, customerName, customerTelephone, customerAddress));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customers;
+    }
 
     public static boolean addProductCategory(ProductCategory productCategory) {
         boolean done = false;
@@ -211,6 +281,7 @@ public class StoreDatabase {
         }
         return category;
     }
+    
     public static ArrayList<ProductCategory> getAllProductsCategories() {
         ArrayList<ProductCategory> productCategories = new ArrayList<>();
         try {
@@ -443,9 +514,11 @@ public class StoreDatabase {
 
     public static boolean addSupplier(Supplier supplier) {
         try {
-            String query = "insert into suppliers" + "(supplier_name)" + "values (?)";
+            String query = "insert into suppliers" + "(supplier_name, supplier_telephone, supplier_address)" + "values (?, ?, ?)";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
             preparedStatement.setString(1, supplier.supplierName);
+            preparedStatement.setString(2, supplier.supplierTelephone);
+            preparedStatement.setString(3, supplier.supplierAddress);
 
             int numOfRows = preparedStatement.executeUpdate();
             if(numOfRows <= 0)
@@ -459,6 +532,31 @@ public class StoreDatabase {
 
         return true;
     }
+    
+    public static boolean updateSupplier(Supplier updatedSupplier) {
+        boolean done = false;
+        try {
+            String query = "update suppliers set supplier_name = ?, supplier_telephone = ?, supplier_address = ? where supplier_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, updatedSupplier.supplierName);
+            preparedStatement.setString(2, updatedSupplier.supplierTelephone);
+            preparedStatement.setString(3, updatedSupplier.supplierAddress);
+            preparedStatement.setInt(4, updatedSupplier.supplierID);
+
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+        }
+    }
 
     public static Supplier getSupplier(int supplierID) {
         Supplier supplier = null;
@@ -471,7 +569,9 @@ public class StoreDatabase {
             if (resultSet.next())
             {
                 String supplierName = resultSet.getString("supplier_name");
-                supplier =  new Supplier(supplierID, supplierName);
+                String supplierTelephone = resultSet.getString("supplier_telephone");
+                String supplierAddress = resultSet.getString("supplier_address");
+                supplier =  new Supplier(supplierID, supplierName, supplierTelephone, supplierAddress);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -492,8 +592,9 @@ public class StoreDatabase {
             {
                 int supplierID = resultSet.getInt("supplier_id");
                 String supplierName = resultSet.getString("supplier_name");
-
-                suppliers.add(new Supplier(supplierID, supplierName));
+                String supplierTelephone = resultSet.getString("supplier_telephone");
+                String supplierAddress = resultSet.getString("supplier_address");
+                suppliers.add(new Supplier(supplierID, supplierName, supplierTelephone, supplierAddress));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -614,14 +715,41 @@ public class StoreDatabase {
         return supplies;
     }
 
+    public static ArrayList<Supply> getSupplierSupplies(Supplier supplier) {
+        ArrayList<Supply> supplies = new ArrayList<>();
+        try {
+            String query = "select * from supplies where supplier_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supplier.supplierID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
+                int supplyID = resultSet.getInt("supply_id");
+                String supplyDate = resultSet.getString("supply_date");
+                int supplierID = resultSet.getInt("supplier_id");
+                double transportationFees = resultSet.getDouble("transportation_fees");
+                double productsTotalCost = resultSet.getDouble("products_total_cost");
+                double supplyTotalCost = resultSet.getDouble("supply_total_cost");
+                ArrayList<BoughtProduct> boughtProducts = getBoughtProducts(supplyID);
+                supplies.add(new Supply(supplyID, supplyDate, supplier, transportationFees, productsTotalCost, supplyTotalCost, boughtProducts));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return supplies;
+        }
+
+        return supplies;
+    }
+
     public static boolean addBill(Bill bill) {
         try {
             //insert bill data
             String query = "insert into bills"
-                    + "(buyer_name, bill_date, products_total_cost, bill_total_cost, payment_method)"
+                    + "(buyer_id, bill_date, products_total_cost, bill_total_cost, payment_method)"
                     + "values (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-            preparedStatement.setString(1, bill.buyerName);
+            preparedStatement.setInt(1, bill.buyer.customerID);
             preparedStatement.setString(2, bill.billDate);
             preparedStatement.setDouble(3, bill.productsTotalCost);
             preparedStatement.setDouble(4, bill.billTotalCost);
@@ -645,17 +773,18 @@ public class StoreDatabase {
             if(bill.getPaymentMethod() == "تقسيط")
             {
                 query = "insert into bills_instalments_details"
-                        + "(bill_id, guarantor_name, initial_payment, remaining_money, instalment_amount, upcoming_instalment_date, remaining_instalments_number)"
+                        + "(bill_id, guarantor_id, initial_payment, remaining_money, instalment_amount, first_instalment_date, last_instalment_date, remaining_instalments_number)"
                         + "values (?, ?, ?, ?, ?, ?, ?)";
                 preparedStatement = databaseConnection.prepareStatement(query);
 
                 preparedStatement.setInt(1, bill.billID);
-                preparedStatement.setString(2, bill.getBillInstalmentsDetails().guarantorName);
-                preparedStatement.setDouble(3, bill.getBillInstalmentsDetails().initialPayment);
-                preparedStatement.setDouble(4, bill.getBillInstalmentsDetails().remainingMoney);
-                preparedStatement.setDouble(5, bill.getBillInstalmentsDetails().initialPayment);
-                preparedStatement.setString(6, bill.getBillInstalmentsDetails().upcomingInstalmentDate);
-                preparedStatement.setInt(7, bill.getBillInstalmentsDetails().remainingInstalmentsNumber);
+                preparedStatement.setInt(2, bill.billInstalmentsDetails.guarantor.customerID);
+                preparedStatement.setDouble(3, bill.billInstalmentsDetails.initialPayment);
+                preparedStatement.setDouble(4, bill.billInstalmentsDetails.remainingMoney);
+                preparedStatement.setDouble(5, bill.billInstalmentsDetails.initialPayment);
+                preparedStatement.setString(6, bill.billInstalmentsDetails.firstInstalmentDate);
+                preparedStatement.setString(7, bill.billInstalmentsDetails.lastInstalmentDate);
+                preparedStatement.setInt(8, bill.billInstalmentsDetails.remainingInstalmentsNumber);
 
                 numOfRows = preparedStatement.executeUpdate();
 
@@ -724,6 +853,40 @@ public class StoreDatabase {
         }
     }
 
+    public static ArrayList<Bill> getCustomerBills(Customer customer) {
+        ArrayList<Bill> bills = new ArrayList<>();
+        try {
+            String query = "select * from bills where buyer_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, customer.customerID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
+                int billID = resultSet.getInt("bill_id");
+                String billDate = resultSet.getString("bill_date");
+                int buyerID = resultSet.getInt("buyer_id");
+                Customer buyer = getCustomer(buyerID);
+                double productsTotalCost = resultSet.getDouble("products_total_cost");
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                String paymentMethod = resultSet.getString("payment_method");
+                ArrayList<SoldProduct> soldProducts = getSoldProducts(billID);
+                if(paymentMethod.equals("كاش"))
+                    bills.add(new Bill(billID, billDate, buyer,  productsTotalCost, billTotalCost, paymentMethod,soldProducts));
+                else
+                {
+                    BillInstalmentsDetails billInstalmentsDetails = getBillInstalmentsDetails(billID);
+                    bills.add(new Bill(billID, billDate, buyer,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return bills;
+        }
+
+        return bills;
+    }
+
     public static ArrayList<Bill> getBills(String queryStartDate, String queryEndDate) {
         ArrayList<Bill> bills = new ArrayList<>();
         try {
@@ -737,17 +900,18 @@ public class StoreDatabase {
             {
                 int billID = resultSet.getInt("bill_id");
                 String billDate = resultSet.getString("bill_date");
-                String buyerName = resultSet.getString("buyer_name");
+                int buyerID = resultSet.getInt("buyer_id");
+                Customer buyer = getCustomer(buyerID);
                 double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double billTotalCost = resultSet.getDouble("bill_total_cost");
                 String paymentMethod = resultSet.getString("payment_method");
                 ArrayList<SoldProduct> soldProducts = getSoldProducts(billID);
                 if(paymentMethod.equals("كاش"))
-                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts));
+                    bills.add(new Bill(billID, billDate, buyer,  productsTotalCost, billTotalCost, paymentMethod,soldProducts));
                 else
                 {
                     BillInstalmentsDetails billInstalmentsDetails = getBillInstalmentsDetails(billID);
-                    bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
+                    bills.add(new Bill(billID, billDate, buyer,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
                 }
             }
         } catch (SQLException e) {
@@ -761,7 +925,7 @@ public class StoreDatabase {
     public static ArrayList<Bill> getUpcomingInstalments(String queryStartDate, String queryEndDate) {
         ArrayList<Bill> bills = new ArrayList<>();
         try {
-            String query = "select * from bills b inner join bills_instalments_details d on b.bill_id = d.bill_id where d.upcoming_instalment_date between ? and ? and d.remaining_instalments_number > 0";
+            String query = "select * from bills b inner join bills_instalments_details d on b.bill_id = d.bill_id where d.first_instalment_date between ? and ? and d.remaining_instalments_number > 0";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
             preparedStatement.setString(1, queryStartDate);
             preparedStatement.setString(2, queryEndDate);
@@ -771,19 +935,22 @@ public class StoreDatabase {
             {
                 int billID = resultSet.getInt("bill_id");
                 String billDate = resultSet.getString("bill_date");
-                String buyerName = resultSet.getString("buyer_name");
+                int buyerID = resultSet.getInt("buyer_id");
+                Customer buyer = getCustomer(buyerID);
                 double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double billTotalCost = resultSet.getDouble("bill_total_cost");
                 String paymentMethod = resultSet.getString("payment_method");
                 ArrayList<SoldProduct> soldProducts = getSoldProducts(billID);
-                String guarantorName = resultSet.getString("guarantor_name");
+                int guarantorID = resultSet.getInt("guarantor_id");
+                Customer guarantor = getCustomer(guarantorID);
                 double initialPayment = resultSet.getDouble("initial_payment");
                 double remainingMoney = resultSet.getDouble("remaining_money");
                 double instalmentAmount = resultSet.getDouble("instalment_amount");
-                String upcomingInstalmentDate = resultSet.getString("upcoming_instalment_date");
+                String firstInstalmentDate = resultSet.getString("first_instalment_date");
+                String lastInstalmentDate = resultSet.getString("last_instalment_date");
                 int remainingInstalmentsNumber = resultSet.getInt("remaining_instalments_number");
-                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
-                bills.add(new Bill(billID, billDate, buyerName,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate, remainingInstalmentsNumber);
+                bills.add(new Bill(billID, billDate, buyer,  productsTotalCost, billTotalCost, paymentMethod,soldProducts, billInstalmentsDetails));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -796,15 +963,16 @@ public class StoreDatabase {
     public static boolean updateBillInstalmentsDetails(BillInstalmentsDetails billInstalmentsDetails, int billID) {
         boolean done = false;
         try {
-            String query = "update bills_instalments_details set guarantor_name = ?, initial_payment = ?, remaining_money = ?, instalment_amount = ?, upcoming_instalment_date = ?, remaining_instalments_number = ? where bill_id = ?";
+            String query = "update bills_instalments_details set guarantor_id = ?, initial_payment = ?, remaining_money = ?, instalment_amount = ?, first_instalment_date = ?, last_insalment_date = ?, remaining_instalments_number = ? where bill_id = ?";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-            preparedStatement.setString(1, billInstalmentsDetails.guarantorName);
+            preparedStatement.setInt(1, billInstalmentsDetails.guarantor.customerID);
             preparedStatement.setDouble(2, billInstalmentsDetails.initialPayment);
             preparedStatement.setDouble(3, billInstalmentsDetails.remainingMoney);
             preparedStatement.setDouble(4, billInstalmentsDetails.initialPayment);
-            preparedStatement.setString(5, billInstalmentsDetails.upcomingInstalmentDate);
-            preparedStatement.setInt(6, billInstalmentsDetails.remainingInstalmentsNumber);
-            preparedStatement.setInt(7, billID);
+            preparedStatement.setString(5, billInstalmentsDetails.firstInstalmentDate);
+            preparedStatement.setString(6, billInstalmentsDetails.lastInstalmentDate);
+            preparedStatement.setInt(7, billInstalmentsDetails.remainingInstalmentsNumber);
+            preparedStatement.setInt(8, billID);
             int numOfRows = preparedStatement.executeUpdate();
             if(numOfRows == 1)
                 done = true;
@@ -830,14 +998,16 @@ public class StoreDatabase {
             ResultSet resultSet = preparedStatement.executeQuery();
             if(resultSet.next())
             {
-                String guarantorName = resultSet.getString("guarantor_name");
+                int guarantorID = resultSet.getInt("guarantor_id");
+                Customer guarantor = getCustomer(guarantorID);
                 double initialPayment = resultSet.getDouble("initial_payment");
                 double remainingMoney = resultSet.getDouble("remaining_money");
                 double instalmentAmount = resultSet.getDouble("instalment_amount");
-                String upcomingInstalmentDate = resultSet.getString("upcoming_instalment_date");
+                String firstInstalmentDate = resultSet.getString("first_instalment_date");
+                String lastInstalmentDate = resultSet.getString("last_instalment_date");
                 int remainingInstalmentsNumber = resultSet.getInt("remaining_instalments_number");
 
-                billInstalmentsDetails = new BillInstalmentsDetails(guarantorName, initialPayment, remainingMoney, instalmentAmount, upcomingInstalmentDate, remainingInstalmentsNumber);
+                billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate,remainingInstalmentsNumber);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -846,31 +1016,147 @@ public class StoreDatabase {
         return billInstalmentsDetails;
     }
 
-
-    public static boolean addPaidInstalment(PaidInstalment paidInstalment, BillInstalmentsDetails billInstalmentsDetails, int billID) {
+    public static ArrayList<Instalment> getCustomerAllInstalments(Customer customer) {
+        ArrayList<Instalment> instalments = new ArrayList<>();
         try {
-
-            String query = "insert into paid_instalments" + "(instalment_due_date, payment_date, paid_amount, bill_id)" + "values (?,?,?,?)";
+            String query = "select * from instalments i inner join bills b on i.bill_id = b.bill_id where b.buyer_id = ?";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-            preparedStatement.setString(1, paidInstalment.getInstalmentDueDate());
-            preparedStatement.setString(2, paidInstalment.getPaymentDate());
-            preparedStatement.setDouble(3, paidInstalment.getPaidAmount());
-            preparedStatement.setInt(4, billID);
+            preparedStatement.setInt(1, customer.customerID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
+            {
+                int instalmentID = resultSet.getInt("instalment_id");
+                double paidMoney = resultSet.getDouble("paid_money");
+                double remainingMoney = resultSet.getDouble("remaining_money");
+                String instalmentDueDate = resultSet.getString("instalment_due_date");
+                String instalmentPaymentDate = resultSet.getString("instalment_payment_date");
+                String instalmentState = resultSet.getString("instalment_state");
+                
+                Instalment instalment = new Instalment(instalmentID, paidMoney, remainingMoney, instalmentDueDate, instalmentPaymentDate, instalmentState);
+                instalment.instalmentPayments = getInstalmentPayments(instalment);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return instalments;
+        }
+
+        return instalments;
+    }
+
+    public static ArrayList<Instalment> getCustomerUnpaidInstalments(Customer customer) {
+        ArrayList<Instalment> instalments = new ArrayList<>();
+        try {
+            String query = "select * from instalments i inner join bills b on i.bill_id = b.bill_id where b.buyer_id = ? and i.instalment_state != 'مدفوع' ";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, customer.customerID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
+            {
+                int instalmentID = resultSet.getInt("instalment_id");
+                double paidMoney = resultSet.getDouble("paid_money");
+                double remainingMoney = resultSet.getDouble("remaining_money");
+                String instalmentDueDate = resultSet.getString("instalment_due_date");
+                String instalmentPaymentDate = resultSet.getString("instalment_payment_date");
+                String instalmentState = resultSet.getString("instalment_state");
+
+                Instalment instalment = new Instalment(instalmentID, paidMoney, remainingMoney, instalmentDueDate, instalmentPaymentDate, instalmentState);
+                instalment.instalmentPayments = getInstalmentPayments(instalment);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return instalments;
+        }
+
+        return instalments;
+    }
+
+    public static boolean addInstalmentPayment(InstalmentPayment instalmentPayment) {
+        boolean done = false;
+        try {
+            String query = "insert into instalments_payments"
+                    + " (instalment_id, paid_money, payment_date)"
+                    + " values (?, ?, ?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, instalmentPayment.instalmentID);
+            preparedStatement.setDouble(2, instalmentPayment.paidMoney);
+            preparedStatement.setString(3, instalmentPayment.paymentDate);
 
             int numOfRows = preparedStatement.executeUpdate();
-            if (numOfRows <= 0)
-                return false;
-            if(billInstalmentsDetails.remainingInstalmentsNumber > 0)
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+
+        }
+    }
+
+    public static boolean updateInstalmentPayment(InstalmentPayment instalmentPayment) {
+        boolean done = false;
+        try {
+            String query = "update instalments_payments set paid_money = ?, payment_date = ? where payment_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setDouble(1, instalmentPayment.paidMoney);
+            preparedStatement.setString(2, instalmentPayment.paymentDate);
+            preparedStatement.setInt(3, instalmentPayment.paymentID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+
+        }
+    }
+
+    public static ArrayList<InstalmentPayment> getInstalmentPayments(Instalment instalment) {
+        ArrayList<InstalmentPayment> instalmentPayments = new ArrayList<>();
+        try {
+            String query = "select * from instalments_payments where instalment_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, instalment.instalmentID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
             {
-                billInstalmentsDetails.remainingInstalmentsNumber--;
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDate upcomingInstalmentDate = LocalDate.parse(billInstalmentsDetails.upcomingInstalmentDate, formatter);
-                upcomingInstalmentDate = upcomingInstalmentDate.plusMonths(1);
-                billInstalmentsDetails.upcomingInstalmentDate = upcomingInstalmentDate.toString();
-                boolean done = updateBillInstalmentsDetails(billInstalmentsDetails, billID);
-                if(!done)
-                    return false;
+                int paymentID = resultSet.getInt("payment_id");
+                Double paidAmount = resultSet.getDouble("paid_amount");
+                String paymentDate = resultSet.getString("payment_date");
+
+                instalmentPayments.add(new InstalmentPayment(paymentID, paidAmount, paymentDate));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return instalmentPayments;
+        }
+
+        return instalmentPayments;
+    }
+
+    public static boolean addCustomer(Customer customer) {
+        try {
+            String query = "insert into customers" + "(customer_name, customer_telephone, customer_address)" + "values (?, ?, ?)";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, customer.customerName);
+            preparedStatement.setString(2, customer.customerTelephone);
+            preparedStatement.setString(3, customer.customerAddress);
+            
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows <= 0)
+                return false;
 
             preparedStatement.close();
         } catch (SQLException e) {
@@ -880,4 +1166,31 @@ public class StoreDatabase {
 
         return true;
     }
+
+    public static boolean updateCustomer(Customer updatedCustomer) {
+        boolean done = false;
+        try {
+            String query = "update customers set customer_name = ?, customer_telephone = ?, customer_address = ? where customer_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, updatedCustomer.customerName);
+            preparedStatement.setString(2, updatedCustomer.customerTelephone);
+            preparedStatement.setString(3, updatedCustomer.customerAddress);
+            preparedStatement.setInt(4, updatedCustomer.customerID);
+
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows == 1)
+                done = true;
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        finally {
+            return done;
+        }
+    }
+
+
 }
