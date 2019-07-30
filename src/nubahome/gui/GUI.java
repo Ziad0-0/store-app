@@ -2,6 +2,7 @@ package nubahome.gui;
 
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -33,7 +34,8 @@ public class GUI {
         mainStage.setMaximized(true);
 
         mainStage.setTitle("تسجيل الدخول");
-        Scene scene = new Scene(getLoginSceneLayout());
+        homeSceneLayout = getClerkHomeSceneLayout();
+        Scene scene = new Scene(getClerkHomeSceneLayout());
         scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         mainStage.setScene(scene);
         mainStage.show();
@@ -162,7 +164,6 @@ public class GUI {
         gridPane.add(showProductsButton, 2, 1);
 
         return gridPane;
-
     }
 
     private static Pane getShowCustomersSceneLayout() {
@@ -205,7 +206,7 @@ public class GUI {
         MenuItem addBill = new MenuItem("إضافة فاتورة");
         MenuItem showBills = new MenuItem("عرض مشتريات العميل");
         MenuItem showInstalments = new MenuItem("عرض أقساط العميل");
-        MenuItem editInfo = new MenuItem("تعديل بيانات العميل");
+        MenuItem editData = new MenuItem("تعديل بيانات العميل");
         MenuItem deleteCustomer = new MenuItem("حذف العميل");
 
         addBill.setOnAction(actionEvent -> {
@@ -226,10 +227,10 @@ public class GUI {
             mainStage.getScene().setRoot(getShowCustomerInstalmentsSceneLayout(selectedCustomer));
         });
 
-        editInfo.setOnAction(actionEvent -> {
+        editData.setOnAction(actionEvent -> {
             Customer selectedCustomer = customersTable.getSelectionModel().getSelectedItem();
             mainStage.setTitle("تعديل بيانات عميل");
-            mainStage.getScene().setRoot(getEditCustomerInfoSceneLayout(selectedCustomer));
+            mainStage.getScene().setRoot(getEditCustomerDataSceneLayout(selectedCustomer));
         });
 
         deleteCustomer.setOnAction(actionEvent -> {
@@ -238,7 +239,7 @@ public class GUI {
         });
 
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(addBill, showBills, showInstalments, editInfo, deleteCustomer);
+        contextMenu.getItems().addAll(addBill, showBills, showInstalments, editData, deleteCustomer);
 
         customersTable.setContextMenu(contextMenu);
         Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -283,7 +284,7 @@ public class GUI {
 
         MenuItem addSupply = new MenuItem("إضافة فاتورة");
         MenuItem showSupplies = new MenuItem("عرض مبيعات المورد");
-        MenuItem editInfo = new MenuItem("تعديل بيانات المورد");
+        MenuItem editData = new MenuItem("تعديل بيانات المورد");
         MenuItem deleteSupplier = new MenuItem("حذف المورد");
 
         addSupply.setOnAction(actionEvent -> {
@@ -299,10 +300,10 @@ public class GUI {
         });
 
 
-        editInfo.setOnAction(actionEvent -> {
+        editData.setOnAction(actionEvent -> {
             Supplier selectedSupplier = suppliersTable.getSelectionModel().getSelectedItem();
             mainStage.setTitle("تعديل بيانات مورد");
-            mainStage.getScene().setRoot(getEditSupplierInfoSceneLayout(selectedSupplier));
+            mainStage.getScene().setRoot(getEditSupplierDataSceneLayout(selectedSupplier));
         });
 
         deleteSupplier.setOnAction(actionEvent -> {
@@ -311,7 +312,7 @@ public class GUI {
         });
 
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(addSupply, showSupplies, editInfo, deleteSupplier);
+        contextMenu.getItems().addAll(addSupply, showSupplies, editData, deleteSupplier);
 
         suppliersTable.setContextMenu(contextMenu);
 
@@ -500,7 +501,6 @@ public class GUI {
         borderPane.setCenter(gridPane);
         borderPane.setBottom(navigationHBox);
 
-
         return borderPane;
     }
 
@@ -616,7 +616,6 @@ public class GUI {
 
         Label supplierNameLabel = new Label("أسم المورد: " + supplier.getSupplierName());
 
-
         Label transportationFessLabel = new Label( "مصاريف المواصلات");
         TextField transportationFeesTextField = new TextField();
         transportationFeesTextField.setPrefSize(100,20);
@@ -673,12 +672,12 @@ public class GUI {
             });
 
 
-            Label boughtQuantityLabel = new Label("الكمية المباعة");
+            Label boughtQuantityLabel = new Label("الكمية المشتراة");
             TextField boughtQuantityTextField = new TextField();
             boughtQuantityTextField.setPrefSize(100,20);
 
 
-            Label buyingPriceLabel = new Label( "سعر البيع");
+            Label buyingPriceLabel = new Label( "سعر الشراء");
             TextField buyingPriceTextField = new TextField();
             buyingPriceTextField.setPrefSize(100,20);
 
@@ -743,8 +742,17 @@ public class GUI {
         });
 
         addNewProductButton.setOnAction(actionEvent -> {
+            Pane addProductSceneLayout = getAddProductSceneLayout();
+            //remove the navigation hBox which is the last node in the pane
+            int lastNodeIndex = addProductSceneLayout.getChildren().size() -1;
+            addProductSceneLayout.getChildren().remove(lastNodeIndex);
 
-
+            Scene scene = new Scene(addProductSceneLayout);
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage newStage = new Stage();
+            newStage.setTitle("إضافة منتج");
+            newStage.setScene(scene);
+            newStage.show();
         });
 
         GridPane gridPane = new GridPane();
@@ -793,7 +801,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getEditCustomerInfoSceneLayout(Customer customer) {
+    private static Pane getEditCustomerDataSceneLayout(Customer customer) {
         String nodeText;
 
         nodeText = "أسم العميل";
@@ -881,7 +889,7 @@ public class GUI {
 
     private static Pane getShowCustomerBillsSceneLayout(Customer customer) {
         TableColumn buyerName = new TableColumn("أسم العميل");
-        TableColumn billID = new TableColumn("رقم الفاتورة");
+        TableColumn billID = new TableColumn("مسلسل الفاتورة");
         TableColumn billDate = new TableColumn("تاريخ الفاتورة");
         TableColumn billTotalCost = new TableColumn("التكلفة الكلية");
         TableColumn paymentMethod = new TableColumn("وسيلة الدفع");
@@ -917,7 +925,6 @@ public class GUI {
             Scene scene = new Scene(getShowBillSoldProductsSceneLayout(selectedBill));
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage newStage = new Stage();
-            newStage.setMaximized(true);
             newStage.setTitle("عرض بيانات المنتجات المباعة");
             newStage.setScene(scene);
             newStage.show();
@@ -975,7 +982,7 @@ public class GUI {
     }
 
     private static Pane getShowSupplierSuppliesSceneLayout(Supplier supplier) {
-        TableColumn supplyID = new TableColumn("رقم التوريد");
+        TableColumn supplyID = new TableColumn("مسلسل التوريد");
         TableColumn supplyDate = new TableColumn("تاريخ التوريد");
         TableColumn supplierName = new TableColumn("اسم المورد");
         TableColumn transportationFees = new TableColumn("مصاريف المواصلات");
@@ -1002,9 +1009,9 @@ public class GUI {
         suppliesTable.getColumns().add(transportationFees);
         suppliesTable.getColumns().add(supplyTotalCost);
 
-
-        ArrayList<Supply> suplierSupplies = StoreDatabase.getSupplierSupplies(supplier);
-        suppliesTable.setItems(FXCollections.observableList(suplierSupplies));
+        
+        ArrayList<Supply> supplierSupplies = StoreDatabase.getSupplierSupplies(supplier);
+        suppliesTable.setItems(FXCollections.observableList(supplierSupplies));
 
         MenuItem addProductToSupplyOption = new MenuItem("أضف منتج للفاتورة");
         addProductToSupplyOption.setOnAction(actionEvent -> {
@@ -1019,7 +1026,7 @@ public class GUI {
             Scene scene = new Scene(getShowSupplyBoughtProductsSceneLayout(selectedSupply));
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage newStage = new Stage();
-            newStage.setMaximized(true);
+            
             newStage.setTitle("عرض بيانات المنتجات المباعة");
             newStage.setScene(scene);
             newStage.show();
@@ -1043,6 +1050,8 @@ public class GUI {
         contextMenu.getItems().add(addProductToSupplyOption);
         contextMenu.getItems().add(editSupplyOption);
         contextMenu.getItems().add(deleteSupplyOption);
+
+        suppliesTable.setContextMenu(contextMenu);
 
         Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
         homeButton.setPrefSize(180, 30);
@@ -1074,8 +1083,9 @@ public class GUI {
         Label showInstalmentsLabel = new Label("أعرض بيانات");
 
         ArrayList<String> options = new ArrayList<>();
-        options.add("كل الأقساط");
         options.add("الأقساط الغير مدفوعة");
+        options.add("الأقساط المدفوعة بالكامل");
+        options.add("كل الأقساط");
         ChoiceBox<String> optionsChoiceBox = new ChoiceBox<>();
         optionsChoiceBox.setItems(FXCollections.observableList(options));
 
@@ -1099,7 +1109,7 @@ public class GUI {
         paidMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("paidMoney"));
         remainingMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("remainingMoney"));
         instalmentStateColumn.setCellValueFactory(new PropertyValueFactory<>("instalmentState"));
-        indexColumn.setCellValueFactory(column-> new ReadOnlyObjectWrapper<>(instalmentsTable.getItems().indexOf(column.getValue())));
+        indexColumn.setCellValueFactory(column-> new ReadOnlyObjectWrapper<>(instalmentsTable.getItems().indexOf(column.getValue())+1));
 
         instalmentsTable.getColumns().addAll(indexColumn, dueDateColumn, paymentDateColumn, paidMoneyColumn, remainingMoneyColumn, instalmentStateColumn);
 
@@ -1107,10 +1117,12 @@ public class GUI {
             String selectedOption = optionsChoiceBox.getValue();
             ArrayList<Instalment> instalments;
 
-            if(optionsChoiceBox.getValue().equals("كل الأقساط"))
-                instalments = StoreDatabase.getCustomerAllInstalments(customer);
-            else
+            if(selectedOption.equals("الأقساط غير المدفوعة"))
                 instalments = StoreDatabase.getCustomerUnpaidInstalments(customer);
+            else if(selectedOption.equals("الأقساط المدفوعة بالكامل"))
+                instalments = StoreDatabase.getCustomerPaidInstalments(customer);
+            else
+                instalments = StoreDatabase.getCustomerAllInstalments(customer);
 
             instalmentsTable.setItems(FXCollections.observableList(instalments));
         });
@@ -1120,8 +1132,12 @@ public class GUI {
 
         payInstalmentOption.setOnAction(actionEvent -> {
             Instalment selectedInstalment = instalmentsTable.getSelectionModel().getSelectedItem();
-            mainStage.setTitle("دفع قسط");
-            mainStage.getScene().setRoot(getAddInstalmentPaymentSceneLayout(selectedInstalment));
+            Stage newStage = new Stage();
+            newStage.setTitle("دفع قسط");
+            Scene scene = new Scene(getAddInstalmentPaymentSceneLayout(selectedInstalment));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            newStage.setScene(scene);
+            newStage.show();
         });
 
         showInstalmentPaymentsOption.setOnAction(actionEvent -> {
@@ -1155,6 +1171,7 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(optionsChoiceBox);
         borderPane.setCenter(instalmentsTable);
         borderPane.setBottom(navigationHBox);
 
@@ -1171,7 +1188,7 @@ public class GUI {
         TableColumn<InstalmentPayment, String> paymentDateColumn = new TableColumn<>("تاريخ الدفع");
         TableColumn<InstalmentPayment, Double> paidMoneyColumn = new TableColumn<>("المدفوع");
 
-        indexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(instalmentPaymentsTable.getItems().indexOf(column.getValue())));
+        indexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(instalmentPaymentsTable.getItems().indexOf(column.getValue())+1));
         paymentDateColumn.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
         paidMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("paidMoney"));
 
@@ -1181,16 +1198,17 @@ public class GUI {
         MenuItem editOption = new MenuItem("تعديل");
         editOption.setOnAction(actionEvent -> {
             InstalmentPayment instalmentPayment = instalmentPaymentsTable.getSelectionModel().getSelectedItem();
-            Stage stage = new Stage();
-            stage.setMaximized(true);
-            stage.setTitle("تعديل مدفوعات قسط");
+            Stage newStage = new Stage();
+            newStage.setTitle("تعديل مدفوعات قسط");
             Scene scene = new Scene(getEditInstalmentPaymentSceneLayout(instalmentPayment));
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            stage.setScene(scene);
-            stage.show();
+            newStage.setScene(scene);
+            newStage.show();
         });
 
         contextMenu.getItems().addAll(editOption);
+        
+        instalmentPaymentsTable.setContextMenu(contextMenu);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -1241,11 +1259,11 @@ public class GUI {
 
         nodeText = "وسيلة الدفع";
         Label paymentMethodLabel = new Label(nodeText);
-        ChoiceBox<String> paymentMethodBox = new ChoiceBox<>();
+        ChoiceBox<String> paymentMethodChoiceBox = new ChoiceBox<>();
         ArrayList<String> paymentMethods = new ArrayList<>();
         paymentMethods.add("كاش");
         paymentMethods.add("تقسيط");
-        paymentMethodBox.setItems(FXCollections.observableList(paymentMethods));
+        paymentMethodChoiceBox.setItems(FXCollections.observableList(paymentMethods));
 
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
@@ -1342,7 +1360,7 @@ public class GUI {
 
             String billDate = billDatePicker.getValue().toString();
             Customer buyer = customer;
-            String paymentMethod = paymentMethodBox.getValue();
+            String paymentMethod = paymentMethodChoiceBox.getValue();
 
 
             ArrayList<SoldProduct> soldProducts = new ArrayList<>();
@@ -1380,7 +1398,7 @@ public class GUI {
         addBillInstalmentsDetailsButton.setOnAction(actionEvent -> {
             String billDate = billDatePicker.getValue().toString();
             Customer buyer = customer;
-            String paymentMethod = paymentMethodBox.getValue();
+            String paymentMethod = paymentMethodChoiceBox.getValue();
 
 
             ArrayList<SoldProduct> soldProducts = new ArrayList<>();
@@ -1406,17 +1424,30 @@ public class GUI {
             mainStage.setTitle("إدخال تفاصيل التقسيط");
             mainStage.getScene().setRoot(getAddBillInstalmentsDetailsSceneLayout(bill));
         });
-
+    
+        paymentMethodChoiceBox.setOnAction(actionEvent -> {
+            if(paymentMethodChoiceBox.getValue().equals("تقسيط"))
+            {
+                gridPane.getChildren().remove(submitButton);
+                gridPane.getChildren().remove(messageLabel);
+                gridPane.add(addBillInstalmentsDetailsButton, 0, 5);
+            }
+            else if(paymentMethodChoiceBox.getValue().equals("كاش"))
+            {
+                gridPane.getChildren().remove(addBillInstalmentsDetailsButton);
+                gridPane.add(submitButton,0,5);
+                gridPane.add(messageLabel,0,6);
+            }
+        });
 
         gridPane.add(billDateLabel,0,0);
         gridPane.add(billDatePicker,1,0);
         gridPane.add(buyerNameLabel,0,1);
         gridPane.add(paymentMethodLabel,0,2);
-        gridPane.add(paymentMethodBox,1,2);
+        gridPane.add(paymentMethodChoiceBox,1,2);
         gridPane.add(addMoreProductsButton,0,3);
         gridPane.add(productsVBox,0,4);
-        gridPane.add(submitButton,0,5);
-        gridPane.add(messageLabel,0,6);
+
 
         ScrollPane pane = new ScrollPane(gridPane);
 
@@ -1488,9 +1519,19 @@ public class GUI {
             Double paidMoney = Double.parseDouble(paidMoneyTextField.getText().trim());
 
             boolean done = StoreDatabase.addInstalmentPayment(new InstalmentPayment(instalment.getInstalmentID(), paidMoney, paymentDate));
+            if(done)
+            {
+                Instalment updatedInstalment;
+                if(paidMoney.equals(instalment.getRemainingMoney()))
+                    updatedInstalment = new Instalment(instalment.getInstalmentID(), instalment.getBillID(), instalment.getPaidMoney() + paidMoney, 0, instalment.getInstalmentDueDate(), paymentDate, "مدفوع بالكامل");
+                else
+                    updatedInstalment = new Instalment(instalment.getInstalmentID(), instalment.getBillID(), instalment.getPaidMoney() + paidMoney, instalment.getRemainingMoney() - paidMoney, instalment.getInstalmentDueDate(), "", "مدفوع جزئيا");
+
+                done = StoreDatabase.updateInstalment(updatedInstalment);
+            }
             messageLabel.setText("");
             if(!done)
-                messageLabel.setText("بيانات خاطئة! أعد محاولة الدخول.");
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
             else
                 messageLabel.setText("تم الإدخال بنجاج!");
         });
@@ -1586,6 +1627,17 @@ public class GUI {
         ChoiceBox<Customer> guarantorChoiceBox = new ChoiceBox<>();
         ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
         guarantorChoiceBox.setItems(FXCollections.observableList(customers));
+        guarantorChoiceBox.setConverter(new StringConverter<Customer>() {
+            @Override
+            public String toString(Customer c) {
+                return c.getCustomerName();
+            }
+
+            @Override
+            public Customer fromString(String s) {
+                return null;
+            }
+        });
 
         nodeText = "المقدم";
         Label initialPaymentLabel = new Label(nodeText);
@@ -1697,9 +1749,9 @@ public class GUI {
         gridPane.add(firstInstalmentDateLabel, 0, 4);
         gridPane.add(startDatePicker, 1, 4);
         gridPane.add(lastInstalmentDateLabel, 0, 5);
-        gridPane.add(endDatePicker, 0, 6);
-        gridPane.add(submitButton, 0, 7);
-        gridPane.add(messageLabel,0, 8);
+        gridPane.add(endDatePicker, 1, 5);
+        gridPane.add(submitButton, 0, 6);
+        gridPane.add(messageLabel,0, 7);
 
         Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
         homeButton.setPrefSize(180, 30);
@@ -1745,11 +1797,7 @@ public class GUI {
         billDetailsTable.getColumns().setAll(productNameCol, soldQuantityCol, sellingPriceCol);
 
         billDetailsTable.setItems(FXCollections.observableList(bill.getSoldProducts()));
-
-        Stage secondaryStage = new Stage();
-        secondaryStage.initModality(Modality.APPLICATION_MODAL);
-        secondaryStage.setMaximized(true);
-        secondaryStage.setTitle("إضافة منتج");
+        
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
@@ -1777,22 +1825,16 @@ public class GUI {
         billDetailsTable.getColumns().setAll(productNameCol, boughtQuantityCol, buyingPriceCol);
 
         billDetailsTable.setItems(FXCollections.observableList(supply.getBoughtProducts()));
-
-        Stage secondaryStage = new Stage();
-        secondaryStage.initModality(Modality.APPLICATION_MODAL);
-        secondaryStage.setMaximized(true);
-        secondaryStage.setTitle("تفاصيل المشتريات");
+        
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(billDetailsTable);
 
-
-
         return borderPane;
     }
 
-    private static Pane getEditSupplierInfoSceneLayout(Supplier supplier) {
+    private static Pane getEditSupplierDataSceneLayout(Supplier supplier) {
         String nodeText;
 
         nodeText = "أسم المورد";
@@ -1925,28 +1967,21 @@ public class GUI {
             productsTable.setItems(FXCollections.observableList(products));
         });
 
-        MenuItem editProductOption = new MenuItem("تعديل بيانات المنتج");
-        editProductOption.setOnAction(actionEvent -> {
-            Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
-
-        });
-
-        MenuItem deleteProductOption = new MenuItem("حدف المنتج");
-        deleteProductOption.setOnAction(actionEvent -> {
-            Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
-
-        });
-
         MenuItem showProductSupplyPrices = new MenuItem("عرض أسعار شراء المنتج");
         showProductSupplyPrices.setOnAction(actionEvent -> {
             Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
 
+            Scene scene = new Scene(getShowProductSuppliesSceneLayout(selectedProduct));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage newStage = new Stage();
+            newStage.setTitle("عرض أسعار شراء منتج");
+            newStage.setScene(scene);
+            newStage.show();
         });
+
 
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getItems().add(showProductSupplyPrices);
-        contextMenu.getItems().add(editProductOption);
-        contextMenu.getItems().add(deleteProductOption);
 
         productsTable.setContextMenu(contextMenu);
 
@@ -1970,5 +2005,42 @@ public class GUI {
 
         return borderPane;
     }
+
+    private static Pane getShowProductSuppliesSceneLayout(Product product) {
+        Label productNameLabel = new Label("أسم المنتج: " + product.getProductName());
+        
+        TableColumn<ProductSupply, Double> productPriceColumn = new TableColumn<>("سعر المنتج");
+        TableColumn<ProductSupply, String> supplierNameColumn = new TableColumn<>("أسم المورد");
+        TableColumn<ProductSupply, String> supplyDateColumn = new TableColumn<>("تاريخ الشراء");
+
+        productPriceColumn.setCellValueFactory(cellData -> {
+            ProductSupply supply = ((ProductSupply)((TableColumn.CellDataFeatures)cellData).getValue());
+            return new SimpleObjectProperty<>(supply.getBuyingPrice());
+        });
+
+        supplierNameColumn.setCellValueFactory(cellData -> {
+            ProductSupply supply = ((ProductSupply)((TableColumn.CellDataFeatures)cellData).getValue());
+            return new SimpleStringProperty(supply.getSupplier().getSupplierName());
+        });
+
+        supplyDateColumn.setCellValueFactory(cellData -> {
+            ProductSupply supply = ((ProductSupply)((TableColumn.CellDataFeatures)cellData).getValue());
+            return new SimpleStringProperty(supply.getSupplyDate());
+        });
+
+        TableView<ProductSupply> productSuppliesTable = new TableView<>();
+        productSuppliesTable.getColumns().addAll(productPriceColumn, supplierNameColumn, supplyDateColumn);
+
+        ArrayList<ProductSupply> productSupplies = StoreDatabase.getProductSupplies(product);
+        productSuppliesTable.setItems(FXCollections.observableList(productSupplies));
+        
+        VBox vBox = new VBox();
+        vBox.setSpacing(10);
+        vBox.getChildren().addAll(productNameLabel, productSuppliesTable);
+        
+        return vBox;
+    }
+
+
 
 }
