@@ -6,25 +6,25 @@ public class Supply {
     int supplyID;
     String supplyDate;
     Supplier supplier;
-    double transportationFees;
+    double aditionalFees;
     double productsTotalCost;
     double supplyTotalCost;
     ArrayList<BoughtProduct> boughtProducts;
 
-    public Supply(String supplyDate, Supplier supplier, double transportationFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
+    public Supply(String supplyDate, Supplier supplier, double aditionalFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
         this.supplyDate = supplyDate;
         this.supplier = supplier;
-        this.transportationFees = transportationFees;
+        this.aditionalFees = aditionalFees;
         this.productsTotalCost = productsTotalCost;
         this.supplyTotalCost = supplyTotalCost;
         this.boughtProducts = boughtProducts;
     }
 
-    public Supply(int supplyID, String supplyDate, Supplier supplier, double transportationFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
+    public Supply(int supplyID, String supplyDate, Supplier supplier, double aditionalFees, double productsTotalCost, double supplyTotalCost, ArrayList<BoughtProduct> boughtProducts) {
         this.supplyID = supplyID;
         this.supplyDate = supplyDate;
         this.supplier = supplier;
-        this.transportationFees = transportationFees;
+        this.aditionalFees = aditionalFees;
         this.productsTotalCost = productsTotalCost;
         this.supplyTotalCost = supplyTotalCost;
         this.boughtProducts = boughtProducts;
@@ -42,8 +42,8 @@ public class Supply {
         return supplier;
     }
 
-    public double getTransportationFees() {
-        return transportationFees;
+    public double getAditionalFees() {
+        return aditionalFees;
     }
 
     public double getProductsTotalCost() {

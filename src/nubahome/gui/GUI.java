@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Stack;
 
 
 public class GUI {
@@ -94,6 +95,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(userNameTextField, 1, 0);
         gridPane.add(userNameLabel, 0, 0);
@@ -155,6 +157,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(showCustomersButton, 0,0);
         gridPane.add(showSuppliersButton, 1,0);
@@ -385,6 +388,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(customerNameLabel,0,0);
         gridPane.add(customerNameTextField,1,0);
@@ -476,6 +480,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(productNameLabel,0,0);
         gridPane.add(productNameTextField,1,0);
@@ -551,6 +556,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(supplierNameLabel,0,0);
         gridPane.add(supplierNameTextField,1,0);
@@ -616,15 +622,16 @@ public class GUI {
 
         Label supplierNameLabel = new Label("أسم المورد: " + supplier.getSupplierName());
 
-        Label transportationFessLabel = new Label( "مصاريف المواصلات");
-        TextField transportationFeesTextField = new TextField();
-        transportationFeesTextField.setPrefSize(100,20);
+        Label aditionalFeesLabel = new Label( "مصاريف إضافية");
+        TextField additionalFeesTextField = new TextField();
+        additionalFeesTextField.setPrefSize(100,20);
 
         Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
         addMoreProductsButton.setPrefSize(120,20);
 
         Button addNewProductButton = new Button("أضف منتج جديد لقاعدة البيانات");
         addNewProductButton.setPrefSize(200,20);
+
 
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
@@ -712,7 +719,7 @@ public class GUI {
             messageLabel.setText(message);
 
             String supplyDate = supplyDatePicker.getValue().toString();
-            double transportationFees = Double.parseDouble(transportationFeesTextField.getText().trim());
+            double additionalFees = Double.parseDouble(additionalFeesTextField.getText().trim());
 
 
             ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
@@ -728,9 +735,9 @@ public class GUI {
                 productsTotalCost += (buyingPrice * boughtQuantity);
             }
 
-            double supplyTotalCost = productsTotalCost + transportationFees;
+            double supplyTotalCost = productsTotalCost + additionalFees;
 
-            Supply supply = new Supply(supplyDate, supplier, transportationFees, productsTotalCost, supplyTotalCost, boughtProducts);
+            Supply supply = new Supply(supplyDate, supplier, additionalFees, productsTotalCost, supplyTotalCost, boughtProducts);
             boolean done = StoreDatabase.addSupply(supply);
 
 
@@ -754,23 +761,25 @@ public class GUI {
             newStage.setScene(scene);
             newStage.show();
         });
-
+        
+        
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(supplyDateLabel,0,0);
         gridPane.add(supplyDatePicker, 1,0);
         gridPane.add(supplierNameLabel,0,1);
-        gridPane.add(transportationFessLabel,0,2);
-        gridPane.add(transportationFeesTextField,1,2);
-        gridPane.add(addMoreProductsButton,0,3);
-        gridPane.add(addNewProductButton, 1, 3);
+        gridPane.add(aditionalFeesLabel,0,2);
+        gridPane.add(additionalFeesTextField,1,2);
+        gridPane.add(addNewProductButton, 0, 3);
         gridPane.add(productsVBox,0,4);
-        gridPane.add(submitButton,0,5);
-        gridPane.add(messageLabel,0,6);
+        gridPane.add(addMoreProductsButton,0,5);
+        gridPane.add(submitButton,0,6);
+        gridPane.add(messageLabel,0,7);
 
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
@@ -850,6 +859,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(customerNameLabel,0,0);
         gridPane.add(customerNameTextField,1,0);
@@ -888,6 +898,8 @@ public class GUI {
     }
 
     private static Pane getShowCustomerBillsSceneLayout(Customer customer) {
+        Label billsOfCustomerLabel = new Label("فواتير عميل: " + customer.getCustomerName());
+
         TableColumn buyerName = new TableColumn("أسم العميل");
         TableColumn billID = new TableColumn("مسلسل الفاتورة");
         TableColumn billDate = new TableColumn("تاريخ الفاتورة");
@@ -912,12 +924,6 @@ public class GUI {
         billsTable.getColumns().add(billTotalCost);
         billsTable.getColumns().add(paymentMethod);
 
-        MenuItem addProductToBillOption = new MenuItem("أضف منتج للفاتورة");
-        addProductToBillOption.setOnAction(actionEvent -> {
-            Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
-
-        });
-
         MenuItem showSoldProductsOption = new MenuItem("عرض المنتجات المباعة");
         showSoldProductsOption.setOnAction(actionEvent -> {
             Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
@@ -934,6 +940,14 @@ public class GUI {
         editBillOption.setOnAction(actionEvent -> {
             Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
 
+            Scene scene = new Scene(getEditBillSceneLayout(selectedBill));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+            Stage newStage = new Stage();
+            newStage.setTitle("تعديل فاتورة");
+            newStage.setScene(scene);
+            newStage.show();
+
         });
 
         MenuItem deleteBillOption = new MenuItem("حذف الفاتورة");
@@ -945,7 +959,7 @@ public class GUI {
 
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getItems().add(showSoldProductsOption);
-        contextMenu.getItems().add(addProductToBillOption);
+
         contextMenu.getItems().add(editBillOption);
         contextMenu.getItems().add(deleteBillOption);
 
@@ -975,6 +989,7 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(billsOfCustomerLabel);
         borderPane.setCenter(billsTable);
         borderPane.setBottom(navigationHBox);
 
@@ -982,17 +997,19 @@ public class GUI {
     }
 
     private static Pane getShowSupplierSuppliesSceneLayout(Supplier supplier) {
+        Label suppliesOfSupplierLabel = new Label("فواتير مورد: " + supplier.getSupplierName());
+
         TableColumn supplyID = new TableColumn("مسلسل التوريد");
         TableColumn supplyDate = new TableColumn("تاريخ التوريد");
         TableColumn supplierName = new TableColumn("اسم المورد");
-        TableColumn transportationFees = new TableColumn("مصاريف المواصلات");
+        TableColumn additionalFees = new TableColumn("مصاريف إضافية");
         TableColumn productsTotalCost = new TableColumn("تكلفة المنتجات");
         TableColumn supplyTotalCost = new TableColumn("التكلفة الكاملة");
 
         supplyID.setCellValueFactory(new PropertyValueFactory<Supply, Integer>("supplyID"));
         supplyDate.setCellValueFactory(new PropertyValueFactory<Supply, String>("supplyDate"));
         productsTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("productsTotalCost"));
-        transportationFees.setCellValueFactory(new PropertyValueFactory<Supply, Double>("transportationFees"));
+        additionalFees.setCellValueFactory(new PropertyValueFactory<Supply, Double>("additionalFees"));
         supplyTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("supplyTotalCost"));
         supplierName.setCellValueFactory(cellData -> {
             Supply supply = (Supply) ((TableColumn.CellDataFeatures) cellData).getValue();
@@ -1006,18 +1023,12 @@ public class GUI {
         suppliesTable.getColumns().add(supplyDate);
         suppliesTable.getColumns().add(supplierName);
         suppliesTable.getColumns().add(productsTotalCost);
-        suppliesTable.getColumns().add(transportationFees);
+        suppliesTable.getColumns().add(additionalFees);
         suppliesTable.getColumns().add(supplyTotalCost);
 
         
         ArrayList<Supply> supplierSupplies = StoreDatabase.getSupplierSupplies(supplier);
         suppliesTable.setItems(FXCollections.observableList(supplierSupplies));
-
-        MenuItem addProductToSupplyOption = new MenuItem("أضف منتج للفاتورة");
-        addProductToSupplyOption.setOnAction(actionEvent -> {
-            Supply selectedSupply = suppliesTable.getSelectionModel().getSelectedItem();
-
-        });
 
         MenuItem showBoughtProductsOption = new MenuItem("عرض المنتجات المباعة");
         showBoughtProductsOption.setOnAction(actionEvent -> {
@@ -1036,6 +1047,14 @@ public class GUI {
         editSupplyOption.setOnAction(actionEvent -> {
             Supply selectedSupply = suppliesTable.getSelectionModel().getSelectedItem();
 
+            Scene scene = new Scene(getEditSupplySceneLayout(selectedSupply));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+            Stage newStage = new Stage();
+            newStage.setTitle("تعديل فاتورة");
+            newStage.setScene(scene);
+            newStage.show();
+
         });
 
         MenuItem deleteSupplyOption = new MenuItem("حذف الفاتورة");
@@ -1047,7 +1066,6 @@ public class GUI {
 
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getItems().add(showBoughtProductsOption);
-        contextMenu.getItems().add(addProductToSupplyOption);
         contextMenu.getItems().add(editSupplyOption);
         contextMenu.getItems().add(deleteSupplyOption);
 
@@ -1073,6 +1091,7 @@ public class GUI {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(suppliesOfSupplierLabel);
         borderPane.setCenter(suppliesTable);
         borderPane.setBottom(navigationHBox);
 
@@ -1219,13 +1238,6 @@ public class GUI {
     }
 
     private static Pane getAddBillToCustomerSceneLayout(Customer customer) {
-        GridPane gridPane = new GridPane();
-
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
         String nodeText;
 
         Label billDateLabel = new Label("تاريخ الفاتورة");
@@ -1264,6 +1276,112 @@ public class GUI {
         paymentMethods.add("كاش");
         paymentMethods.add("تقسيط");
         paymentMethodChoiceBox.setItems(FXCollections.observableList(paymentMethods));
+
+        nodeText = "أسم الضامن";
+        Label guarantorNameLabel = new Label(nodeText);
+        ChoiceBox<Customer> guarantorChoiceBox = new ChoiceBox<>();
+        ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
+        guarantorChoiceBox.setItems(FXCollections.observableList(customers));
+        guarantorChoiceBox.setConverter(new StringConverter<Customer>() {
+            @Override
+            public String toString(Customer c) {
+                return c.getCustomerName();
+            }
+
+            @Override
+            public Customer fromString(String s) {
+                return null;
+            }
+        });
+
+        nodeText = "المقدم";
+        Label initialPaymentLabel = new Label(nodeText);
+        TextField initialPaymentTextField = new TextField();
+        initialPaymentTextField.setPrefSize(100,20);
+
+        nodeText = "تاريخ أول قسط";
+        Label firstInstalmentDateLabel = new Label(nodeText);
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                startDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        nodeText = "تاريخ أخر قسط";
+        Label lastInstalmentDateLabel = new Label(nodeText);
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                endDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        nodeText = "عدد الأقساط المتبقية";
+        Label remainingInstalmentsNumberLabel = new Label(nodeText);
+        TextField remainingInstalmentsNumberTextField = new TextField();
+        remainingInstalmentsNumberTextField.setPrefSize(50,20);
+
+        nodeText = "قيمة القسط";
+        Label instalmentAmountLabel = new Label(nodeText);
+        TextField instalmentAmountTextField = new TextField();
+        instalmentAmountTextField.setPrefSize(100,20);
+
+       
+        
+        GridPane instalmentsDetailsGridPane = new GridPane();
+        instalmentsDetailsGridPane.setHgap(15);
+        instalmentsDetailsGridPane.setVgap(15);
+        
+
+        instalmentsDetailsGridPane.add(guarantorNameLabel, 0, 0);
+        instalmentsDetailsGridPane.add(guarantorChoiceBox, 1, 0);
+        instalmentsDetailsGridPane.add(initialPaymentLabel, 0,1);
+        instalmentsDetailsGridPane.add(initialPaymentTextField, 1,1);
+        instalmentsDetailsGridPane.add(instalmentAmountLabel, 0,2);
+        instalmentsDetailsGridPane.add(instalmentAmountTextField, 1, 2);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberLabel, 0,3);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberTextField, 1, 3);
+        instalmentsDetailsGridPane.add(firstInstalmentDateLabel, 0, 4);
+        instalmentsDetailsGridPane.add(startDatePicker, 1, 4);
+        instalmentsDetailsGridPane.add(lastInstalmentDateLabel, 0, 5);
+        instalmentsDetailsGridPane.add(endDatePicker, 1, 5);
 
         ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
         ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
@@ -1381,10 +1499,24 @@ public class GUI {
             double billTotalCost = productsTotalCost;
 
 
-            Bill bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
-
+            Bill bill;
+            if(paymentMethod.equals("كاش"))
+                bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
+            else
+            {
+                Customer guarantor = guarantorChoiceBox.getValue();
+                double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
+                double remainingMoney = billTotalCost - initialPayment;
+                double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
+                String firstInstalmentDate = startDatePicker.getValue().toString();
+                String lastInstalmentDate = endDatePicker.getValue().toString();
+                int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate, remainingInstalmentsNumber);
+                bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts, billInstalmentsDetails);
+            }
+            
+            
             boolean done = StoreDatabase.addBill(bill);
-
 
             if(done)
                 messageLabel.setText("!تم إدخال البيانات بنجاح");
@@ -1393,50 +1525,32 @@ public class GUI {
 
         });
 
-        Button addBillInstalmentsDetailsButton = new Button("أضف تفاصيل التفسيط");
-        addBillInstalmentsDetailsButton.setPrefSize(180, 20);
-        addBillInstalmentsDetailsButton.setOnAction(actionEvent -> {
-            String billDate = billDatePicker.getValue().toString();
-            Customer buyer = customer;
-            String paymentMethod = paymentMethodChoiceBox.getValue();
-
-
-            ArrayList<SoldProduct> soldProducts = new ArrayList<>();
-
-            int numOfSoldProducts =  productsChoiceBoxes.size();
-            double productsTotalCost = 0;
-            for(int i = 0; i < numOfSoldProducts; i++)
-            {
-                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
-                int soldQuantity = Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim());
-                double sellingPrice = Double.parseDouble(sellingPricesTextFields.get(i).getText().trim());
-                soldProducts.add(new SoldProduct(currentProduct, soldQuantity, sellingPrice));
-
-                productsTotalCost += (sellingPrice * soldQuantity);
-            }
-
-
-            double billTotalCost = productsTotalCost;
-
-
-            Bill bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
-
-            mainStage.setTitle("إدخال تفاصيل التقسيط");
-            mainStage.getScene().setRoot(getAddBillInstalmentsDetailsSceneLayout(bill));
-        });
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
     
         paymentMethodChoiceBox.setOnAction(actionEvent -> {
             if(paymentMethodChoiceBox.getValue().equals("تقسيط"))
             {
-                gridPane.getChildren().remove(submitButton);
-                gridPane.getChildren().remove(messageLabel);
-                gridPane.add(addBillInstalmentsDetailsButton, 0, 5);
+                gridPane.getChildren().removeAll(productsVBox, addMoreProductsButton, submitButton, messageLabel);
+
+                gridPane.add(instalmentsDetailsGridPane, 0, 3);
+                gridPane.add(productsVBox,0,4);
+                gridPane.add(addMoreProductsButton,0,5);
+                gridPane.add(submitButton,0,6);
+                gridPane.add(messageLabel,0,7);
+
             }
             else if(paymentMethodChoiceBox.getValue().equals("كاش"))
             {
-                gridPane.getChildren().remove(addBillInstalmentsDetailsButton);
+                gridPane.getChildren().removeAll(instalmentsDetailsGridPane, productsVBox, addMoreProductsButton, submitButton, messageLabel);
+
+                gridPane.add(productsVBox,0,3);
+                gridPane.add(addMoreProductsButton,0,4);
                 gridPane.add(submitButton,0,5);
-                gridPane.add(messageLabel,0,6);
+                gridPane.add(messageLabel,0,6);;
             }
         });
 
@@ -1445,8 +1559,7 @@ public class GUI {
         gridPane.add(buyerNameLabel,0,1);
         gridPane.add(paymentMethodLabel,0,2);
         gridPane.add(paymentMethodChoiceBox,1,2);
-        gridPane.add(addMoreProductsButton,0,3);
-        gridPane.add(productsVBox,0,4);
+
 
 
         ScrollPane pane = new ScrollPane(gridPane);
@@ -1541,6 +1654,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(paymentDateLabel, 0, 0);
         gridPane.add(paymentDatePicker, 1, 0);
@@ -1609,6 +1723,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(paymentDateLabel, 0, 0);
         gridPane.add(paymentDatePicker, 1, 0);
@@ -1619,166 +1734,7 @@ public class GUI {
 
         return gridPane;
     }
-
-    private static Pane getAddBillInstalmentsDetailsSceneLayout(Bill bill) {
-        String nodeText;
-        nodeText = "أسم الضامن";
-        Label guarantorNameLabel = new Label(nodeText);
-        ChoiceBox<Customer> guarantorChoiceBox = new ChoiceBox<>();
-        ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
-        guarantorChoiceBox.setItems(FXCollections.observableList(customers));
-        guarantorChoiceBox.setConverter(new StringConverter<Customer>() {
-            @Override
-            public String toString(Customer c) {
-                return c.getCustomerName();
-            }
-
-            @Override
-            public Customer fromString(String s) {
-                return null;
-            }
-        });
-
-        nodeText = "المقدم";
-        Label initialPaymentLabel = new Label(nodeText);
-        TextField initialPaymentTextField = new TextField();
-        initialPaymentTextField.setPrefSize(100,20);
-
-        nodeText = "تاريخ أول قسط";
-        Label firstInstalmentDateLabel = new Label(nodeText);
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                startDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        nodeText = "تاريخ أخر قسط";
-        Label lastInstalmentDateLabel = new Label(nodeText);
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setConverter(new StringConverter<LocalDate>() {
-            String pattern = "yyyy-MM-dd";
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-            {
-                endDatePicker.setPromptText(pattern.toLowerCase());
-            }
-
-            @Override public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        nodeText = "عدد الأقساط المتبقية";
-        Label remainingInstalmentsNumberLabel = new Label(nodeText);
-        TextField remainingInstalmentsNumberTextField = new TextField();
-        remainingInstalmentsNumberTextField.setPrefSize(50,20);
-
-        nodeText = "قيمة القسط";
-        Label instalmentAmountLabel = new Label(nodeText);
-        TextField instalmentAmountTextField = new TextField();
-        instalmentAmountTextField.setPrefSize(100,20);
-
-        nodeText = "أدخل";
-        Button submitButton = new Button(nodeText);
-        submitButton.setPrefSize(50, 20);
-        Label messageLabel = new Label();
-
-        submitButton.setOnAction(actionEvent -> {
-            messageLabel.setText("");
-            Customer guarantor = guarantorChoiceBox.getValue();
-            double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
-            double remainingMoney = bill.getBillTotalCost() - initialPayment;
-            double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
-            String firstInstalmentDate = startDatePicker.getValue().toString();
-            String lastInstalmentDate = endDatePicker.getValue().toString();
-            int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
-            BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate, remainingInstalmentsNumber);
-            Bill updatedBill = new Bill(bill.getBillDate(), bill.getBuyer(), bill.getProductsTotalCost(), bill.getBillTotalCost(), bill.getPaymentMethod(), bill.getSoldProducts(), billInstalmentsDetails);
-
-            boolean done = StoreDatabase.addBill(updatedBill);
-            if(done)
-                messageLabel.setText("تم إدخال البيانات بنجاح!");
-            else
-                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
-        });
-
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(30, 30, 30, 30));
-        gridPane.setHgap(15);
-        gridPane.setVgap(15);
-        gridPane.setAlignment(Pos.CENTER);
-
-        gridPane.add(guarantorNameLabel, 0, 0);
-        gridPane.add(guarantorChoiceBox, 1, 0);
-        gridPane.add(initialPaymentLabel, 0,1);
-        gridPane.add(initialPaymentTextField, 1,1);
-        gridPane.add(instalmentAmountLabel, 0,2);
-        gridPane.add(instalmentAmountTextField, 1, 2);
-        gridPane.add(remainingInstalmentsNumberLabel, 0,3);
-        gridPane.add(remainingInstalmentsNumberTextField, 1, 3);
-        gridPane.add(firstInstalmentDateLabel, 0, 4);
-        gridPane.add(startDatePicker, 1, 4);
-        gridPane.add(lastInstalmentDateLabel, 0, 5);
-        gridPane.add(endDatePicker, 1, 5);
-        gridPane.add(submitButton, 0, 6);
-        gridPane.add(messageLabel,0, 7);
-
-        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
-        homeButton.setPrefSize(180, 30);
-        homeButton.setOnAction(actionEvent -> {
-            mainStage.setTitle("الواجهة الرئيسية");
-            mainStage.getScene().setRoot(homeSceneLayout);
-        });
-
-        Button backButton = new Button("العودة إلي الواجهة السابقة");
-        backButton.setPrefSize(180, 30);
-        backButton.setOnAction(actionEvent -> {
-            mainStage.setTitle("عرض بيانات العملاء");
-            mainStage.getScene().setRoot(getShowCustomersSceneLayout());
-        });
-
-        HBox navigationHBox = new HBox();
-        navigationHBox.setSpacing(10);
-        navigationHBox.getChildren().addAll(homeButton, backButton);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(gridPane);
-        borderPane.setBottom(navigationHBox);
-
-        return borderPane;
-    }
-
+    
     private static Pane getShowBillSoldProductsSceneLayout(Bill bill) {
         TableColumn productNameCol = new TableColumn("أسم المنتج");
         productNameCol.setCellValueFactory(cellData -> {
@@ -1882,6 +1838,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
+        
 
         gridPane.add(supplierNameLabel,0,0);
         gridPane.add(supplierNameTextField,1,0);
@@ -2040,7 +1997,308 @@ public class GUI {
         
         return vBox;
     }
+    
+    private static Pane getEditBillSceneLayout(Bill bill) {
+        String nodeText;
 
+        Label billDateLabel = new Label("تاريخ الفاتورة");
+        DatePicker billDatePicker = new DatePicker();
+        billDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                billDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+        billDatePicker.setValue(LocalDate.parse(bill.getBillDate()));
+
+        nodeText = "أسم العميل: " + bill.getBuyer().getCustomerName();
+        Label buyerNameLabel = new Label(nodeText);
+
+
+
+        nodeText = "وسيلة الدفع: " + bill.getPaymentMethod();
+        Label paymentMethodLabel = new Label(nodeText);
+
+
+        nodeText = "أسم الضامن: " + bill.getBillInstalmentsDetails().getGuarantor().getCustomerName();
+        Label guarantorNameLabel = new Label(nodeText);
+
+        nodeText = "المقدم";
+        Label initialPaymentLabel = new Label(nodeText);
+        TextField initialPaymentTextField = new TextField();
+        initialPaymentTextField.setPrefSize(100,20);
+        initialPaymentTextField.setText(bill.getBillInstalmentsDetails().getInitialPayment() + "");
+
+        nodeText = "تاريخ أول قسط";
+        Label firstInstalmentDateLabel = new Label(nodeText);
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                startDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+        startDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getFirstInstalmentDate()));
+
+        nodeText = "تاريخ أخر قسط";
+        Label lastInstalmentDateLabel = new Label(nodeText);
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                endDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+        endDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getLastInstalmentDate()));
+
+        nodeText = "عدد الأقساط المتبقية";
+        Label remainingInstalmentsNumberLabel = new Label(nodeText);
+        TextField remainingInstalmentsNumberTextField = new TextField();
+        remainingInstalmentsNumberTextField.setPrefSize(50,20);
+        remainingInstalmentsNumberTextField.setText(bill.getBillInstalmentsDetails().getRemainingInstalmentsNumber() + "");
+
+        nodeText = "قيمة القسط";
+        Label instalmentAmountLabel = new Label(nodeText);
+        TextField instalmentAmountTextField = new TextField();
+        instalmentAmountTextField.setPrefSize(100,20);
+        instalmentAmountTextField.setText(bill.getBillInstalmentsDetails().getInstalmentAmount() + "");
+
+        GridPane instalmentsDetailsGridPane = new GridPane();
+        instalmentsDetailsGridPane.setHgap(15);
+        instalmentsDetailsGridPane.setVgap(15);
+
+
+        instalmentsDetailsGridPane.add(guarantorNameLabel, 0, 0);
+        instalmentsDetailsGridPane.add(initialPaymentLabel, 0,1);
+        instalmentsDetailsGridPane.add(initialPaymentTextField, 1,1);
+        instalmentsDetailsGridPane.add(instalmentAmountLabel, 0,2);
+        instalmentsDetailsGridPane.add(instalmentAmountTextField, 1, 2);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberLabel, 0,3);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberTextField, 1, 3);
+        instalmentsDetailsGridPane.add(firstInstalmentDateLabel, 0, 4);
+        instalmentsDetailsGridPane.add(startDatePicker, 1, 4);
+        instalmentsDetailsGridPane.add(lastInstalmentDateLabel, 0, 5);
+        instalmentsDetailsGridPane.add(endDatePicker, 1, 5);
+
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        Label messageLabel = new Label();
+        submitButton.setOnAction(event -> {
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String billDate = billDatePicker.getValue().toString();
+            Customer buyer = bill.getBuyer();
+            String paymentMethod = bill.getPaymentMethod();
+
+            ArrayList<SoldProduct> soldProducts = bill.getSoldProducts();
+            double billTotalCost = bill.getBillTotalCost();
+            double productsTotalCost = bill.getProductsTotalCost();
+
+            Bill updatedBill;
+            if(paymentMethod.equals("كاش"))
+                updatedBill = new Bill(bill.getBillID(), billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
+            else
+            {
+                Customer guarantor = bill.getBillInstalmentsDetails().getGuarantor();
+                double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
+                double remainingMoney = billTotalCost - initialPayment;
+                double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
+                String firstInstalmentDate = startDatePicker.getValue().toString();
+                String lastInstalmentDate = endDatePicker.getValue().toString();
+                int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate, remainingInstalmentsNumber);
+                updatedBill = new Bill(bill.getBillID(), billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts, billInstalmentsDetails);
+            }
+
+            boolean done = StoreDatabase.updateBill(updatedBill);
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
+
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+
+        gridPane.add(billDateLabel,0,0);
+        gridPane.add(billDatePicker,1,0);
+        gridPane.add(buyerNameLabel,0,1);
+        gridPane.add(paymentMethodLabel,0,2);
+        if(bill.getPaymentMethod().equals("تقسيط"))
+        {
+            gridPane.add(instalmentsDetailsGridPane, 0, 3);
+            gridPane.add(submitButton,0,4);
+            gridPane.add(messageLabel,0,5);
+
+        }
+        else
+        {
+            gridPane.add(submitButton,0,3);
+            gridPane.add(messageLabel,0,4);;
+        }
+
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+
+        return borderPane;
+    }
+
+    private static Pane getEditSupplySceneLayout(Supply supply) {
+        Label messageLabel = new Label();
+
+        Button submitButton = new Button("أدخل");
+        submitButton.setPrefSize(100, 20);
+
+        Label supplyDateLabel = new Label("تاريخ الشراء");
+        DatePicker supplyDatePicker = new DatePicker();
+        supplyDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                supplyDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+        supplyDatePicker.setValue(LocalDate.parse(supply.getSupplyDate()));
+
+        Label supplierNameLabel = new Label("أسم المورد: " + supply.getSupplier().getSupplierName());
+
+
+        Label aditionalFeesLabel = new Label( "مصاريف إضافية");
+        TextField additionalFeesTextField = new TextField();
+        additionalFeesTextField.setPrefSize(100,20);
+        additionalFeesTextField.setText(supply.getAditionalFees() + "");
+        
+        
+        submitButton.setOnAction(event -> {
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String supplyDate = supplyDatePicker.getValue().toString();
+            Supplier supplier = supply.getSupplier();
+            double additionalFees = Double.parseDouble(additionalFeesTextField.getText().trim());
+
+
+            ArrayList<BoughtProduct> boughtProducts = supply.getBoughtProducts();
+            double productsTotalCost = supply.getProductsTotalCost();
+
+            double supplyTotalCost = productsTotalCost + additionalFees;
+
+            Supply updatedSupply = new Supply(supply.getSupplyID() ,supplyDate, supplier, additionalFees, productsTotalCost, supplyTotalCost, boughtProducts);
+            boolean done = StoreDatabase.updateSupply(updatedSupply);
+
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+        });
+
+        
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        gridPane.add(supplyDateLabel,0,0);
+        gridPane.add(supplyDatePicker, 1,0);
+        gridPane.add(supplierNameLabel,0,1);
+        gridPane.add(aditionalFeesLabel,0,2);
+        gridPane.add(additionalFeesTextField,1,2);
+        gridPane.add(submitButton,0,3);
+        gridPane.add(messageLabel,0,4);
+
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
+
+
+
+        return borderPane;
+    }
 
 
 }
