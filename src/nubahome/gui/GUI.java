@@ -1085,6 +1085,39 @@ public class GUI {
         deleteSupplyOption.setOnAction(actionEvent -> {
             Supply selectedSupply = suppliesTable.getSelectionModel().getSelectedItem();
 
+            Alert deleteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            deleteAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            deleteAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            deleteAlert.setTitle("تأكيد حذف الفاتورة");
+            deleteAlert.setHeaderText(null);
+            deleteAlert.setContentText("هل أنت متأكد من حذف الفاتورة؟");
+            ButtonType yesButtonType = new ButtonType("نعم");
+            ButtonType noButtonType = new ButtonType("لا", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+            deleteAlert.getButtonTypes().setAll(yesButtonType, noButtonType);
+
+            Optional<ButtonType> result = deleteAlert.showAndWait();
+            if(result.get() == yesButtonType)
+            {
+                boolean done = StoreDatabase.deleteSupply(selectedSupply);
+                if(done)
+                {
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                    successAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                    successAlert.setResizable(true);
+                    successAlert.setTitle("تم الحذف");
+                    successAlert.setHeaderText(null);
+                    successAlert.setContentText("تم حذف جميع بيانات الفاتورة بنجاح!");
+
+                    result = successAlert.showAndWait();
+                    if(result.get() == ButtonType.OK)
+                        mainStage.getScene().setRoot(getShowSupplierSuppliesSceneLayout(supplier));
+                }
+                else
+                    System.out.println("false");
+            }
+
         });
 
 

@@ -780,6 +780,31 @@ public class StoreDatabase {
         return true;
     }
 
+    public static boolean deleteSupply(Supply supply) {
+        try {
+            String query = "delete from bought_products where supply_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supply.supplyID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows < 1)
+                return false;
+
+
+            query = "delete from supplies where supply_id = ?";
+            preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, supply.supplyID);
+
+            numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+    
     public static ArrayList<Supply> getSupplies(String queryStartDate, String queryEndDate) {
         ArrayList<Supply> supplies = new ArrayList<>();
         try {
