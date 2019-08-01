@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Stack;
 
 
@@ -948,6 +949,40 @@ public class GUI {
         MenuItem deleteBillOption = new MenuItem("حذف الفاتورة");
         deleteBillOption.setOnAction(actionEvent -> {
             Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
+
+            Alert deleteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            deleteAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            deleteAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            deleteAlert.setTitle("تأكيد حذف الفاتورة");
+            deleteAlert.setHeaderText(null);
+            deleteAlert.setContentText("هل أنت متأكد من حذف الفاتورة؟");
+            ButtonType yesButtonType = new ButtonType("نعم");
+            ButtonType noButtonType = new ButtonType("لا", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+            deleteAlert.getButtonTypes().setAll(yesButtonType, noButtonType);
+
+            Optional<ButtonType> result = deleteAlert.showAndWait();
+            if(result.get() == yesButtonType)
+            {
+                boolean done = StoreDatabase.deleteBill(selectedBill);
+                if(done)
+                {
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                    successAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+                    successAlert.setResizable(true);
+                    successAlert.setTitle("تم الحذف");
+                    successAlert.setHeaderText(null);
+                    successAlert.setContentText("تم حذف جميع بيانات الفاتورة بنجاح!");
+
+                    result = successAlert.showAndWait();
+                    if(result.get() == ButtonType.OK)
+                        mainStage.getScene().setRoot(getShowCustomerBillsSceneLayout(customer));
+
+                }
+                else
+                    System.out.println("false");
+            }
 
         });
 

@@ -1010,6 +1010,58 @@ public class StoreDatabase {
         return true;
     }
 
+    public static boolean deleteBill(Bill bill) {
+        try {
+            String query = "delete from sold_products where bill_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, bill.billID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows < 1)
+                return false;
+
+            if(bill.paymentMethod.equals("تقسيط"))
+            {
+                query = "delete from instalments_payments where instalment_id in (select instalment_id from instalments where bill_id = ?)";
+                preparedStatement = databaseConnection.prepareStatement(query);
+                preparedStatement.setInt(1, bill.billID);
+
+                numOfRows = preparedStatement.executeUpdate();
+                if(numOfRows < 0)
+                    return false;
+
+                query = "delete from instalments where bill_id = ?";
+                preparedStatement = databaseConnection.prepareStatement(query);
+                preparedStatement.setInt(1, bill.billID);
+
+                numOfRows = preparedStatement.executeUpdate();
+                if(numOfRows < 1)
+                    return false;
+
+                query = "delete from bills_instalments_details where bill_id = ?";
+                preparedStatement = databaseConnection.prepareStatement(query);
+                preparedStatement.setInt(1, bill.billID);
+
+                numOfRows = preparedStatement.executeUpdate();
+                if(numOfRows != 1)
+                    return false;
+
+            }
+
+            query = "delete from bills where bill_id = ?";
+            preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setInt(1, bill.billID);
+
+            numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     public static ArrayList<Bill> getCustomerBills(Customer customer) {
         ArrayList<Bill> bills = new ArrayList<>();
         try {
@@ -1445,7 +1497,6 @@ public class StoreDatabase {
             return done;
         }
     }
-
 
     public static ArrayList<ProductSupply> getProductSupplies(Product product) {
         ArrayList<ProductSupply> productSupplies = new ArrayList<>();
