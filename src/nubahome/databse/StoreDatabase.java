@@ -461,6 +461,40 @@ public class StoreDatabase {
         return product;
     }
 
+    public static boolean updateBoughtProduct(Supply supply, BoughtProduct updatedBoughtProduct, double updatedProductsTotalCost) {
+
+        try {
+            String query = "update bought_products set bought_quantity = ?, buying_price = ? where supply_id = ? and product_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+
+            preparedStatement.setDouble(1, updatedBoughtProduct.boughtQuantity);
+            preparedStatement.setDouble(2, updatedBoughtProduct.buyingPrice);
+            preparedStatement.setInt(3, supply.supplyID);
+            preparedStatement.setInt(4, updatedBoughtProduct.productID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+            query = "update supplies set products_total_cost = ?, supply_total_cost = ? where supply_id = ?";
+            preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setDouble(1, updatedProductsTotalCost);
+            preparedStatement.setDouble(2, supply.additionalFees + updatedProductsTotalCost);
+            preparedStatement.setInt(3, supply.supplyID);
+
+
+            numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        return true;
+    }
+
     public static ArrayList<BoughtProduct> getBoughtProducts(int supplyID) {
         ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
         try
@@ -485,6 +519,39 @@ public class StoreDatabase {
         }
 
         return boughtProducts;
+    }
+
+    public static boolean updateSoldProduct(Bill bill, SoldProduct updatedSoldProduct, double updatedProductsTotalCost) {
+        try {
+            String query = "update sold_products set sold_quantity = ?, selling_price = ? where bill_id = ? and product_id = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+
+            preparedStatement.setDouble(1, updatedSoldProduct.soldQuantity);
+            preparedStatement.setDouble(2, updatedSoldProduct.sellingPrice);
+            preparedStatement.setInt(3, bill.billID);
+            preparedStatement.setInt(4, updatedSoldProduct.productID);
+
+            int numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+            query = "update bills set products_total_cost = ?, bill_total_cost = ? where bill_id = ?";
+            preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setDouble(1, updatedProductsTotalCost);
+            preparedStatement.setDouble(2, updatedProductsTotalCost);
+            preparedStatement.setInt(3, bill.billID);
+
+
+            numOfRows = preparedStatement.executeUpdate();
+            if(numOfRows != 1)
+                return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
     public static ArrayList<SoldProduct> getSoldProducts(int billID) {
@@ -607,12 +674,12 @@ public class StoreDatabase {
     public static boolean addSupply(Supply supply) {
         try {
             String query = "insert into supplies"
-                    + "(supplier_id, supply_date, aditional_fees, products_total_cost, supply_total_cost)"
+                    + "(supplier_id, supply_date, additional_fees, products_total_cost, supply_total_cost)"
                     + "values (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
             preparedStatement.setInt(1, supply.supplier.supplierID);
             preparedStatement.setString(2, supply.supplyDate);
-            preparedStatement.setDouble(3, supply.aditionalFees);
+            preparedStatement.setDouble(3, supply.additionalFees);
             preparedStatement.setDouble(4, supply.productsTotalCost);
             preparedStatement.setDouble(5, supply.supplyTotalCost);
 
@@ -637,7 +704,7 @@ public class StoreDatabase {
                 preparedStatement.setInt(1,supply.supplyID);
                 preparedStatement.setInt(2, x.productID);
                 preparedStatement.setInt(3, x.boughtQuantity);
-                preparedStatement.setDouble(4, x.supplyPrice);
+                preparedStatement.setDouble(4, x.buyingPrice);
 
                 preparedStatement.addBatch();
 
@@ -694,7 +761,7 @@ public class StoreDatabase {
             PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
             preparedStatement.setString(1, updatedSupply.supplyDate);
             preparedStatement.setInt(2, updatedSupply.supplier.supplierID);
-            preparedStatement.setDouble(3, updatedSupply.aditionalFees);
+            preparedStatement.setDouble(3, updatedSupply.additionalFees);
             preparedStatement.setDouble(4, updatedSupply.productsTotalCost);
             preparedStatement.setDouble(5, updatedSupply.supplyTotalCost);
             preparedStatement.setInt(6, updatedSupply.supplyID);
@@ -728,11 +795,11 @@ public class StoreDatabase {
                 String supplyDate = resultSet.getString("supply_date");
                 int supplierID = resultSet.getInt("supplier_id");
                 Supplier supplier = getSupplier(supplierID);
-                double aditionalFees = resultSet.getDouble("aditional_fees");
+                double additionalFees = resultSet.getDouble("additional_fees");
                 double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double supplyTotalCost = resultSet.getDouble("supply_total_cost");
                 ArrayList<BoughtProduct> boughtProducts = getBoughtProducts(supplyID);
-                supplies.add(new Supply(supplyID, supplyDate, supplier, aditionalFees, productsTotalCost, supplyTotalCost, boughtProducts));
+                supplies.add(new Supply(supplyID, supplyDate, supplier, additionalFees, productsTotalCost, supplyTotalCost, boughtProducts));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -755,11 +822,11 @@ public class StoreDatabase {
                 int supplyID = resultSet.getInt("supply_id");
                 String supplyDate = resultSet.getString("supply_date");
                 int supplierID = resultSet.getInt("supplier_id");
-                double aditionalFees = resultSet.getDouble("aditional_fees");
+                double additionalFees = resultSet.getDouble("additional_fees");
                 double productsTotalCost = resultSet.getDouble("products_total_cost");
                 double supplyTotalCost = resultSet.getDouble("supply_total_cost");
                 ArrayList<BoughtProduct> boughtProducts = getBoughtProducts(supplyID);
-                supplies.add(new Supply(supplyID, supplyDate, supplier, aditionalFees, productsTotalCost, supplyTotalCost, boughtProducts));
+                supplies.add(new Supply(supplyID, supplyDate, supplier, additionalFees, productsTotalCost, supplyTotalCost, boughtProducts));
             }
         } catch (SQLException e) {
             e.printStackTrace();

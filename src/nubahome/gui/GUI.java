@@ -622,7 +622,7 @@ public class GUI {
 
         Label supplierNameLabel = new Label("أسم المورد: " + supplier.getSupplierName());
 
-        Label aditionalFeesLabel = new Label( "مصاريف إضافية");
+        Label additionalFeesLabel = new Label( "مصاريف إضافية");
         TextField additionalFeesTextField = new TextField();
         additionalFeesTextField.setPrefSize(100,20);
 
@@ -773,7 +773,7 @@ public class GUI {
         gridPane.add(supplyDateLabel,0,0);
         gridPane.add(supplyDatePicker, 1,0);
         gridPane.add(supplierNameLabel,0,1);
-        gridPane.add(aditionalFeesLabel,0,2);
+        gridPane.add(additionalFeesLabel,0,2);
         gridPane.add(additionalFeesTextField,1,2);
         gridPane.add(addNewProductButton, 0, 3);
         gridPane.add(productsVBox,0,4);
@@ -900,17 +900,12 @@ public class GUI {
     private static Pane getShowCustomerBillsSceneLayout(Customer customer) {
         Label billsOfCustomerLabel = new Label("فواتير عميل: " + customer.getCustomerName());
 
-        TableColumn buyerName = new TableColumn("أسم العميل");
         TableColumn billID = new TableColumn("مسلسل الفاتورة");
         TableColumn billDate = new TableColumn("تاريخ الفاتورة");
         TableColumn billTotalCost = new TableColumn("التكلفة الكلية");
         TableColumn paymentMethod = new TableColumn("وسيلة الدفع");
 
         billID.setCellValueFactory( new PropertyValueFactory<Bill, Integer>("billID"));
-        buyerName.setCellValueFactory( cellData -> {
-            Bill bill = (Bill) ((TableColumn.CellDataFeatures) cellData).getValue();
-            return new SimpleStringProperty(bill.getBuyer().getCustomerName());
-        });
         billDate.setCellValueFactory( new PropertyValueFactory<Bill, Date>("billDate"));
         billTotalCost.setCellValueFactory( new PropertyValueFactory<Bill, Double>("billTotalCost"));
         paymentMethod.setCellValueFactory(new PropertyValueFactory<Bill, String>("paymentMethod"));
@@ -920,7 +915,6 @@ public class GUI {
 
         billsTable.getColumns().add(billID);
         billsTable.getColumns().add(billDate);
-        billsTable.getColumns().add(buyerName);
         billsTable.getColumns().add(billTotalCost);
         billsTable.getColumns().add(paymentMethod);
 
@@ -931,6 +925,7 @@ public class GUI {
             Scene scene = new Scene(getShowBillSoldProductsSceneLayout(selectedBill));
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage newStage = new Stage();
+            newStage.setMaximized(true);
             newStage.setTitle("عرض بيانات المنتجات المباعة");
             newStage.setScene(scene);
             newStage.show();
@@ -1001,7 +996,6 @@ public class GUI {
 
         TableColumn supplyID = new TableColumn("مسلسل التوريد");
         TableColumn supplyDate = new TableColumn("تاريخ التوريد");
-        TableColumn supplierName = new TableColumn("اسم المورد");
         TableColumn additionalFees = new TableColumn("مصاريف إضافية");
         TableColumn productsTotalCost = new TableColumn("تكلفة المنتجات");
         TableColumn supplyTotalCost = new TableColumn("التكلفة الكاملة");
@@ -1011,17 +1005,12 @@ public class GUI {
         productsTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("productsTotalCost"));
         additionalFees.setCellValueFactory(new PropertyValueFactory<Supply, Double>("additionalFees"));
         supplyTotalCost.setCellValueFactory(new PropertyValueFactory<Supply, Double>("supplyTotalCost"));
-        supplierName.setCellValueFactory(cellData -> {
-            Supply supply = (Supply) ((TableColumn.CellDataFeatures) cellData).getValue();
-            return new SimpleStringProperty(supply.getSupplier().getSupplierName());
-        });
 
         TableView<Supply> suppliesTable = new TableView();
         suppliesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         suppliesTable.getColumns().add(supplyID);
         suppliesTable.getColumns().add(supplyDate);
-        suppliesTable.getColumns().add(supplierName);
         suppliesTable.getColumns().add(productsTotalCost);
         suppliesTable.getColumns().add(additionalFees);
         suppliesTable.getColumns().add(supplyTotalCost);
@@ -1037,7 +1026,7 @@ public class GUI {
             Scene scene = new Scene(getShowSupplyBoughtProductsSceneLayout(selectedSupply));
             scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             Stage newStage = new Stage();
-            
+            newStage.setMaximized(true);
             newStage.setTitle("عرض بيانات المنتجات المباعة");
             newStage.setScene(scene);
             newStage.show();
@@ -1748,16 +1737,31 @@ public class GUI {
         TableColumn sellingPriceCol = new TableColumn("سعر بيع الوحدة");
         sellingPriceCol.setCellValueFactory(new PropertyValueFactory<SoldProduct, Double>("sellingPrice"));
 
-        TableView<SoldProduct> billDetailsTable = new TableView<>();
-        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        billDetailsTable.getColumns().setAll(productNameCol, soldQuantityCol, sellingPriceCol);
+        TableView<SoldProduct> soldProductsTable = new TableView<>();
+        soldProductsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        soldProductsTable.getColumns().setAll(productNameCol, soldQuantityCol, sellingPriceCol);
 
-        billDetailsTable.setItems(FXCollections.observableList(bill.getSoldProducts()));
+        soldProductsTable.setItems(FXCollections.observableList(bill.getSoldProducts()));
+
+        MenuItem editOption = new MenuItem("تعديل");
+        editOption.setOnAction(actionEvent -> {
+            SoldProduct selectedSoldProducts = soldProductsTable.getSelectionModel().getSelectedItem();
+
+            Scene scene = new Scene(getEditSoldProductDataSceneLayout(bill, selectedSoldProducts));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage newStage = new Stage();
+            newStage.setTitle("تعديل بيانات منتج مباع");
+            newStage.setScene(scene);
+            newStage.show();
+        });
+
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.getItems().add(editOption);
+        soldProductsTable.setContextMenu(contextMenu);
         
-
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(billDetailsTable);
+        borderPane.setCenter(soldProductsTable);
 
 
         return borderPane;
@@ -1776,16 +1780,32 @@ public class GUI {
         TableColumn buyingPriceCol = new TableColumn("سعر شراء الوحدة");
         buyingPriceCol.setCellValueFactory(new PropertyValueFactory<BoughtProduct, Double>("buyingPrice"));
 
-        TableView<BoughtProduct> billDetailsTable = new TableView<>();
-        billDetailsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        billDetailsTable.getColumns().setAll(productNameCol, boughtQuantityCol, buyingPriceCol);
+        TableView<BoughtProduct> boughtProductsTable = new TableView<>();
+        boughtProductsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        boughtProductsTable.getColumns().setAll(productNameCol, boughtQuantityCol, buyingPriceCol);
 
-        billDetailsTable.setItems(FXCollections.observableList(supply.getBoughtProducts()));
+        boughtProductsTable.setItems(FXCollections.observableList(supply.getBoughtProducts()));
         
-
+        MenuItem editOption = new MenuItem("تعديل");
+        editOption.setOnAction(actionEvent -> {
+            BoughtProduct selectedBoughtProduct = boughtProductsTable.getSelectionModel().getSelectedItem();
+            
+            Scene scene = new Scene(getEditBoughtProductDataSceneLayout(supply, selectedBoughtProduct));
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage newStage = new Stage();
+            newStage.setTitle("تعديل بيانات منتج مشتري");
+            newStage.setScene(scene);
+            newStage.show();
+        });
+        
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.getItems().add(editOption);
+        boughtProductsTable.setContextMenu(contextMenu);
+        
+        
         BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20, 20, 20, 20));
-        borderPane.setCenter(billDetailsTable);
+        borderPane.setCenter(boughtProductsTable);
 
         return borderPane;
     }
@@ -2243,10 +2263,10 @@ public class GUI {
         Label supplierNameLabel = new Label("أسم المورد: " + supply.getSupplier().getSupplierName());
 
 
-        Label aditionalFeesLabel = new Label( "مصاريف إضافية");
+        Label additionalFeesLabel = new Label( "مصاريف إضافية");
         TextField additionalFeesTextField = new TextField();
         additionalFeesTextField.setPrefSize(100,20);
-        additionalFeesTextField.setText(supply.getAditionalFees() + "");
+        additionalFeesTextField.setText(supply.getAdditionalFees() + "");
         
         
         submitButton.setOnAction(event -> {
@@ -2285,7 +2305,7 @@ public class GUI {
         gridPane.add(supplyDateLabel,0,0);
         gridPane.add(supplyDatePicker, 1,0);
         gridPane.add(supplierNameLabel,0,1);
-        gridPane.add(aditionalFeesLabel,0,2);
+        gridPane.add(additionalFeesLabel,0,2);
         gridPane.add(additionalFeesTextField,1,2);
         gridPane.add(submitButton,0,3);
         gridPane.add(messageLabel,0,4);
@@ -2299,6 +2319,118 @@ public class GUI {
 
         return borderPane;
     }
+    
+    private static Pane getEditBoughtProductDataSceneLayout(Supply supply, BoughtProduct boughtProduct) {
+        Label productNameLabel = new Label("أسم المنتج: " + boughtProduct.getProductName());
+        
+        Label buyingPriceLabel = new Label("سعر الشراء");
+        TextField buyingPriceTextField = new TextField();
+        buyingPriceTextField.setPrefSize(100, 20);
+        buyingPriceTextField.setText(boughtProduct.getBuyingPrice() + "");
+        
+        Label boughtQuantityLabel = new Label("الكمية المشتراة");
+        TextField boughtQuantityTextField = new TextField();
+        boughtQuantityTextField.setPrefSize(100, 20);
+        boughtQuantityTextField.setText(boughtProduct.getBoughtQuantity() + "");
+        
+        Label messageLabel = new Label("");
+        
+        Button submitButton = new Button("أدخل");
+        submitButton.setPrefSize(100, 20);
+        submitButton.setOnAction(actionEvent -> {
+            double buyingPrice = Double.parseDouble(buyingPriceTextField.getText().trim());
+            int boughtQuantity = Integer.parseInt(boughtQuantityTextField.getText().trim());
+            
+            double oldProductTotalCost = boughtProduct.getBoughtQuantity() * boughtProduct.getBuyingPrice();
+            double newProductTotalCost = boughtQuantity * buyingPrice;
+            
+            double updatedProductsTotalCost;
+            if(newProductTotalCost > oldProductTotalCost)
+                updatedProductsTotalCost = supply.getProductsTotalCost() + (newProductTotalCost - oldProductTotalCost);
+            else
+                updatedProductsTotalCost = supply.getProductsTotalCost() - (oldProductTotalCost - newProductTotalCost);
+            
+            Product product = new Product(boughtProduct.getProductID(), boughtProduct.getProductName(), boughtProduct.getCategory(), boughtProduct.getAvailableQuantity(), boughtProduct.getSupplyPrice(), boughtProduct.getLastSupplyDate(), boughtProduct.getCashSellingPrice(), boughtProduct.getInstalmentSellingPrice());
+            boolean done = StoreDatabase.updateBoughtProduct(supply, new BoughtProduct(product, boughtQuantity, buyingPrice), updatedProductsTotalCost);
+            messageLabel.setText("");
+            if(done)
+                messageLabel.setText("تم إدخال البيانات بنجاح!");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
+        });
+        
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        
+        gridPane.add(productNameLabel, 0, 0);
+        gridPane.add(boughtQuantityLabel, 0, 1);
+        gridPane.add(boughtQuantityTextField, 1, 1);
+        gridPane.add(buyingPriceLabel, 0, 2);
+        gridPane.add(buyingPriceTextField, 1, 2);
+        gridPane.add(submitButton, 0, 3);
+        gridPane.add(messageLabel, 0, 4);
+        
+        return gridPane;
+    }
 
+    private static Pane getEditSoldProductDataSceneLayout(Bill bill, SoldProduct soldProduct) {
+        Label productNameLabel = new Label("أسم المنتج: " + soldProduct.getProductName());
+
+        Label sellingPriceLabel = new Label("سعر البيع");
+        TextField sellingPriceTextField = new TextField();
+        sellingPriceTextField.setPrefSize(100, 20);
+        sellingPriceTextField.setText(soldProduct.getSellingPrice() + "");
+
+        Label soldQuantityLabel = new Label("الكمية المباعة");
+        TextField soldQuantityTextField = new TextField();
+        soldQuantityTextField.setPrefSize(100, 20);
+        soldQuantityTextField.setText(soldProduct.getSoldQuantity() + "");
+
+        Label messageLabel = new Label("");
+
+        Button submitButton = new Button("أدخل");
+        submitButton.setPrefSize(100, 20);
+        submitButton.setOnAction(actionEvent -> {
+            double sellingPrice = Double.parseDouble(sellingPriceTextField.getText().trim());
+            int soldQuantity = Integer.parseInt(soldQuantityTextField.getText().trim());
+            
+            double oldProductTotalCost = soldProduct.getSoldQuantity() * soldProduct.getSellingPrice();
+            double newProductTotalCost = soldQuantity * sellingPrice;
+
+            double updatedProductsTotalCost;
+            if(newProductTotalCost > oldProductTotalCost)
+                updatedProductsTotalCost = bill.getProductsTotalCost() + (newProductTotalCost - oldProductTotalCost);
+            else
+                updatedProductsTotalCost = bill.getProductsTotalCost() - (oldProductTotalCost - newProductTotalCost);
+            
+            Product product = new Product(soldProduct.getProductID(), soldProduct.getProductName(), soldProduct.getCategory(), soldProduct.getAvailableQuantity(), soldProduct.getSupplyPrice(), soldProduct.getLastSupplyDate(), soldProduct.getCashSellingPrice(), soldProduct.getInstalmentSellingPrice());
+            boolean done = StoreDatabase.updateSoldProduct(bill, new SoldProduct(product, soldQuantity, sellingPrice), updatedProductsTotalCost);
+
+            messageLabel.setText("");
+            if(done)
+                messageLabel.setText("تم إدخال البيانات بنجاح!");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+
+        gridPane.add(productNameLabel, 0, 0);
+        gridPane.add(soldQuantityLabel, 0, 1);
+        gridPane.add(soldQuantityTextField, 1, 1);
+        gridPane.add(sellingPriceLabel, 0, 2);
+        gridPane.add(sellingPriceTextField, 1, 2);
+        gridPane.add(submitButton, 0, 3);
+        gridPane.add(messageLabel, 0, 4);
+
+        return gridPane;
+    }
 
 }
