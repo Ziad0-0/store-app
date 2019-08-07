@@ -30,7 +30,6 @@ public class GUI {
     private static Stage mainStage;
     private static Pane homeSceneLayout;
 
-
     public static void open(Stage primaryStage) {
         mainStage = primaryStage;
         mainStage.setMaximized(true);
@@ -211,7 +210,6 @@ public class GUI {
         MenuItem showBills = new MenuItem("عرض مشتريات العميل");
         MenuItem showInstalments = new MenuItem("عرض أقساط العميل");
         MenuItem editData = new MenuItem("تعديل بيانات العميل");
-        MenuItem deleteCustomer = new MenuItem("حذف العميل");
 
         addBill.setOnAction(actionEvent -> {
             Customer selectedCustomer = customersTable.getSelectionModel().getSelectedItem();
@@ -237,13 +235,10 @@ public class GUI {
             mainStage.getScene().setRoot(getEditCustomerDataSceneLayout(selectedCustomer));
         });
 
-        deleteCustomer.setOnAction(actionEvent -> {
-            Customer selectedCustomer = customersTable.getSelectionModel().getSelectedItem();
 
-        });
 
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(addBill, showBills, showInstalments, editData, deleteCustomer);
+        contextMenu.getItems().addAll(addBill, showBills, showInstalments, editData);
 
         customersTable.setContextMenu(contextMenu);
         Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
@@ -289,7 +284,7 @@ public class GUI {
         MenuItem addSupply = new MenuItem("إضافة فاتورة");
         MenuItem showSupplies = new MenuItem("عرض مبيعات المورد");
         MenuItem editData = new MenuItem("تعديل بيانات المورد");
-        MenuItem deleteSupplier = new MenuItem("حذف المورد");
+
 
         addSupply.setOnAction(actionEvent -> {
             Supplier selectedSupplier = suppliersTable.getSelectionModel().getSelectedItem();
@@ -310,13 +305,9 @@ public class GUI {
             mainStage.getScene().setRoot(getEditSupplierDataSceneLayout(selectedSupplier));
         });
 
-        deleteSupplier.setOnAction(actionEvent -> {
-            Supplier selectedSupplier = suppliersTable.getSelectionModel().getSelectedItem();
-
-        });
 
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(addSupply, showSupplies, editData, deleteSupplier);
+        contextMenu.getItems().addAll(addSupply, showSupplies, editData);
 
         suppliersTable.setContextMenu(contextMenu);
 
@@ -2074,6 +2065,7 @@ public class GUI {
         });
 
         TableView<ProductSupply> productSuppliesTable = new TableView<>();
+        productSuppliesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         productSuppliesTable.getColumns().addAll(productPriceColumn, supplierNameColumn, supplyDateColumn);
 
         ArrayList<ProductSupply> productSupplies = StoreDatabase.getProductSupplies(product);
