@@ -197,9 +197,9 @@ public class StoreDatabase {
 
         try {
             String query = "select * from customers "
-                    + "inner join bills on customer_id = buyer_id "
-                    + "inner join bills_instalments_details on bills.bill_id = bills_instalments_details.bill_id "
-                    + "where remaining_instalments_number > 0";
+                    + "where customer_id in (select distinct buyer_id from bills "
+                    + "where bill_id in (select bill_id from bills_instalments_details "
+                    + "where remaining_instalments_number > 0))";
             Statement statement = databaseConnection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next())
