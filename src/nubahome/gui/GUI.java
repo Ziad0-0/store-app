@@ -2117,14 +2117,12 @@ public class GUI {
         Label paymentMethodLabel = new Label(nodeText);
 
 
-        nodeText = "أسم الضامن: " + bill.getBillInstalmentsDetails().getGuarantor().getCustomerName();
-        Label guarantorNameLabel = new Label(nodeText);
+        Label guarantorNameLabel = new Label();
 
         nodeText = "المقدم";
         Label initialPaymentLabel = new Label(nodeText);
         TextField initialPaymentTextField = new TextField();
         initialPaymentTextField.setPrefSize(100,20);
-        initialPaymentTextField.setText(bill.getBillInstalmentsDetails().getInitialPayment() + "");
 
         nodeText = "تاريخ أول قسط";
         Label firstInstalmentDateLabel = new Label(nodeText);
@@ -2152,7 +2150,6 @@ public class GUI {
                 }
             }
         });
-        startDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getFirstInstalmentDate()));
 
         nodeText = "تاريخ أخر قسط";
         Label lastInstalmentDateLabel = new Label(nodeText);
@@ -2180,19 +2177,27 @@ public class GUI {
                 }
             }
         });
-        endDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getLastInstalmentDate()));
+
 
         nodeText = "عدد الأقساط المتبقية";
         Label remainingInstalmentsNumberLabel = new Label(nodeText);
         TextField remainingInstalmentsNumberTextField = new TextField();
         remainingInstalmentsNumberTextField.setPrefSize(50,20);
-        remainingInstalmentsNumberTextField.setText(bill.getBillInstalmentsDetails().getRemainingInstalmentsNumber() + "");
 
         nodeText = "قيمة القسط";
         Label instalmentAmountLabel = new Label(nodeText);
         TextField instalmentAmountTextField = new TextField();
         instalmentAmountTextField.setPrefSize(100,20);
-        instalmentAmountTextField.setText(bill.getBillInstalmentsDetails().getInstalmentAmount() + "");
+
+        if(bill.getPaymentMethod().equals("تقسيط"))
+        {
+            guarantorNameLabel.setText("أسم الضامن: " + bill.getBillInstalmentsDetails().getGuarantor().getCustomerName());
+            initialPaymentTextField.setText(bill.getBillInstalmentsDetails().getInitialPayment() + "");
+            instalmentAmountTextField.setText(bill.getBillInstalmentsDetails().getInstalmentAmount() + "");
+            remainingInstalmentsNumberTextField.setText(bill.getBillInstalmentsDetails().getRemainingInstalmentsNumber() + "");
+            startDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getFirstInstalmentDate()));
+            endDatePicker.setValue(LocalDate.parse(bill.getBillInstalmentsDetails().getLastInstalmentDate()));
+        }
 
         GridPane instalmentsDetailsGridPane = new GridPane();
         instalmentsDetailsGridPane.setHgap(15);
