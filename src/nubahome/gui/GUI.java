@@ -153,12 +153,13 @@ public class GUI {
             mainStage.getScene().setRoot(getShowProductsSceneLayout());
         });
 
-        Button showBillsAndSuppliesButton = new Button("عرض المبيعات و المشتريات");
-        showBillsAndSuppliesButton.setPrefSize(150, 50);
-        showBillsAndSuppliesButton.setOnAction(actionEvent -> {
+        Button showTransactionsButton = new Button("عرض سجل المعاملات التجارية");
+        showTransactionsButton.setPrefSize(180, 50);
+        showTransactionsButton.setOnAction(actionEvent -> {
             mainStage.setTitle("عرض المبيعات و المشتريات");
-            mainStage.getScene().setRoot(getShowBillsAndSuppliesSceneLayout());
+            mainStage.getScene().setRoot(getShowTransactionsSceneLayout());
         });
+        
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -173,13 +174,11 @@ public class GUI {
         gridPane.add(addCustomerButton,0,1);
         gridPane.add(addSuppliersButton, 1,1);
         gridPane.add(showProductsButton, 2, 1);
-        gridPane.add(showBillsAndSuppliesButton, 0, 3);
+        gridPane.add(showTransactionsButton, 0, 3);
 
         return gridPane;
     }
-
-
-
+    
     private static Pane getShowCustomersSceneLayout() {
         Label showCustomersLabel = new Label("أعرض بيانات");
 
@@ -2511,7 +2510,7 @@ public class GUI {
         return gridPane;
     }
 
-    private static Parent getShowBillsAndSuppliesSceneLayout() {
+    private static Parent getShowTransactionsSceneLayout() {
         Label monthLabel  = new Label("شهر: ");
         ChoiceBox<String> monthChoiceBox = new ChoiceBox<>();
         ArrayList<String> months = new ArrayList<>();
@@ -2571,7 +2570,7 @@ public class GUI {
         showButton.setOnAction(actionEvent -> {
             int selectedMonth = monthChoiceBox.getSelectionModel().getSelectedIndex() + 1;
             String selectedYear = yearChoiceBox.getValue();
-
+            
             ArrayList<Transaction> transactions = StoreDatabase.getTransactions(selectedMonth, selectedYear);
             transactionsTable.setItems(FXCollections.observableList(transactions));
         });
