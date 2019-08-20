@@ -1596,4 +1596,33 @@ public class StoreDatabase {
         }
         return transactions;
     }
+
+    public static ArrayList<InstalmentSummary> getCurrentMonthInstalmentSummaries() {
+        ArrayList<InstalmentSummary> instalmentSummaries = new ArrayList<>();
+        try {
+            String query = "select * from instalments inner join bills on instalments.bill_id = bills.bill_id inner join customers on bills.buyer_id = customers.customer_id where strftime('%m', instalment_due_date) = ? and strftime('%Y', instalment_due_date) = ? ";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            int month =  LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            preparedStatement.setString(1, String.format("%02d", month));
+            preparedStatement.setString(2, year + "");
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
+            {
+                String customerName = resultSet.getString("customer_name");
+                String instalmentDueDate = resultSet.getString("instalment_due_date");
+                double instalmentRemainingMoney = resultSet.getDouble("remaining_money");
+
+                instalmentSummaries.add(new InstalmentSummary(customerName, instalmentDueDate, instalmentRemainingMoney));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return instalmentSummaries;
+        }
+
+        return instalmentSummaries;
+    }
 }

@@ -154,12 +154,18 @@ public class GUI {
         });
 
         Button showTransactionsButton = new Button("عرض سجل المعاملات التجارية");
-        showTransactionsButton.setPrefSize(180, 50);
+        showTransactionsButton.setPrefSize(150, 50);
         showTransactionsButton.setOnAction(actionEvent -> {
             mainStage.setTitle("عرض المبيعات و المشتريات");
             mainStage.getScene().setRoot(getShowTransactionsSceneLayout());
         });
-        
+
+        Button showCurrentMonthInstalmentsButton = new Button("عرض أقساط الشهر الحالي");
+        showCurrentMonthInstalmentsButton.setPrefSize(150, 50);
+        showCurrentMonthInstalmentsButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("عرض أقساط الشهر الحالي");
+            mainStage.getScene().setRoot(getShowCurrentMonthInstalments());
+        });
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
@@ -175,6 +181,7 @@ public class GUI {
         gridPane.add(addSuppliersButton, 1,1);
         gridPane.add(showProductsButton, 2, 1);
         gridPane.add(showTransactionsButton, 0, 3);
+        gridPane.add(showCurrentMonthInstalmentsButton, 1, 3);
 
         return gridPane;
     }
@@ -2510,7 +2517,7 @@ public class GUI {
         return gridPane;
     }
 
-    private static Parent getShowTransactionsSceneLayout() {
+    private static Pane getShowTransactionsSceneLayout() {
         Label monthLabel  = new Label("شهر: ");
         ChoiceBox<String> monthChoiceBox = new ChoiceBox<>();
         ArrayList<String> months = new ArrayList<>();
@@ -2589,7 +2596,46 @@ public class GUI {
 
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setTop(topHBox);
-       borderPane.setCenter(transactionsTable);
+        borderPane.setCenter(transactionsTable);
+        borderPane.setBottom(navigationHBox);
+
+        return borderPane;
+    }
+
+    private static Pane getShowCurrentMonthInstalments() {
+        TableColumn<InstalmentSummary, Number> indexColumn = new TableColumn<InstalmentSummary, Number>("رقم القسط");
+        TableColumn<InstalmentSummary, String> customerNameColumn = new TableColumn<>("أسم العميل");
+        TableColumn<InstalmentSummary, String> dueDateColumn = new TableColumn<>("تاريخ الإستحقاق");
+        TableColumn<InstalmentSummary, Double> remainingMoneyColumn = new TableColumn<>("الباقي");
+
+        TableView<InstalmentSummary> instalmentsTable = new TableView<>();
+        instalmentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        indexColumn.setCellValueFactory(column-> new ReadOnlyObjectWrapper<>(instalmentsTable.getItems().indexOf(column.getValue())+1));
+        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        dueDateColumn.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
+        remainingMoneyColumn.setCellValueFactory(new PropertyValueFactory<>("remainingMoney"));
+
+
+        instalmentsTable.getColumns().addAll(indexColumn, customerNameColumn, dueDateColumn, remainingMoneyColumn);
+
+        ArrayList<InstalmentSummary> instalmentSummaries = StoreDatabase.getCurrentMonthInstalmentSummaries();
+        instalmentsTable.setItems(FXCollections.observableList(instalmentSummaries));
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().add(homeButton);
+        BorderPane borderPane = new BorderPane();
+
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(instalmentsTable);
         borderPane.setBottom(navigationHBox);
 
         return borderPane;
