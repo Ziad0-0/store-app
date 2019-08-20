@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -152,6 +153,13 @@ public class GUI {
             mainStage.getScene().setRoot(getShowProductsSceneLayout());
         });
 
+        Button showBillsAndSuppliesButton = new Button("عرض المبيعات و المشتريات");
+        showBillsAndSuppliesButton.setPrefSize(150, 50);
+        showBillsAndSuppliesButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("عرض المبيعات و المشتريات");
+            mainStage.getScene().setRoot(getShowBillsAndSuppliesSceneLayout());
+        });
+
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(30, 30, 30, 30));
         gridPane.setHgap(15);
@@ -165,9 +173,12 @@ public class GUI {
         gridPane.add(addCustomerButton,0,1);
         gridPane.add(addSuppliersButton, 1,1);
         gridPane.add(showProductsButton, 2, 1);
+        gridPane.add(showBillsAndSuppliesButton, 0, 3);
 
         return gridPane;
     }
+
+
 
     private static Pane getShowCustomersSceneLayout() {
         Label showCustomersLabel = new Label("أعرض بيانات");
@@ -942,6 +953,7 @@ public class GUI {
             Bill selectedBill = billsTable.getSelectionModel().getSelectedItem();
 
             Alert deleteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            deleteAlert.setResizable(true);
             deleteAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             deleteAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
             deleteAlert.setTitle("تأكيد حذف الفاتورة");
@@ -1077,6 +1089,7 @@ public class GUI {
             Supply selectedSupply = suppliesTable.getSelectionModel().getSelectedItem();
 
             Alert deleteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            deleteAlert.setResizable(true);
             deleteAlert.getDialogPane().getScene().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
             deleteAlert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
             deleteAlert.setTitle("تأكيد حذف الفاتورة");
@@ -2498,4 +2511,88 @@ public class GUI {
         return gridPane;
     }
 
+    private static Parent getShowBillsAndSuppliesSceneLayout() {
+        Label monthLabel  = new Label("شهر: ");
+        ChoiceBox<String> monthChoiceBox = new ChoiceBox<>();
+        ArrayList<String> months = new ArrayList<>();
+        months.add("يناير");
+        months.add("فبراير");
+        months.add("مارس");
+        months.add("أبريل");
+        months.add("مايو");
+        months.add("يونيو");
+        months.add("يوليو");
+        months.add("أغسطس");
+        months.add("سبتمبر");
+        months.add("أكتوبر");
+        months.add("نوفمبر");
+        months.add("ديسمبر");
+        monthChoiceBox.setItems(FXCollections.observableList(months));
+
+        Label yearLabel = new Label("سنة: ");
+        ChoiceBox<String> yearChoiceBox  = new ChoiceBox<>();
+        ArrayList<String> years = new ArrayList<>();
+        years.add("2018");
+        years.add("2019");
+        years.add("2020");
+        years.add("2021");
+        years.add("2022");
+        yearChoiceBox.setItems(FXCollections.observableList(years));
+
+        Button showButton = new Button("أعرض");
+        showButton.setPrefSize(50, 30);
+
+        HBox topHBox = new HBox();
+        topHBox.setSpacing(10);
+        topHBox.getChildren().add(monthLabel);
+        topHBox.getChildren().add(monthChoiceBox);
+        topHBox.getChildren().add(yearLabel);
+        topHBox.getChildren().add(yearChoiceBox);
+        topHBox.getChildren().add(showButton);
+
+        TableView<Transaction> transactionsTable = new TableView<>();
+        transactionsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Transaction, String> transactionDateColumn = new TableColumn<>("تاريخ");
+        transactionDateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
+
+        TableColumn<Transaction, String> transactionSourceNameColumn = new TableColumn<>("أسم");
+        transactionSourceNameColumn.setCellValueFactory(new PropertyValueFactory<>("transactionSourceName"));
+
+        TableColumn<Transaction, Double> transactionCostColumn = new TableColumn<>("تكلفة");
+        transactionCostColumn.setCellValueFactory(new PropertyValueFactory<>("transactionCost"));
+
+        TableColumn<Transaction, String> transactionTypeColumn = new TableColumn<>("نوع");
+        transactionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
+
+        transactionsTable.getColumns().addAll(transactionDateColumn, transactionSourceNameColumn, transactionCostColumn, transactionTypeColumn);
+
+
+        showButton.setOnAction(actionEvent -> {
+            int selectedMonth = monthChoiceBox.getSelectionModel().getSelectedIndex() + 1;
+            String selectedYear = yearChoiceBox.getValue();
+
+            ArrayList<Transaction> transactions = StoreDatabase.getTransactions(selectedMonth, selectedYear);
+            transactionsTable.setItems(FXCollections.observableList(transactions));
+        });
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().add(homeButton);
+        BorderPane borderPane = new BorderPane();
+
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(topHBox);
+       borderPane.setCenter(transactionsTable);
+        borderPane.setBottom(navigationHBox);
+
+        return borderPane;
+    }
 }

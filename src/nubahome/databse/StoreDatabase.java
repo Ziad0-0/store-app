@@ -1554,4 +1554,46 @@ public class StoreDatabase {
 
         return productSupplies;
     }
+
+    public static ArrayList<Transaction> getTransactions(int month, String year) {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        try {
+            String query = "select * from bills where strftime('%m', bill_date) = ? and strftime('%Y', bill_date) = ?";
+            PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, String.format("%02d", month));
+            preparedStatement.setString(2, year);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String billDate = resultSet.getString("bill_date");
+                int buyerID = resultSet.getInt("buyer_id");
+                String buyerName = getCustomer(buyerID).getCustomerName();
+                double billTotalCost = resultSet.getDouble("bill_total_cost");
+                String transactionType = "بيع";
+                transactions.add(new Transaction(billDate, buyerName, billTotalCost, transactionType));
+            }
+
+            query = "select * from supplies where strftime('%m', supply_date) = ? and strftime('%Y', supply_date) = ?";
+            preparedStatement = databaseConnection.prepareStatement(query);
+            preparedStatement.setString(1, String.format("%02d", month));
+            preparedStatement.setString(2, year);
+
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
+                String supplyDate = resultSet.getString("supply_date");
+                int supplierID = resultSet.getInt("supplier_id");
+                String supplierName = getSupplier(supplierID).getSupplierName();
+                double supplyTotalCost = resultSet.getDouble("supply_total_cost");
+                String transactionType = "شراء";
+
+                transactions.add(new Transaction(supplyDate, supplierName, supplyTotalCost, transactionType));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return transactions;
+        }
+        return transactions;
+    }
 }
