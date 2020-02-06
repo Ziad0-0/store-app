@@ -190,7 +190,7 @@ public class GUI {
         addProductCategoryButton.setPrefSize(150, 50);
         addProductCategoryButton.setOnAction(actionEvent -> {
             mainStage.setTitle("المنتجات");
-            mainStage.getScene().setRoot(getAddProductSceneLayout());
+            mainStage.getScene().setRoot(getAddProductCategorySceneLayout());
         });
 
         Button addProductButton = new Button("إضافة منتج");
@@ -3293,6 +3293,69 @@ public class GUI {
 
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(instalmentsTable);
+        borderPane.setBottom(navigationHBox);
+
+        return borderPane;
+    }
+
+    private static Pane getAddProductCategorySceneLayout(){
+        String nodeText;
+
+        nodeText = "أسم نوع المنتج";
+        Label productCategoryNameLabel = new Label(nodeText);
+        TextField productCategoryNameTextField = new TextField();
+        productCategoryNameTextField.setPrefSize(200, 20);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String productCategoryName = productCategoryNameTextField.getText().trim();
+            ProductCategory productCategory = new ProductCategory(productCategoryName);
+
+            boolean done = StoreDatabase.addProductCategory(productCategory);
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+
+        gridPane.add(productCategoryNameLabel,0,0);
+        gridPane.add(productCategoryNameTextField,1,0);
+        gridPane.add(submitButton,0,3);
+        gridPane.add(messageLabel,0,4);
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().add(homeButton);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
         borderPane.setBottom(navigationHBox);
 
         return borderPane;

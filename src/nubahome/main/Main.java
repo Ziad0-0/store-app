@@ -20,7 +20,7 @@ public class Main extends Application {
         //set app language to arabic
         Locale.setDefault(new Locale("ar"));
 
-        StoreDatabase.setDatabaseURL("jdbc:sqlite:db/nuba_home.db");
+        StoreDatabase.setDatabaseURL("jdbc:sqlite:" + System.getProperty("user.dir") + "/db/nuba_home.db");
         StoreDatabase.connect();
 
         Application.launch(args);
