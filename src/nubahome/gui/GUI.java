@@ -506,11 +506,14 @@ public class GUI {
                 return c.getCategoryName();
             }
 
+
             @Override
             public ProductCategory fromString(String s) {
                 return null;
             }
         });
+
+
         ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
         productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
 
@@ -2746,12 +2749,12 @@ public class GUI {
 
         ArrayList<ProductSupply> productSupplies = StoreDatabase.getProductSupplies(product);
         productSuppliesTable.setItems(FXCollections.observableList(productSupplies));
-        
-        VBox vBox = new VBox();
-        vBox.setSpacing(10);
-        vBox.getChildren().addAll(productNameLabel, productSuppliesTable);
-        
-        return vBox;
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setTop(productNameLabel);
+        borderPane.setCenter(productSuppliesTable);
+        return borderPane;
     }
     
     private static Pane getEditBillSceneLayout(Bill bill) {
@@ -2773,6 +2776,7 @@ public class GUI {
                     return "";
                 }
             }
+
 
             @Override public LocalDate fromString(String string) {
                 if (string != null && !string.isEmpty()) {
