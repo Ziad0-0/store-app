@@ -20,6 +20,7 @@ public class StoreDatabase {
 
     public static void connect() {
         try {
+
             databaseConnection = DriverManager.getConnection(databaseURL);
             System.out.println("Connection to SQLite has been established.");
         }

@@ -36,20 +36,19 @@ public class GUI {
         mainStage.setMaximized(true);
 
         mainStage.setTitle("تسجيل الدخول");
-        homeSceneLayout = getClerkHomeSceneLayout();
-        Scene scene = new Scene(getClerkHomeSceneLayout());
+        Scene scene = new Scene(getLoginSceneLayout());
         scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         mainStage.setScene(scene);
         mainStage.show();
     }
-
+    
     private static Pane getLoginSceneLayout() {
 
         String nodeText;
         nodeText = "أسم المستخدم";
         Label userNameLabel = new Label(nodeText);
         TextField userNameTextField = new TextField();
-        userNameTextField.setPrefSize(100, 20);
+        userNameTextField.setPrefSize(200, 20);
 
         nodeText = "كلمة السر";
         Label passwordLabel = new Label(nodeText);
@@ -77,13 +76,13 @@ public class GUI {
                 if (currentUserRole.getRoleName().equals("مدير"))
                 {
                     System.out.println("مدير");
-                    //homeScene = new getManagerHomeSceneLayout();
+                    homeSceneLayout = getManagerHomeSceneLayout();
                 }
                 else if (currentUserRole.getRoleName().equals("موظف")) {
                     System.out.println("موظف");
                     homeSceneLayout = getClerkHomeSceneLayout();
                 }
-
+                
                 mainStage.setTitle("الواجهة الرئيسية");
                 mainStage.getScene().setRoot(homeSceneLayout);
             }
@@ -109,7 +108,7 @@ public class GUI {
 
     }
 
-    private static Pane getClerkHomeSceneLayout() {
+    private static Pane getManagerHomeSceneLayout() {
         Button showCustomersButton = new Button("عرض بيانات العملاء");
         showCustomersButton.setPrefSize(150, 50);
         showCustomersButton.setOnAction(actionEvent -> {
@@ -172,7 +171,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        
+
 
         gridPane.add(showCustomersButton, 0,0);
         gridPane.add(showSuppliersButton, 1,0);
@@ -185,7 +184,69 @@ public class GUI {
 
         return gridPane;
     }
-    
+
+    private static Pane getClerkHomeSceneLayout() {
+        Button addProductCategoryButton = new Button("إضافة نوع منتج");
+        addProductCategoryButton.setPrefSize(150, 50);
+        addProductCategoryButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("المنتجات");
+            mainStage.getScene().setRoot(getAddProductCategorySceneLayout());
+        });
+
+        Button addProductButton = new Button("إضافة منتج");
+        addProductButton.setPrefSize(150, 50);
+        addProductButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("إصافة منتج");
+            mainStage.getScene().setRoot(getAddProductSceneLayout());
+        });
+
+        Button addSuppliersButton = new Button("إضافة بيانات مورد");
+        addSuppliersButton.setPrefSize(150, 50);
+        addSuppliersButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("إضافة بيانات مورد");
+            mainStage.getScene().setRoot(getAddSupplierSceneLayout());
+        });
+
+
+        Button addCustomerButton = new Button("إضافة بيانات عميل");
+        addCustomerButton.setPrefSize(150, 50);
+        addCustomerButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("إضافة بيانات عميل");
+            mainStage.getScene().setRoot(getAddCustomerSceneLayout());
+        });
+
+        Button addSupplyButton = new Button("إضافة فاتورة توريد");
+        addSupplyButton.setPrefSize(150, 50);
+        addSupplyButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("إضافة عميل");
+            mainStage.getScene().setRoot(getAddSupplySceneLayout());
+        });
+
+        Button addBillButton = new Button("إضافة فاتورة بيع");
+        addBillButton.setPrefSize(150, 50);
+        addBillButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("إضافة فاتورة بيع");
+            mainStage.getScene().setRoot(getAddBillSceneLayout());
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+
+        gridPane.add(addProductCategoryButton, 0,0);
+        gridPane.add(addProductButton, 1,0);
+        gridPane.add(addCustomerButton, 2,0);
+        gridPane.add(addSuppliersButton,0,1);
+        gridPane.add(addSupplyButton, 1, 1);
+        gridPane.add(addBillButton, 2, 1);
+
+
+        return gridPane;
+    }
+
     private static Pane getShowCustomersSceneLayout() {
         Label showCustomersLabel = new Label("أعرض بيانات");
 
@@ -397,7 +458,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        
+
 
         gridPane.add(customerNameLabel,0,0);
         gridPane.add(customerNameTextField,1,0);
@@ -434,7 +495,7 @@ public class GUI {
         nodeText = "أسم المنتج";
         Label productNameLabel = new Label(nodeText);
         TextField productNameTextField = new TextField();
-        productNameTextField.setPrefSize(100, 20);
+        productNameTextField.setPrefSize(200, 20);
 
         nodeText = "نوع المنتج";
         Label productCategoryLabel = new Label(nodeText);
@@ -492,7 +553,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        
+
 
         gridPane.add(productNameLabel,0,0);
         gridPane.add(productNameTextField,1,0);
@@ -568,7 +629,7 @@ public class GUI {
         gridPane.setHgap(15);
         gridPane.setVgap(15);
         gridPane.setAlignment(Pos.CENTER);
-        
+
 
         gridPane.add(supplierNameLabel,0,0);
         gridPane.add(supplierNameTextField,1,0);
@@ -600,7 +661,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddSupplyToSupplierSceneLayout(Supplier supplier) {
+    private static Pane getAddSupplySceneLayout() {
         Label messageLabel = new Label();
 
         Button submitButton = new Button("أدخل");
@@ -632,11 +693,25 @@ public class GUI {
             }
         });
 
-        Label supplierNameLabel = new Label("أسم المورد: " + supplier.getSupplierName());
+        Label supplierNameLabel = new Label("أسم المورد: ");
+        ArrayList<Supplier> suppliers = StoreDatabase.getAllSuppliers();
+        ChoiceBox<Supplier> supplierChoiceBox = new ChoiceBox<>();
+        supplierChoiceBox.setItems(FXCollections.observableList(suppliers));
+        supplierChoiceBox.setConverter(new StringConverter<Supplier>() {
+            @Override
+            public String toString(Supplier s) {
+                return s.getSupplierName();
+            }
+
+            @Override
+            public Supplier fromString(String s) {
+                return null;
+            }
+        });
 
         Label additionalFeesLabel = new Label( "مصاريف إضافية");
         TextField additionalFeesTextField = new TextField();
-        additionalFeesTextField.setPrefSize(100,20);
+        additionalFeesTextField.setPrefSize(200,20);
 
         Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
         addMoreProductsButton.setPrefSize(120,20);
@@ -693,12 +768,231 @@ public class GUI {
 
             Label boughtQuantityLabel = new Label("الكمية المشتراة");
             TextField boughtQuantityTextField = new TextField();
-            boughtQuantityTextField.setPrefSize(100,20);
+            boughtQuantityTextField.setPrefSize(200,20);
 
 
             Label buyingPriceLabel = new Label( "سعر الشراء");
             TextField buyingPriceTextField = new TextField();
-            buyingPriceTextField.setPrefSize(100,20);
+            buyingPriceTextField.setPrefSize(200,20);
+
+            productsChoiceBoxes.add(productsChoiceBox);
+            productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
+            boughtQuantitiesTextFields.add(boughtQuantityTextField);
+            buyingPricesTextFields.add(buyingPriceTextField);
+
+            HBox productHBox = new HBox();
+            productHBox.setSpacing(10);
+
+            productHBox.getChildren().add(categoryLabel);
+            productHBox.getChildren().add(productsCategoriesChoiceBox);
+            productHBox.getChildren().add(productLabel);
+            productHBox.getChildren().add(productsChoiceBox);
+            productHBox.getChildren().add(buyingPriceLabel);
+            productHBox.getChildren().add(buyingPriceTextField);
+            productHBox.getChildren().add(boughtQuantityLabel);
+            productHBox.getChildren().add(boughtQuantityTextField);
+
+            productsVBox.getChildren().add(productHBox);
+
+
+
+
+        });
+
+        submitButton.setOnAction(event -> {
+
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String supplyDate = supplyDatePicker.getValue().toString();
+            double additionalFees = Double.parseDouble(additionalFeesTextField.getText().trim());
+
+            Supplier supplier = supplierChoiceBox.getValue();
+
+            ArrayList<BoughtProduct> boughtProducts = new ArrayList<>();
+            double productsTotalCost = 0;
+            int numOfBoughtProducts =  productsChoiceBoxes.size();
+            for(int i = 0; i < numOfBoughtProducts; i++)
+            {
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int boughtQuantity = Integer.parseInt(boughtQuantitiesTextFields.get(i).getText().trim());
+                double buyingPrice = Double.parseDouble(buyingPricesTextFields.get(i).getText().trim());
+                boughtProducts.add(new BoughtProduct(currentProduct, boughtQuantity, buyingPrice));
+
+                productsTotalCost += (buyingPrice * boughtQuantity);
+            }
+
+            double supplyTotalCost = productsTotalCost + additionalFees;
+
+            Supply supply = new Supply(supplyDate, supplier, additionalFees, productsTotalCost, supplyTotalCost, boughtProducts);
+            boolean done = StoreDatabase.addSupply(supply);
+
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+        });
+
+        addNewProductButton.setOnAction(actionEvent -> {
+            Pane addProductSceneLayout = getAddProductSceneLayout();
+            //remove the navigation hBox which is the last node in the pane
+            int lastNodeIndex = addProductSceneLayout.getChildren().size() -1;
+            addProductSceneLayout.getChildren().remove(lastNodeIndex);
+
+            Scene scene = new Scene(addProductSceneLayout);
+            scene.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            Stage newStage = new Stage();
+            newStage.setTitle("إضافة منتج");
+            newStage.setScene(scene);
+            newStage.show();
+        });
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+
+        gridPane.add(supplyDateLabel,0,0);
+        gridPane.add(supplyDatePicker, 1,0);
+        gridPane.add(supplierNameLabel,0,1);
+        gridPane.add(supplierChoiceBox, 1, 1);
+        gridPane.add(additionalFeesLabel,0,2);
+        gridPane.add(additionalFeesTextField,1,2);
+        gridPane.add(addNewProductButton, 0, 3);
+        gridPane.add(productsVBox,0,4);
+        gridPane.add(addMoreProductsButton,0,5);
+        gridPane.add(submitButton,0,6);
+        gridPane.add(messageLabel,0,7);
+
+        ScrollPane scrollPane = new ScrollPane(gridPane);
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().addAll(homeButton);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(scrollPane);
+        borderPane.setBottom(navigationHBox);
+
+
+        return borderPane;
+    }
+
+    private static Pane getAddSupplyToSupplierSceneLayout(Supplier supplier) {
+        Label messageLabel = new Label();
+
+        Button submitButton = new Button("أدخل");
+        submitButton.setPrefSize(100, 20);
+
+        Label supplyDateLabel = new Label("تاريخ الشراء");
+        DatePicker supplyDatePicker = new DatePicker();
+        supplyDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                supplyDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        Label supplierNameLabel = new Label("أسم المورد: " + supplier.getSupplierName());
+
+        Label additionalFeesLabel = new Label( "مصاريف إضافية");
+        TextField additionalFeesTextField = new TextField();
+        additionalFeesTextField.setPrefSize(200,20);
+
+        Button addMoreProductsButton = new Button("أضف منتج للفاتورة");
+        addMoreProductsButton.setPrefSize(120,20);
+
+        Button addNewProductButton = new Button("أضف منتج جديد لقاعدة البيانات");
+        addNewProductButton.setPrefSize(200,20);
+
+
+        ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<TextField> boughtQuantitiesTextFields = new ArrayList<>();
+        ArrayList<TextField> buyingPricesTextFields = new ArrayList<>();
+
+        VBox productsVBox = new VBox();
+        productsVBox.setSpacing(10);
+
+        addMoreProductsButton.setOnAction(event -> {
+            Label productLabel = new Label("أسم المنتج");
+            ChoiceBox<Product> productsChoiceBox = new ChoiceBox<>();
+            productsChoiceBox.setConverter(new StringConverter<Product>() {
+                @Override
+                public String toString(Product p) {
+                    return p.getProductName();
+                }
+
+                @Override
+                public Product fromString(String s) {
+                    return null;
+                }
+            });
+
+            Label categoryLabel = new Label("نوع المنتج");
+            ChoiceBox<ProductCategory> productsCategoriesChoiceBox = new ChoiceBox<>();
+            productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                @Override
+                public String toString(ProductCategory c) {
+                    return c.getCategoryName();
+                }
+
+                @Override
+                public ProductCategory fromString(String s) {
+                    return null;
+                }
+            });
+            ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+            productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+
+            productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                ProductCategory selectedCategory = productsCategoriesChoiceBox.getValue();
+                ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
+            });
+
+
+            Label boughtQuantityLabel = new Label("الكمية المشتراة");
+            TextField boughtQuantityTextField = new TextField();
+            boughtQuantityTextField.setPrefSize(200,20);
+
+
+            Label buyingPriceLabel = new Label( "سعر الشراء");
+            TextField buyingPriceTextField = new TextField();
+            buyingPriceTextField.setPrefSize(200,20);
 
             productsChoiceBoxes.add(productsChoiceBox);
             productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
@@ -1307,7 +1601,7 @@ public class GUI {
         return borderPane;
     }
 
-    private static Pane getAddBillToCustomerSceneLayout(Customer customer) {
+    private static Pane getAddBillSceneLayout() {
         String nodeText;
 
         Label billDateLabel = new Label("تاريخ الفاتورة");
@@ -1336,8 +1630,22 @@ public class GUI {
             }
         });
 
-        nodeText = "أسم العميل: " + customer.getCustomerName();
+        nodeText = "أسم العميل: ";
         Label buyerNameLabel = new Label(nodeText);
+        ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
+        ChoiceBox<Customer> customerChoiceBox = new ChoiceBox<>();
+        customerChoiceBox.setItems(FXCollections.observableList(customers));
+        customerChoiceBox.setConverter(new StringConverter<Customer>() {
+            @Override
+            public String toString(Customer c) {
+                return c.getCustomerName();
+            }
+
+            @Override
+            public Customer fromString(String s) {
+                return null;
+            }
+        });
 
         nodeText = "وسيلة الدفع";
         Label paymentMethodLabel = new Label(nodeText);
@@ -1350,7 +1658,6 @@ public class GUI {
         nodeText = "أسم الضامن";
         Label guarantorNameLabel = new Label(nodeText);
         ChoiceBox<Customer> guarantorChoiceBox = new ChoiceBox<>();
-        ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
         guarantorChoiceBox.setItems(FXCollections.observableList(customers));
         guarantorChoiceBox.setConverter(new StringConverter<Customer>() {
             @Override
@@ -1367,7 +1674,7 @@ public class GUI {
         nodeText = "المقدم";
         Label initialPaymentLabel = new Label(nodeText);
         TextField initialPaymentTextField = new TextField();
-        initialPaymentTextField.setPrefSize(100,20);
+        initialPaymentTextField.setPrefSize(200,20);
 
         nodeText = "تاريخ أول قسط";
         Label firstInstalmentDateLabel = new Label(nodeText);
@@ -1431,7 +1738,357 @@ public class GUI {
         nodeText = "قيمة القسط";
         Label instalmentAmountLabel = new Label(nodeText);
         TextField instalmentAmountTextField = new TextField();
-        instalmentAmountTextField.setPrefSize(100,20);
+        instalmentAmountTextField.setPrefSize(200,20);
+
+
+
+        GridPane instalmentsDetailsGridPane = new GridPane();
+        instalmentsDetailsGridPane.setHgap(15);
+        instalmentsDetailsGridPane.setVgap(15);
+
+
+        instalmentsDetailsGridPane.add(guarantorNameLabel, 0, 0);
+        instalmentsDetailsGridPane.add(guarantorChoiceBox, 1, 0);
+        instalmentsDetailsGridPane.add(initialPaymentLabel, 0,1);
+        instalmentsDetailsGridPane.add(initialPaymentTextField, 1,1);
+        instalmentsDetailsGridPane.add(instalmentAmountLabel, 0,2);
+        instalmentsDetailsGridPane.add(instalmentAmountTextField, 1, 2);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberLabel, 0,3);
+        instalmentsDetailsGridPane.add(remainingInstalmentsNumberTextField, 1, 3);
+        instalmentsDetailsGridPane.add(firstInstalmentDateLabel, 0, 4);
+        instalmentsDetailsGridPane.add(startDatePicker, 1, 4);
+        instalmentsDetailsGridPane.add(lastInstalmentDateLabel, 0, 5);
+        instalmentsDetailsGridPane.add(endDatePicker, 1, 5);
+
+        ArrayList<ChoiceBox> productsChoiceBoxes = new ArrayList<>();
+        ArrayList<ChoiceBox> productsCategoriesChoiceBoxes = new ArrayList<>();
+        ArrayList<TextField> soldQuantitiesTextFields = new ArrayList<>();
+        ArrayList<TextField> sellingPricesTextFields = new ArrayList<>();
+
+        VBox productsVBox = new VBox();
+        productsVBox.setSpacing(10);
+
+
+        nodeText = "أضف منتج للفاتورة";
+        Button addMoreProductsButton = new Button(nodeText);
+        addMoreProductsButton.setPrefSize(120,20);
+        addMoreProductsButton.setOnAction(event -> {
+            Label productLabel = new Label("أسم المنتج");
+            ChoiceBox<Product> productsChoiceBox = new ChoiceBox<>();
+            productsChoiceBox.setConverter(new StringConverter<Product>() {
+                @Override
+                public String toString(Product p) {
+                    return p.getProductName();
+                }
+
+                @Override
+                public Product fromString(String s) {
+                    return null;
+                }
+            });
+
+            Label categoryLabel = new Label("نوع المنتج");
+            ChoiceBox<ProductCategory> productsCategoriesChoiceBox = new ChoiceBox<>();
+            productsCategoriesChoiceBox.setConverter(new StringConverter<ProductCategory>() {
+                @Override
+                public String toString(ProductCategory c) {
+                    return c.getCategoryName();
+                }
+
+                @Override
+                public ProductCategory fromString(String s) {
+                    return null;
+                }
+            });
+            ArrayList<ProductCategory> productsCategories = StoreDatabase.getAllProductsCategories();
+            productsCategoriesChoiceBox.setItems(FXCollections.observableList(productsCategories));
+
+            productsCategoriesChoiceBox.setOnAction( actionEvent -> {
+                ProductCategory selectedCategory = productsCategoriesChoiceBox.getValue();
+                ArrayList<Product> productsInCategory = StoreDatabase.getProductsInCategory(selectedCategory);
+                productsChoiceBox.setItems(FXCollections.observableList(productsInCategory));
+            });
+
+
+            Label soldQuantityLabel = new Label("الكمية المباعة");
+            TextField soldQuantityTextField = new TextField();
+            soldQuantityTextField.setPrefSize(200,20);
+
+
+            Label sellingPriceLabel = new Label( "سعر البيع");
+            TextField sellingPriceTextField = new TextField();
+            sellingPriceTextField.setPrefSize(200,20);
+
+            productsChoiceBoxes.add(productsChoiceBox);
+            productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
+            soldQuantitiesTextFields.add(soldQuantityTextField);
+            sellingPricesTextFields.add(sellingPriceTextField);
+
+            HBox productHBox = new HBox();
+            productHBox.setSpacing(10);
+
+            productHBox.getChildren().add(categoryLabel);
+            productHBox.getChildren().add(productsCategoriesChoiceBox);
+            productHBox.getChildren().add(productLabel);
+            productHBox.getChildren().add(productsChoiceBox);
+            productHBox.getChildren().add(sellingPriceLabel);
+            productHBox.getChildren().add(sellingPriceTextField);
+            productHBox.getChildren().add(soldQuantityLabel);
+            productHBox.getChildren().add(soldQuantityTextField);
+
+            productsVBox.getChildren().add(productHBox);
+
+
+
+
+        });
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        Label messageLabel = new Label();
+        submitButton.setOnAction(event -> {
+
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String billDate = billDatePicker.getValue().toString();
+            Customer buyer = customerChoiceBox.getValue();
+            System.out.println(buyer.getCustomerName());
+            String paymentMethod = paymentMethodChoiceBox.getValue();
+
+
+            ArrayList<SoldProduct> soldProducts = new ArrayList<>();
+
+            int numOfSoldProducts =  productsChoiceBoxes.size();
+            double productsTotalCost = 0;
+            for(int i = 0; i < numOfSoldProducts; i++)
+            {
+                Product currentProduct = (Product) productsChoiceBoxes.get(i).getSelectionModel().getSelectedItem();
+                int soldQuantity = Integer.parseInt(soldQuantitiesTextFields.get(i).getText().trim());
+                double sellingPrice = Double.parseDouble(sellingPricesTextFields.get(i).getText().trim());
+                soldProducts.add(new SoldProduct(currentProduct, soldQuantity, sellingPrice));
+
+                productsTotalCost += (sellingPrice * soldQuantity);
+            }
+
+
+            double billTotalCost = productsTotalCost;
+
+
+            Bill bill;
+            if(paymentMethod.equals("كاش"))
+                bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts);
+            else
+            {
+                Customer guarantor = guarantorChoiceBox.getValue();
+                double initialPayment = Double.parseDouble(initialPaymentTextField.getText().trim());
+                double remainingMoney = billTotalCost - initialPayment;
+                double instalmentAmount = Double.parseDouble(instalmentAmountTextField.getText().trim());
+                String firstInstalmentDate = startDatePicker.getValue().toString();
+                String lastInstalmentDate = endDatePicker.getValue().toString();
+                int remainingInstalmentsNumber = Integer.parseInt(remainingInstalmentsNumberTextField.getText().trim());
+                BillInstalmentsDetails billInstalmentsDetails = new BillInstalmentsDetails(guarantor, initialPayment, remainingMoney, instalmentAmount, firstInstalmentDate, lastInstalmentDate, remainingInstalmentsNumber);
+                bill = new Bill(billDate, buyer, productsTotalCost, billTotalCost, paymentMethod, soldProducts, billInstalmentsDetails);
+            }
+
+
+            boolean done = StoreDatabase.addBill(bill);
+
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات!");
+
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+        paymentMethodChoiceBox.setOnAction(actionEvent -> {
+            if(paymentMethodChoiceBox.getValue().equals("تقسيط"))
+            {
+                gridPane.getChildren().removeAll(productsVBox, addMoreProductsButton, submitButton, messageLabel);
+
+                gridPane.add(instalmentsDetailsGridPane, 0, 3);
+                gridPane.add(productsVBox,0,4);
+                gridPane.add(addMoreProductsButton,0,5);
+                gridPane.add(submitButton,0,6);
+                gridPane.add(messageLabel,0,7);
+
+            }
+            else if(paymentMethodChoiceBox.getValue().equals("كاش"))
+            {
+                gridPane.getChildren().removeAll(instalmentsDetailsGridPane, productsVBox, addMoreProductsButton, submitButton, messageLabel);
+
+                gridPane.add(productsVBox,0,3);
+                gridPane.add(addMoreProductsButton,0,4);
+                gridPane.add(submitButton,0,5);
+                gridPane.add(messageLabel,0,6);;
+            }
+        });
+
+        gridPane.add(billDateLabel,0,0);
+        gridPane.add(billDatePicker,1,0);
+        gridPane.add(buyerNameLabel,0,1);
+        gridPane.add(customerChoiceBox, 1, 1);
+        gridPane.add(paymentMethodLabel,0,2);
+        gridPane.add(paymentMethodChoiceBox,1,2);
+
+
+
+        ScrollPane pane = new ScrollPane(gridPane);
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().addAll(homeButton);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(pane);
+        borderPane.setBottom(navigationHBox);
+
+
+        return borderPane;
+    }
+
+    private static Pane getAddBillToCustomerSceneLayout(Customer customer) {
+        String nodeText;
+
+        Label billDateLabel = new Label("تاريخ الفاتورة");
+        DatePicker billDatePicker = new DatePicker();
+        billDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                billDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        nodeText = "أسم العميل: " + customer.getCustomerName();
+        Label buyerNameLabel = new Label(nodeText);
+
+        nodeText = "وسيلة الدفع";
+        Label paymentMethodLabel = new Label(nodeText);
+        ChoiceBox<String> paymentMethodChoiceBox = new ChoiceBox<>();
+        ArrayList<String> paymentMethods = new ArrayList<>();
+        paymentMethods.add("كاش");
+        paymentMethods.add("تقسيط");
+        paymentMethodChoiceBox.setItems(FXCollections.observableList(paymentMethods));
+
+        nodeText = "أسم الضامن";
+        Label guarantorNameLabel = new Label(nodeText);
+        ChoiceBox<Customer> guarantorChoiceBox = new ChoiceBox<>();
+        ArrayList<Customer> customers = StoreDatabase.getAllCustomers();
+        guarantorChoiceBox.setItems(FXCollections.observableList(customers));
+        guarantorChoiceBox.setConverter(new StringConverter<Customer>() {
+            @Override
+            public String toString(Customer c) {
+                return c.getCustomerName();
+            }
+
+            @Override
+            public Customer fromString(String s) {
+                return null;
+            }
+        });
+
+        nodeText = "المقدم";
+        Label initialPaymentLabel = new Label(nodeText);
+        TextField initialPaymentTextField = new TextField();
+        initialPaymentTextField.setPrefSize(200,20);
+
+        nodeText = "تاريخ أول قسط";
+        Label firstInstalmentDateLabel = new Label(nodeText);
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                startDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        nodeText = "تاريخ أخر قسط";
+        Label lastInstalmentDateLabel = new Label(nodeText);
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                endDatePicker.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        nodeText = "عدد الأقساط المتبقية";
+        Label remainingInstalmentsNumberLabel = new Label(nodeText);
+        TextField remainingInstalmentsNumberTextField = new TextField();
+        remainingInstalmentsNumberTextField.setPrefSize(50,20);
+
+        nodeText = "قيمة القسط";
+        Label instalmentAmountLabel = new Label(nodeText);
+        TextField instalmentAmountTextField = new TextField();
+        instalmentAmountTextField.setPrefSize(200,20);
 
        
         
@@ -1505,12 +2162,12 @@ public class GUI {
 
             Label soldQuantityLabel = new Label("الكمية المباعة");
             TextField soldQuantityTextField = new TextField();
-            soldQuantityTextField.setPrefSize(100,20);
+            soldQuantityTextField.setPrefSize(200,20);
 
 
             Label sellingPriceLabel = new Label( "سعر البيع");
             TextField sellingPriceTextField = new TextField();
-            sellingPriceTextField.setPrefSize(100,20);
+            sellingPriceTextField.setPrefSize(200,20);
 
             productsChoiceBoxes.add(productsChoiceBox);
             productsCategoriesChoiceBoxes.add(productsCategoriesChoiceBox);
@@ -2145,7 +2802,7 @@ public class GUI {
         nodeText = "المقدم";
         Label initialPaymentLabel = new Label(nodeText);
         TextField initialPaymentTextField = new TextField();
-        initialPaymentTextField.setPrefSize(100,20);
+        initialPaymentTextField.setPrefSize(200,20);
 
         nodeText = "تاريخ أول قسط";
         Label firstInstalmentDateLabel = new Label(nodeText);
@@ -2210,7 +2867,7 @@ public class GUI {
         nodeText = "قيمة القسط";
         Label instalmentAmountLabel = new Label(nodeText);
         TextField instalmentAmountTextField = new TextField();
-        instalmentAmountTextField.setPrefSize(100,20);
+        instalmentAmountTextField.setPrefSize(200,20);
 
         if(bill.getPaymentMethod().equals("تقسيط"))
         {
@@ -2353,7 +3010,7 @@ public class GUI {
 
         Label additionalFeesLabel = new Label( "مصاريف إضافية");
         TextField additionalFeesTextField = new TextField();
-        additionalFeesTextField.setPrefSize(100,20);
+        additionalFeesTextField.setPrefSize(200,20);
         additionalFeesTextField.setText(supply.getAdditionalFees() + "");
         
         
@@ -2413,12 +3070,12 @@ public class GUI {
         
         Label buyingPriceLabel = new Label("سعر الشراء");
         TextField buyingPriceTextField = new TextField();
-        buyingPriceTextField.setPrefSize(100, 20);
+        buyingPriceTextField.setPrefSize(200, 20);
         buyingPriceTextField.setText(boughtProduct.getBuyingPrice() + "");
         
         Label boughtQuantityLabel = new Label("الكمية المشتراة");
         TextField boughtQuantityTextField = new TextField();
-        boughtQuantityTextField.setPrefSize(100, 20);
+        boughtQuantityTextField.setPrefSize(200, 20);
         boughtQuantityTextField.setText(boughtProduct.getBoughtQuantity() + "");
         
         Label messageLabel = new Label("");
@@ -2469,12 +3126,12 @@ public class GUI {
 
         Label sellingPriceLabel = new Label("سعر البيع");
         TextField sellingPriceTextField = new TextField();
-        sellingPriceTextField.setPrefSize(100, 20);
+        sellingPriceTextField.setPrefSize(200, 20);
         sellingPriceTextField.setText(soldProduct.getSellingPrice() + "");
 
         Label soldQuantityLabel = new Label("الكمية المباعة");
         TextField soldQuantityTextField = new TextField();
-        soldQuantityTextField.setPrefSize(100, 20);
+        soldQuantityTextField.setPrefSize(200, 20);
         soldQuantityTextField.setText(soldProduct.getSoldQuantity() + "");
 
         Label messageLabel = new Label("");
@@ -2640,6 +3297,69 @@ public class GUI {
 
         borderPane.setPadding(new Insets(20, 20, 20, 20));
         borderPane.setCenter(instalmentsTable);
+        borderPane.setBottom(navigationHBox);
+
+        return borderPane;
+    }
+
+    private static Pane getAddProductCategorySceneLayout(){
+        String nodeText;
+
+        nodeText = "أسم نوع المنتج";
+        Label productCategoryNameLabel = new Label(nodeText);
+        TextField productCategoryNameTextField = new TextField();
+        productCategoryNameTextField.setPrefSize(200, 20);
+
+        Label messageLabel = new Label();
+
+        nodeText = "أدخل";
+        Button submitButton = new Button(nodeText);
+        submitButton.setPrefSize(50, 20);
+        submitButton.setOnAction(event -> {
+
+
+            String message = "";
+            messageLabel.setText(message);
+
+            String productCategoryName = productCategoryNameTextField.getText().trim();
+            ProductCategory productCategory = new ProductCategory(productCategoryName);
+
+            boolean done = StoreDatabase.addProductCategory(productCategory);
+            if(done)
+                messageLabel.setText("!تم إدخال البيانات بنجاح");
+            else
+                messageLabel.setText("حدث خطأ أثناء إدخال البيانات");
+
+
+        });
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(30, 30, 30, 30));
+        gridPane.setHgap(15);
+        gridPane.setVgap(15);
+        gridPane.setAlignment(Pos.CENTER);
+
+
+        gridPane.add(productCategoryNameLabel,0,0);
+        gridPane.add(productCategoryNameTextField,1,0);
+        gridPane.add(submitButton,0,3);
+        gridPane.add(messageLabel,0,4);
+
+        Button homeButton = new Button("العودة إلي الواجهة الرئيسية");
+        homeButton.setPrefSize(180, 30);
+        homeButton.setOnAction(actionEvent -> {
+            mainStage.setTitle("الواجهة الرئيسية");
+            mainStage.getScene().setRoot(homeSceneLayout);
+        });
+
+
+        HBox navigationHBox = new HBox();
+        navigationHBox.setSpacing(10);
+        navigationHBox.getChildren().add(homeButton);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(20, 20, 20, 20));
+        borderPane.setCenter(gridPane);
         borderPane.setBottom(navigationHBox);
 
         return borderPane;
