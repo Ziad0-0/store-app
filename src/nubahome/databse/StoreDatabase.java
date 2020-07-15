@@ -697,10 +697,10 @@ public class StoreDatabase {
             query = "insert into bought_products"
                     + "(supply_id, product_id, bought_quantity, buying_price)"
                     + "values (?, ?, ?, ?)";
+            preparedStatement = databaseConnection.prepareStatement(query);
 
             for(BoughtProduct x : supply.boughtProducts)
             {
-                preparedStatement = databaseConnection.prepareStatement(query);
                 preparedStatement.setInt(1,supply.supplyID);
                 preparedStatement.setInt(2, x.productID);
                 preparedStatement.setInt(3, x.boughtQuantity);
